@@ -1,0 +1,39 @@
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { Bot, Home, AlertCircle, ArrowLeft } from "lucide-react";
+import { InteractiveGrid } from "@/components/marketing/interactive-grid";
+
+export default function NotFound() {
+  return (
+    <div className="relative min-h-screen w-full flex flex-col items-center justify-center bg-[var(--m-bg-primary)] px-4 text-center overflow-hidden select-none">
+      {/* Grid backdrops */}
+      <InteractiveGrid gridSize={42} className="opacity-20" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[350px] rounded-full bg-orange-500/5 blur-[120px] pointer-events-none" />
+
+      <div className="relative z-10 max-w-md mx-auto space-y-6">
+        <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 mx-auto animate-bounce">
+          <AlertCircle className="size-6" />
+        </div>
+
+        <div className="space-y-2">
+          <h1 className="text-6xl font-extrabold text-[var(--m-text-heading)] tracking-tight font-mono">404</h1>
+          <h2 className="text-lg font-bold text-[var(--m-text-primary)]">Message Delivery Failed</h2>
+          <p className="text-xs text-[var(--m-text-tertiary)] leading-relaxed max-w-sm mx-auto">
+            The conversation path you are looking for has expired or does not exist. We've returned a '404' delivery status receipt.
+          </p>
+        </div>
+
+        <div className="pt-4 flex items-center justify-center gap-3">
+          <Link
+            href="/"
+            className="bg-orange-500 hover:bg-orange-400 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-[0_0_12px_rgba(255,165,0,0.2)] flex items-center gap-1.5"
+          >
+            <ArrowLeft className="size-3.5" /> Return to Homepage
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

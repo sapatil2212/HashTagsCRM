@@ -1,0 +1,815 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Marketing Theme Tokens */
+  --color-m-bg-primary: var(--m-bg-primary);
+  --color-m-bg-secondary: var(--m-bg-secondary);
+  --color-m-bg-tertiary: var(--m-bg-tertiary);
+  --color-m-bg-surface: var(--m-bg-surface);
+  --color-m-bg-card: var(--m-bg-card);
+  --color-m-bg-glass: var(--m-bg-glass);
+  --color-m-border-primary: var(--m-border-primary);
+  --color-m-border-secondary: var(--m-border-secondary);
+  --color-m-border-glass: var(--m-border-glass);
+  --color-m-text-primary: var(--m-text-primary);
+  --color-m-text-secondary: var(--m-text-secondary);
+  --color-m-text-tertiary: var(--m-text-tertiary);
+  --color-m-text-muted: var(--m-text-muted);
+  --color-m-text-heading: var(--m-text-heading);
+  --color-m-shadow-card: var(--m-shadow-card);
+  --color-m-shadow-glow: var(--m-shadow-glow);
+  --color-m-glow-emerald: var(--m-glow-emerald);
+  --color-m-glow-cyan: var(--m-glow-cyan);
+  --color-m-glow-purple: var(--m-glow-purple);
+  --color-m-gradient-fade: var(--m-gradient-fade);
+  --color-m-input-bg: var(--m-input-bg);
+  --color-m-input-border: var(--m-input-border);
+}
+
+
+/* ============================================================
+ * COLOR THEMES
+ *
+ * 5 dark themes sharing structure, swapping only the primary
+ * accent (and a tiny hue rotation on the slate base). Switched
+ * at runtime by setting `document.documentElement.dataset.theme`
+ * — see ThemeProvider + the inline boot script in layout.tsx.
+ *
+ * `:root` mirrors Violet so default visitors render correctly
+ * before JS runs. `[data-theme="violet"]` is included for the
+ * explicit-select path (settings UI sets it after a pick).
+ *
+ * The three `--primary-*` extras (hover / soft / soft-2) are
+ * new — used for hovered primary buttons and tinted-primary
+ * surfaces (sidebar active pill, validation badges). Components
+ * that don't use them remain backward-compatible.
+ *
+ * Token shapes come straight from the design handoff at
+ * project/Color Themes.html — change one, change the other.
+ * ============================================================ */
+
+:root,
+html[data-theme="orange"] {
+  --background: oklch(0.135 0.012 60);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.185 0.012 60);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.185 0.012 60);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.745 0.17 65);
+  --primary-foreground: oklch(0.985 0 0);
+  --primary-hover: oklch(0.80 0.15 65);
+  --primary-soft: oklch(0.745 0.17 65 / 0.12);
+  --primary-soft-2: oklch(0.745 0.17 65 / 0.22);
+  --secondary: oklch(0.225 0.012 60);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.225 0.012 60);
+  --muted-foreground: oklch(0.66 0.01 60);
+  --accent: oklch(0.225 0.012 60);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.285 0.012 60);
+  --input: oklch(0.285 0.012 60);
+  --ring: oklch(0.745 0.17 65);
+  --chart-1: oklch(0.745 0.17 65);
+  --chart-2: oklch(0.7 0.15 35);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.165 0.012 60);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.745 0.17 65);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.225 0.012 60);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.285 0.012 60);
+  --sidebar-ring: oklch(0.745 0.17 65);
+}
+
+html[data-theme="emerald"] {
+  --background: oklch(0.135 0.01 200);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.185 0.01 200);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.185 0.01 200);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.62 0.16 162);
+  --primary-foreground: oklch(0.985 0 0);
+  --primary-hover: oklch(0.68 0.15 162);
+  --primary-soft: oklch(0.62 0.16 162 / 0.12);
+  --primary-soft-2: oklch(0.62 0.16 162 / 0.22);
+  --secondary: oklch(0.225 0.01 200);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.225 0.01 200);
+  --muted-foreground: oklch(0.65 0.01 200);
+  --accent: oklch(0.225 0.01 200);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.285 0.01 200);
+  --input: oklch(0.285 0.01 200);
+  --ring: oklch(0.62 0.16 162);
+  --chart-1: oklch(0.62 0.16 162);
+  --chart-2: oklch(0.7 0.14 195);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.165 0.01 200);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.62 0.16 162);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.225 0.01 200);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.285 0.01 200);
+  --sidebar-ring: oklch(0.62 0.16 162);
+}
+
+html[data-theme="violet"] {
+  --background: oklch(0.13 0.01 260);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.18 0.01 260);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.18 0.01 260);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.526 0.247 293);
+  --primary-foreground: oklch(0.985 0 0);
+  --primary-hover: oklch(0.6 0.22 293);
+  --primary-soft: oklch(0.526 0.247 293 / 0.12);
+  --primary-soft-2: oklch(0.526 0.247 293 / 0.2);
+  --secondary: oklch(0.22 0.01 260);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.22 0.01 260);
+  --muted-foreground: oklch(0.65 0.01 260);
+  --accent: oklch(0.22 0.01 260);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.28 0.01 260);
+  --input: oklch(0.28 0.01 260);
+  --ring: oklch(0.526 0.247 293);
+  --chart-1: oklch(0.526 0.247 293);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.16 0.01 260);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.526 0.247 293);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.22 0.01 260);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.28 0.01 260);
+  --sidebar-ring: oklch(0.526 0.247 293);
+}
+
+html[data-theme="cobalt"] {
+  --background: oklch(0.13 0.015 252);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.18 0.015 252);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.18 0.015 252);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.585 0.2 254);
+  --primary-foreground: oklch(0.985 0 0);
+  --primary-hover: oklch(0.66 0.18 254);
+  --primary-soft: oklch(0.585 0.2 254 / 0.12);
+  --primary-soft-2: oklch(0.585 0.2 254 / 0.22);
+  --secondary: oklch(0.22 0.015 252);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.22 0.015 252);
+  --muted-foreground: oklch(0.65 0.012 252);
+  --accent: oklch(0.22 0.015 252);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.28 0.015 252);
+  --input: oklch(0.28 0.015 252);
+  --ring: oklch(0.585 0.2 254);
+  --chart-1: oklch(0.585 0.2 254);
+  --chart-2: oklch(0.7 0.15 220);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.16 0.015 252);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.585 0.2 254);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.22 0.015 252);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.28 0.015 252);
+  --sidebar-ring: oklch(0.585 0.2 254);
+}
+
+html[data-theme="amber"] {
+  --background: oklch(0.135 0.012 60);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.185 0.012 60);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.185 0.012 60);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.745 0.16 65);
+  --primary-foreground: oklch(0.985 0 0);
+  --primary-hover: oklch(0.8 0.15 65);
+  --primary-soft: oklch(0.745 0.16 65 / 0.12);
+  --primary-soft-2: oklch(0.745 0.16 65 / 0.22);
+  --secondary: oklch(0.225 0.012 60);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.225 0.012 60);
+  --muted-foreground: oklch(0.66 0.01 60);
+  --accent: oklch(0.225 0.012 60);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.285 0.012 60);
+  --input: oklch(0.285 0.012 60);
+  --ring: oklch(0.745 0.16 65);
+  --chart-1: oklch(0.745 0.16 65);
+  --chart-2: oklch(0.7 0.15 35);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.165 0.012 60);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.745 0.16 65);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.225 0.012 60);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.285 0.012 60);
+  --sidebar-ring: oklch(0.745 0.16 65);
+}
+
+html[data-theme="rose"] {
+  --background: oklch(0.13 0.012 15);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.18 0.012 15);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.18 0.012 15);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.645 0.22 16);
+  --primary-foreground: oklch(0.985 0 0);
+  --primary-hover: oklch(0.71 0.2 16);
+  --primary-soft: oklch(0.645 0.22 16 / 0.12);
+  --primary-soft-2: oklch(0.645 0.22 16 / 0.22);
+  --secondary: oklch(0.22 0.012 15);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.22 0.012 15);
+  --muted-foreground: oklch(0.65 0.01 15);
+  --accent: oklch(0.22 0.012 15);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.28 0.012 15);
+  --input: oklch(0.28 0.012 15);
+  --ring: oklch(0.645 0.22 16);
+  --chart-1: oklch(0.645 0.22 16);
+  --chart-2: oklch(0.7 0.18 340);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.16 0.012 15);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.645 0.22 16);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.22 0.012 15);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.28 0.012 15);
+  --sidebar-ring: oklch(0.645 0.22 16);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+
+  /* Premium theme-responsive custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--background);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+    border: 2px solid var(--background);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+}
+
+/* ============================================================
+ * MARKETING THEME SYSTEM (CSS CUSTOM PROPERTIES)
+ *
+ * Defines semantic tokens for dark and light modes of the marketing pages.
+ * ============================================================ */
+
+:root, [data-mtheme="dark"] {
+  --m-bg-primary: #020617;        /* slate-950 */
+  --m-bg-secondary: #0f172a;      /* slate-900 */
+  --m-bg-tertiary: #1e293b;       /* slate-800 */
+  --m-bg-surface: rgba(10, 15, 29, 0.8);
+  --m-bg-card: rgba(15, 23, 42, 0.4);
+  --m-bg-glass: rgba(2, 6, 23, 0.7);
+  --m-border-primary: #1e293b;    /* slate-800 */
+  --m-border-secondary: #334155;  /* slate-700 */
+  --m-border-glass: rgba(30, 41, 59, 0.6);
+  --m-text-primary: #f1f5f9;      /* slate-100 */
+  --m-text-secondary: #cbd5e1;    /* slate-300 */
+  --m-text-tertiary: #94a3b8;     /* slate-400 */
+  --m-text-muted: #64748b;        /* slate-500 */
+  --m-text-heading: #ffffff;
+  --m-shadow-card: 0 25px 60px rgba(0,0,0,0.8);
+  --m-shadow-glow: 0 0 80px rgba(255,165,0,0.12);
+  --m-glow-emerald: rgba(255,165,0,0.12);
+  --m-glow-cyan: rgba(255,183,50,0.10);
+  --m-glow-purple: rgba(249,115,22,0.08);
+  --m-glass-blur: 12px;
+  --m-gradient-fade: #020617;
+  --m-gradient-mesh-1: rgba(255,165,0,0.06);
+  --m-gradient-mesh-2: rgba(255,183,50,0.05);
+  --m-input-bg: rgba(2, 6, 23, 0.5);
+  --m-input-border: #1e293b;
+  --m-grid-opacity-scale: 1.0;
+  --m-grid-stroke: rgba(148, 163, 184, 0.07);
+  --m-badge-bg: rgba(255, 165, 0, 0.12);
+  --m-spotlight-blend: screen;
+  --m-spotlight-opacity: 1;
+  --m-transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, text-shadow 0.4s ease;
+}
+
+[data-mtheme="light"] {
+  --m-bg-primary: #f8fafc;        /* slate-50 */
+  --m-bg-secondary: #ffffff;
+  --m-bg-tertiary: #f1f5f9;       /* slate-100 */
+  --m-bg-surface: rgba(255, 255, 255, 0.85);
+  --m-bg-card: rgba(255, 255, 255, 0.7);
+  --m-bg-glass: rgba(255, 255, 255, 0.6);
+  --m-border-primary: #e2e8f0;    /* slate-200 */
+  --m-border-secondary: #cbd5e1;  /* slate-300 */
+  --m-border-glass: rgba(226, 232, 240, 0.6);
+  --m-text-primary: #0f172a;      /* slate-900 */
+  --m-text-secondary: #334155;    /* slate-700 */
+  --m-text-tertiary: #64748b;     /* slate-500 */
+  --m-text-muted: #94a3b8;        /* slate-400 */
+  --m-text-heading: #020617;      /* slate-950 */
+  --m-shadow-card: 0 8px 30px rgba(0,0,0,0.04);
+  --m-shadow-glow: 0 0 60px rgba(255,165,0,0.06);
+  --m-glow-emerald: rgba(255,165,0,0.06);
+  --m-glow-cyan: rgba(255,183,50,0.04);
+  --m-glow-purple: rgba(249,115,22,0.03);
+  --m-glass-blur: 16px;
+  --m-gradient-fade: #f8fafc;
+  --m-gradient-mesh-1: rgba(255,165,0,0.03);
+  --m-gradient-mesh-2: rgba(255,183,50,0.02);
+  --m-input-bg: #ffffff;
+  --m-input-border: #e2e8f0;
+  --m-grid-opacity-scale: 0.6;
+  --m-grid-stroke: rgba(100, 116, 139, 0.18);
+  --m-badge-bg: rgba(255, 165, 0, 0.08);
+  --m-spotlight-blend: multiply;
+  --m-spotlight-opacity: 0.6;
+}
+
+/* ============================================================
+ * DASHBOARD LIGHT MODE OVERRIDES
+ *
+ * Swap background, card, border, text and sidebar variables to premium
+ * light-mode values when the data-mtheme attribute is set to "light".
+ * The active primary colors still adapt dynamically via the theme ID dataset.
+ * ============================================================ */
+
+html[data-mtheme="light"],
+html[data-mtheme="light"][data-theme] {
+  /* Override core dashboard variables */
+  --background: oklch(0.985 0.003 260); /* clean, high-end slate white */
+  --foreground: oklch(0.18 0.01 260); /* deep carbon grey for readability */
+  --card: oklch(1 0 0); /* pure white card backgrounds */
+  --card-foreground: oklch(0.18 0.01 260);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.01 260);
+  --secondary: oklch(0.95 0.005 260);
+  --secondary-foreground: oklch(0.18 0.01 260);
+  --muted: oklch(0.94 0.005 260);
+  --muted-foreground: oklch(0.48 0.01 260);
+  --accent: oklch(0.95 0.005 260);
+  --accent-foreground: oklch(0.18 0.01 260);
+  --border: oklch(0.91 0.005 260);
+  --input: #e2e8f0;
+  --ring: var(--primary);
+  
+  --sidebar: #ffffff; /* pure white sidebar for clean look */
+  --sidebar-foreground: #0f172a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-ring: var(--primary);
+
+}
+
+/* Force hardcoded dark backgrounds to adapt gracefully in Light Mode */
+html[data-mtheme="light"] .bg-slate-950,
+html[data-mtheme="light"] .bg-slate-950\/10,
+html[data-mtheme="light"] .bg-slate-950\/20,
+html[data-mtheme="light"] .bg-slate-950\/30,
+html[data-mtheme="light"] .bg-slate-950\/40,
+html[data-mtheme="light"] .bg-slate-950\/50,
+html[data-mtheme="light"] .bg-slate-950\/60,
+html[data-mtheme="light"] .bg-slate-950\/70,
+html[data-mtheme="light"] .bg-slate-950\/80,
+html[data-mtheme="light"] .bg-slate-950\/90 {
+  background-color: #f8fafc !important;
+}
+
+html[data-mtheme="light"] .inbox-doodle-bg {
+  background-color: #f8fafc !important;
+  background-image: url('/inbox-doodle.svg');
+}
+
+.inbox-doodle-bg {
+  background-image: url('/inbox-doodle.svg');
+}
+
+html[data-mtheme="light"] .bg-slate-900,
+html[data-mtheme="light"] .bg-sidebar,
+html[data-mtheme="light"] .bg-card,
+html[data-mtheme="light"] .bg-slate-900\/10,
+html[data-mtheme="light"] .bg-slate-900\/20,
+html[data-mtheme="light"] .bg-slate-900\/30,
+html[data-mtheme="light"] .bg-slate-900\/40,
+html[data-mtheme="light"] .bg-slate-900\/50,
+html[data-mtheme="light"] .bg-slate-900\/60,
+html[data-mtheme="light"] .bg-slate-900\/70,
+html[data-mtheme="light"] .bg-slate-900\/80,
+html[data-mtheme="light"] .bg-slate-900\/90 {
+  background-color: #ffffff !important;
+}
+
+/* Force all borders to adapt gracefully in Light Mode */
+html[data-mtheme="light"] .border-slate-800,
+html[data-mtheme="light"] .border-slate-850,
+html[data-mtheme="light"] .border-slate-700,
+html[data-mtheme="light"] .border-slate-700\/50,
+html[data-mtheme="light"] .border-border,
+html[data-mtheme="light"] .border-sidebar-border {
+  border-color: #e2e8f0 !important;
+}
+
+/* Force dark text color overlays in Light Mode for hardcoded text elements */
+html[data-mtheme="light"] .text-white,
+html[data-mtheme="light"] [aria-pressed="false"] .text-white,
+html[data-mtheme="light"] .text-sidebar-foreground,
+html[data-mtheme="light"] .text-slate-50,
+html[data-mtheme="light"] .text-slate-100,
+html[data-mtheme="light"] .text-slate-200 {
+  color: #0f172a !important;
+}
+
+html[data-mtheme="light"] .text-slate-300,
+html[data-mtheme="light"] .text-slate-400,
+html[data-mtheme="light"] .text-muted-foreground,
+html[data-mtheme="light"] .text-sidebar-foreground\/60,
+html[data-mtheme="light"] .text-sidebar-foreground\/75 {
+  color: #475569 !important;
+}
+
+/* Universal crisp white text contrast on active primary and brand buttons */
+button.bg-primary,
+a.bg-primary,
+.bg-primary,
+.text-primary-foreground,
+[data-slot="button"].bg-primary,
+[data-slot="button"].bg-orange-500,
+[data-slot="button"].bg-orange-600,
+button.bg-orange-500,
+button.bg-orange-600,
+a.bg-orange-500,
+a.bg-orange-600,
+html[data-mtheme="light"] .bg-primary .text-white,
+html[data-mtheme="light"] .bg-primary.text-white,
+html[data-mtheme="light"] button.bg-primary,
+html[data-mtheme="light"] a.bg-primary,
+html[data-mtheme="light"] .text-primary-foreground,
+html[data-mtheme="light"] [data-state="active"] .text-white,
+html[data-mtheme="light"] .bg-teal-600 .text-white,
+html[data-mtheme="light"] .bg-teal-600.text-white,
+html[data-mtheme="light"] .bg-teal-500.text-white,
+html[data-mtheme="light"] .bg-orange-650 .text-white,
+html[data-mtheme="light"] .bg-orange-650.text-white,
+html[data-mtheme="light"] .bg-orange-600 .text-white,
+html[data-mtheme="light"] .bg-orange-600.text-white,
+html[data-mtheme="light"] .bg-orange-500.text-white,
+html[data-mtheme="light"] .bg-orange-500 .text-white,
+html[data-mtheme="light"] .bg-red-500.text-white,
+html[data-mtheme="light"] .bg-red-500 .text-white {
+  color: #ffffff !important;
+}
+
+/* ── Marketing page: ensure section text is readable in light mode ── */
+
+/* Navbar transparent state — text must be dark on light bg */
+html[data-mtheme="light"] header .text-slate-400 {
+  color: #475569 !important;
+}
+html[data-mtheme="light"] header .text-slate-600 {
+  color: #334155 !important;
+}
+
+/* SpotlightCard and feature cards — add visible border + bg in light */
+html[data-mtheme="light"] .border-\[var\(--m-border-glass\)\] {
+  border-color: #e2e8f0 !important;
+}
+
+/* Workflow visualizer terminal panel */
+html[data-mtheme="light"] .bg-\[var\(--m-bg-primary\)\]\/60 {
+  background-color: rgba(248,250,252,0.8) !important;
+}
+
+/* Custom status select dropdown styling */
+.status-select-scheduled {
+  color: #059669 !important;
+  background-color: rgba(5, 150, 105, 0.08) !important;
+  border-color: rgba(5, 150, 105, 0.2) !important;
+}
+html[data-mtheme="dark"] .status-select-scheduled,
+html:not([data-mtheme="light"]) .status-select-scheduled {
+  color: #34d399 !important;
+  background-color: rgba(16, 185, 129, 0.08) !important;
+  border-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+.status-select-completed {
+  color: #0d9488 !important;
+  background-color: rgba(13, 148, 136, 0.08) !important;
+  border-color: rgba(13, 148, 136, 0.2) !important;
+}
+html[data-mtheme="dark"] .status-select-completed,
+html:not([data-mtheme="light"]) .status-select-completed {
+  color: #2dd4bf !important;
+  background-color: rgba(20, 184, 166, 0.08) !important;
+  border-color: rgba(20, 184, 166, 0.2) !important;
+}
+
+.status-select-cancelled {
+  color: #e11d48 !important;
+  background-color: rgba(225, 29, 72, 0.08) !important;
+  border-color: rgba(225, 29, 72, 0.2) !important;
+}
+html[data-mtheme="dark"] .status-select-cancelled,
+html:not([data-mtheme="light"]) .status-select-cancelled {
+  color: #fb7185 !important;
+  background-color: rgba(244, 63, 94, 0.08) !important;
+  border-color: rgba(244, 63, 94, 0.2) !important;
+}
+[data-mtheme], [data-theme] {
+  transition: var(--m-transition);
+}
+
+[data-mtheme] *,
+[data-mtheme] *::before,
+[data-mtheme] *::after,
+[data-theme] *,
+[data-theme] *::before,
+[data-theme] *::after {
+  /* Avoid transitioning layout properties to prevent glitches */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, text-shadow 0.3s ease;
+}
+
+/* ── Dashboard light mode: slate-800/700 backgrounds ── */
+html[data-mtheme="light"] .bg-slate-800,
+html[data-mtheme="light"] .bg-slate-800\/60,
+html[data-mtheme="light"] .bg-slate-800\/40,
+html[data-mtheme="light"] .bg-slate-800\/30 {
+  background-color: #f1f5f9 !important;
+}
+
+html[data-mtheme="light"] .bg-slate-700 {
+  background-color: #e2e8f0 !important;
+}
+
+html[data-mtheme="light"] .hover\:bg-slate-800:hover,
+html[data-mtheme="light"] .hover\:bg-slate-800\/60:hover {
+  background-color: #e2e8f0 !important;
+}
+
+html[data-mtheme="light"] .hover\:bg-slate-700:hover {
+  background-color: #cbd5e1 !important;
+}
+
+/* slate-500 text — subtitles, timestamps, muted labels */
+html[data-mtheme="light"] .text-slate-500 {
+  color: #64748b !important;
+}
+
+/* Borders */
+html[data-mtheme="light"] .border-slate-800,
+html[data-mtheme="light"] .divide-slate-800 > * + * {
+  border-color: #e2e8f0 !important;
+}
+
+/* Chart SVG fills */
+html[data-mtheme="light"] .fill-slate-500 {
+  fill: #64748b !important;
+}
+html[data-mtheme="light"] .fill-slate-400 {
+  fill: #94a3b8 !important;
+}
+
+/* Activity feed stripe */
+html[data-mtheme="light"] .bg-slate-900\/40 {
+  background-color: #f8fafc !important;
+}
+
+/* Skeleton pulse */
+html[data-mtheme="light"] .bg-slate-800.animate-pulse {
+  background-color: #e2e8f0 !important;
+}
+
+/* Quick actions hover */
+html[data-mtheme="light"] .hover\:border-slate-700:hover {
+  border-color: #cbd5e1 !important;
+}
+
+/* Chart tooltip — scoped to tooltip-role elements only so it does not
+   override the admin-panel shell background which also uses bg-slate-950 */
+html[data-mtheme="light"] [role="tooltip"] .bg-slate-950,
+html[data-mtheme="light"] .chart-tooltip .bg-slate-950 {
+  background-color: #1e293b !important;
+}
+
+/* Range tab active */
+html[data-mtheme="light"] .bg-slate-800\/60 {
+  background-color: #f1f5f9 !important;
+}
+
+/* ── Admin panel: missing opacity-variant overrides ── */
+html[data-mtheme="light"] .border-slate-800\/50 {
+  border-color: #e2e8f0 !important;
+}
+
+html[data-mtheme="light"] .bg-slate-800\/50 {
+  background-color: #f1f5f9 !important;
+}
+
+html[data-mtheme="light"] .hover\:bg-slate-800\/30:hover {
+  background-color: #f1f5f9 !important;
+}
+
+html[data-mtheme="light"] .hover\:text-white:hover {
+  color: #0f172a !important;
+}
+
+/* Preserve white text on primary-colored hover buttons */
+html[data-mtheme="light"] .bg-violet-600 .hover\:text-white:hover,
+html[data-mtheme="light"] .bg-violet-600.hover\:text-white:hover,
+html[data-mtheme="light"] .bg-teal-600 .hover\:text-white:hover,
+html[data-mtheme="light"] .bg-teal-600.hover\:text-white:hover,
+html[data-mtheme="light"] .bg-emerald-600 .hover\:text-white:hover,
+html[data-mtheme="light"] .bg-emerald-600.hover\:text-white:hover,
+html[data-mtheme="light"] .bg-primary .hover\:text-white:hover {
+  color: #ffffff !important;
+}
+
+/* ============================================================
+ * THEME-RESPONSIVE FORM FIELD OVERRIDES
+ *
+ * Ensures all native HTML fields (select, options, date/time, textareas)
+ * are perfectly readable with proper contrast in both Light and Dark modes.
+ * ============================================================ */
+
+/* Ensure native dropdown select and option fields are fully readable */
+html[data-mtheme="light"] select {
+  background-color: #ffffff;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+html[data-mtheme="light"] option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+html[data-mtheme="dark"] select,
+html:not([data-mtheme="light"]) select {
+  background-color: #090d16;
+  color: #ffffff;
+  border-color: #1e293b;
+}
+
+html[data-mtheme="dark"] option,
+html:not([data-mtheme="light"]) option {
+  background-color: #090d16 !important;
+  color: #ffffff !important;
+}
+
+/* Ensure native date and time picker fields are readable with appropriate indicators */
+html[data-mtheme="light"] input[type="date"],
+html[data-mtheme="light"] input[type="time"],
+html[data-mtheme="light"] input[type="datetime-local"] {
+  background-color: #ffffff;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+html[data-mtheme="light"] input[type="date"]::-webkit-calendar-picker-indicator,
+html[data-mtheme="light"] input[type="time"]::-webkit-calendar-picker-indicator,
+html[data-mtheme="light"] input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0) !important;
+}
+
+html[data-mtheme="dark"] input[type="date"],
+html[data-mtheme="dark"] input[type="time"],
+html[data-mtheme="dark"] input[type="datetime-local"],
+html:not([data-mtheme="light"]) input[type="date"],
+html:not([data-mtheme="light"]) input[type="time"],
+html:not([data-mtheme="light"]) input[type="datetime-local"] {
+  background-color: #090d16;
+  color: #ffffff;
+  border-color: #1e293b;
+}
+
+html[data-mtheme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+html[data-mtheme="dark"] input[type="time"]::-webkit-calendar-picker-indicator,
+html[data-mtheme="dark"] input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+html:not([data-mtheme="light"]) input[type="date"]::-webkit-calendar-picker-indicator,
+html:not([data-mtheme="light"]) input[type="time"]::-webkit-calendar-picker-indicator,
+html:not([data-mtheme="light"]) input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) !important;
+}
+
+/* Webkit autofill overrides for seamless transitions between light and dark themes */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+html[data-mtheme="light"] input:-webkit-autofill {
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+html[data-mtheme="dark"] input:-webkit-autofill {
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Ensure all light-mode input fields have dark text and readable placeholders */
+html[data-mtheme="light"] input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]),
+html[data-mtheme="light"] textarea {
+  color: #0f172a;
+}
+
+html[data-mtheme="light"] input::placeholder,
+html[data-mtheme="light"] textarea::placeholder {
+  color: #64748b !important;
+}
