@@ -1,77 +1,72 @@
-# ⚡ ChatNexGen Ai
+# #️⃣ HashTags CRM
 
-> The ultimate self-hostable CRM and no-code automation engine built for the official WhatsApp Business (Cloud) API. Empower your team with a real-time shared inbox, contact segmentation, visual Kanban pipelines, automated broadcasts, and an autonomous AI Healthcare Assistant.
+> The ultimate enterprise CRM and no-code automation platform built on Next.js, MySQL (Prisma), Socket.io, and the official WhatsApp Business (Cloud) API. Empower your team with a real-time shared team inbox, visual Kanban pipelines, automated broadcasts, contact management, AI automation, and dynamic multi-business appointment booking.
 
 ---
 
 ## 🚀 Key Modules & Features
 
 ### 📥 Real-Time Shared Inbox
-- **Multi-Agent Collaboration:** Connect one official WhatsApp number and let your entire customer support and sales teams collaborate under a single interface.
-- **Thread Assignment:** Assign conversations to specific agents, transition states, and add internal collaborator notes to avoid customer collision.
-- **Media Support:** Seamlessly send and receive text, images, documents, audio, and interactive buttons.
+- **Multi-Agent Collaboration:** Connect official WhatsApp Business numbers and collaborate under a single fast, unified interface.
+- **Thread Assignment & Realtime Sync:** Assign conversations to specific agents, transition statuses (Open, Pending, Resolved), and sync instantaneously over WebSockets (Socket.io).
+- **Rich Media & Interactive Messages:** Send and receive text, images, documents, audio, videos, interactive button templates, and quick replies.
 
 ### 📊 Visual Kanban Pipelines
-- **Design for Chat:** Drag-and-drop deals linked directly to active WhatsApp conversations.
-- **Value Tracking:** Define pipeline stages, assign monetary values to deals, and track your total pipeline value in real-time.
-- **Quick-Actions:** Trigger status updates or send template messages directly from the pipeline view.
+- **Chat-Linked Deals:** Drag-and-drop deals linked directly to active WhatsApp customer threads.
+- **Stage & Value Tracking:** Define custom stages, assign monetary values, and visualize total pipeline revenue in real-time.
+- **Direct Actions:** Trigger stage transitions or dispatch template messages straight from the pipeline view.
 
 ### 📢 Targeted Broadcast Campaigns
-- **Meta-Approved Templates:** Schedule or instantly dispatch broadcast campaigns to custom lists.
-- **Dynamic Variable Substitution:** Personalize messages with client-specific custom fields.
-- **Analytics Dashboard:** Track precise delivery rates, read rates, and quick-reply button clicks.
+- **Meta-Approved Templates:** Schedule or instantly dispatch broadcast campaigns to targeted audiences.
+- **Dynamic Variables & Custom Fields:** Personalize broadcasts with contact names and bespoke custom attributes.
+- **Live Campaign Analytics:** Track sent, delivered, read, failed, and response rates in real-time.
 
 ### 🔌 No-Code Flow & Automation Builder
-- **Visual Node Builder:** Create complex automation trees with triggers like incoming keywords, contact registration, or schedule events.
-- **Conditional Logic:** Branch flows based on contact tags, custom fields, or business hours.
-- **Action Nodes:** Trigger custom webhooks, assign tags, send template follow-ups, or insert wait steps.
+- **Visual Automation Trees:** Construct intelligent logic workflows triggered by incoming keywords, contact actions, or schedules.
+- **Branching & Conditions:** Route flows dynamically based on tags, intent, business hours, and attributes.
+- **Action Nodes:** Trigger webhooks, auto-tag contacts, dispatch templates, or insert delay nodes.
 
-### 🏥 Autonomous AI Healthcare Assistant
-- **Dual AI Engine:** Leverages **Google Gemini 1.5/2.0 Flash** as the primary responder with an automatic failover to **OpenAI GPT-4o-Mini** (or OpenRouter) via a built-in circuit breaker.
-- **Strict 4-Step Appointment Booking Flow:**
-  1. *Patient Details:* Collects patient name, age, and reason for visit in a single step.
-  2. *Doctor Selection:* Presents available specialist options.
-  3. *Dynamic Slot Calculation:* Reads real-time doctor schedules, clinic timings, and exceptions, presenting only open times (automatically filtering out lunch breaks and existing bookings).
-  4. *Confirmation:* Finalizes details and logs the appointment.
-- **Google Sheets Sync:** Integrates with Google Sheets using a secure webhook Script to automatically log booked visits in real-time.
-- **Strict Guardrails:** Programmed to never diagnose conditions, never recommend/prescribe medications, bypasses HTML in responses, and triggers instant human agent handover upon detecting emergency or escalation keywords.
+### 🤖 Multi-Segment AI Assistant & Booking
+- **Dual AI Engine:** Powered by Google Gemini with automatic failover to OpenAI / OpenRouter models.
+- **Intelligent Appointment Workflows:** Real-time doctor/specialist availability lookup, smart slot calculation, conflict prevention, and confirmation.
+- **Strict Compliance & Guardrails:** Built-in safeguards preventing medical prescriptions, enforcing compliant responses, and enabling seamless human agent takeover.
 
 ---
 
 ## 🛠️ Technological Stack
 
-- **Frontend Framework:** Next.js 16 (App Router), React 19, TypeScript
-- **Styling:** Tailwind CSS v4, Framer Motion (smooth page transitions and animations), Lucide Icons
-- **Database & Backend:** Supabase (Postgres, Auth, Realtime listeners, Storage, Row-Level Security)
-- **WhatsApp Gateway:** Meta WhatsApp Cloud API (compliant integration to prevent number bans)
+- **Frontend:** Next.js 16 (App Router), React 19, TypeScript
+- **Styling:** Tailwind CSS, Framer Motion, Lucide Icons, Modern Brand Orange Theme (`#FFA500`)
+- **Backend & Database:** Node.js custom server (`server.js`), Prisma ORM, MySQL, Socket.io for bidirectional realtime communication
+- **WhatsApp Gateway:** Official Meta WhatsApp Cloud API (Compliant, high-throughput delivery)
 
 ---
 
 ## ⚙️ Environment Configuration
 
-To run the application, copy the example environment template:
+Copy the sample environment configuration file:
 ```bash
-cp .env.local.example .env.local
+cp .env.example .env
 ```
 
-### Required Configuration
+### Required Configuration Variables
 
 | Key | Description |
 | :--- | :--- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL. |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous API key. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (must remain secret, used for webhook verification and cron triggers). |
-| `ENCRYPTION_KEY` | 64 hex characters (32 bytes) used for encrypting WhatsApp API credentials. |
-| `META_APP_SECRET` | Used to verify HMAC signatures of incoming WhatsApp webhook events. |
+| `DATABASE_URL` | MySQL database connection string. |
+| `NEXTAUTH_SECRET` | Secret key for session authentication and JWT tokens. |
+| `NEXTAUTH_URL` | Base URL of the application (e.g. `http://localhost:3000`). |
+| `ENCRYPTION_KEY` | 64-character hex string (32 bytes) for encrypting WhatsApp API credentials. |
+| `META_APP_SECRET` | Used to verify HMAC signatures of incoming WhatsApp webhooks. |
+| `NEXT_PUBLIC_SOCKET_URL` | URL of the Socket.io WebSocket server. |
 
-### Optional AI Healthcare Configuration
+### Optional AI & Integration Keys
 
 | Key | Description |
 | :--- | :--- |
-| `GEMINI_API_KEY` | Google Gemini API Key (required for AI auto-replies). |
-| `OPENAI_API_KEY` | OpenAI/OpenRouter API key (fallback responder if Gemini hits rate limits or error thresholds). |
-| `GOOGLE_SHEETS_WEBHOOK_URL` | Web App URL for the Apps Script (logs and syncs booked appointments in Google Sheets). |
-| `AUTOMATION_CRON_SECRET` | Secret to secure automation cron routes. |
+| `GEMINI_API_KEY` | Google Gemini API Key for autonomous AI replies and intent recognition. |
+| `OPENAI_API_KEY` | OpenAI API Key for fallback model handling. |
+| `RESEND_API_KEY` | Resend API key for transactional emails (OTP, password reset, demo booking). |
 
 ---
 
@@ -79,45 +74,25 @@ cp .env.local.example .env.local
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone https://github.com/sapatil2212/WhatsApp-Automation-CRM-V2.git
-cd WhatsApp-Automation-CRM-V2
+git clone https://github.com/sapatil2212/HashTagsCRM.git
+cd HashTagsCRM
 npm install
 ```
 
-### 2. Configure Your Database
-Run the SQL migration scripts located in [supabase/migrations](file:///e:/Full%20Stack%20Projects/WhatsApp-CRM-2/supabase/migrations) on your Supabase instance to set up all tables, relationships, and triggers:
-- Apply initial schema, pipelines, broadcasts, and automation engines.
-- Apply AI Healthcare schema and RLS policies (`013_ai_healthcare.sql` to `019_add_reminders_4h_2h.sql`).
+### 2. Configure Database & Prisma
+```bash
+npx prisma generate
+npx prisma db push
+```
 
-### 3. Run Locally
+### 3. Run Development Server
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) to view the application dashboard.
-
----
-
-## 📂 Project Structure
-
-```
-├── docs/                      # Google Sheets apps scripts and offline documentation
-├── src/
-│   ├── app/                   # Next.js page layout and API routing
-│   │   ├── (auth)/            # Login, Registration, Password resets
-│   │   ├── (dashboard)/       # Dashboard, Shared Inbox, Contacts, Pipelines, Flows, AI Healthcare
-│   │   └── (marketing)/       # Landing and product marketing pages
-│   ├── components/            # Shared UI components and layout widgets
-│   ├── context/               # Global React context providers
-│   ├── hooks/                 # Reusable React hooks
-│   ├── lib/                   # Meta WhatsApp API helper functions, caching tools, and utilities
-│   ├── services/              # AI Healthcare processing services
-│   └── types/                 # TypeScript type declarations
-├── supabase/
-│   └── migrations/            # SQL database migration files
-```
+Open [http://localhost:3000](http://localhost:3000) to access the HashTags CRM application.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the [MIT License](file:///e:/Full%20Stack%20Projects/WhatsApp-CRM-2/LICENSE) — feel free to customize, host, and white-label it for your own business or clients.
+This project is licensed under the [MIT License](LICENSE) — feel free to customize, host, and deploy for your business.

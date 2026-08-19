@@ -1,17 +1,17 @@
 {
-  "name": "chatnexgenai",
+  "name": "hashtagscrm",
   "version": "0.2.0",
   "private": true,
-  "description": "Self-hostable CRM template for WhatsApp built on Next.js and Supabase — shared inbox, contacts, sales pipelines, broadcasts, and no-code automations.",
+  "description": "Enterprise CRM and no-code automation platform for WhatsApp built on Next.js, MySQL (Prisma), Socket.io, and Meta Cloud API.",
   "license": "MIT",
-  "author": "ChatNexGen Ai",
-  "homepage": "https://github.com/sapatil2212/WhatsApp-Automation-CRM-V2",
+  "author": "HashTags CRM",
+  "homepage": "https://github.com/sapatil2212/HashTagsCRM",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sapatil2212/WhatsApp-Automation-CRM-V2.git"
+    "url": "git+https://github.com/sapatil2212/HashTagsCRM.git"
   },
   "bugs": {
-    "url": "https://github.com/sapatil2212/WhatsApp-Automation-CRM-V2/issues"
+    "url": "https://github.com/sapatil2212/HashTagsCRM/issues"
   },
   "keywords": [
     "crm",
