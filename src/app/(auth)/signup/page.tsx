@@ -59,7 +59,7 @@ const PLANS: Plan[] = [
     period: "/month",
     renewal: null,
     icon: Zap,
-    color: "emerald",
+    color: "orange",
     popular: false,
     features: [
       "Official WhatsApp Business API",
@@ -240,8 +240,8 @@ export default function SignupPage() {
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center bg-[var(--m-bg-primary)] py-12 px-4 overflow-y-auto select-none">
       <InteractiveGrid gridSize={40} className="opacity-20" />
-      <div className="absolute top-[20%] left-[20%] w-[50%] h-[50%] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[20%] right-[20%] w-[50%] h-[50%] rounded-full bg-teal-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[20%] left-[20%] w-[50%] h-[50%] rounded-full bg-orange-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[20%] right-[20%] w-[50%] h-[50%] rounded-full bg-amber-500/5 blur-[120px] pointer-events-none" />
 
       {/* Back Home */}
       <Link
@@ -268,7 +268,7 @@ export default function SignupPage() {
                   Create Account
                 </CardTitle>
                 <CardDescription className="text-xs text-[var(--m-text-tertiary)] mt-1">
-                  Get started with CRM Template for WhatsApp
+                  Get started with HashTags CRM for WhatsApp
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
@@ -284,21 +284,21 @@ export default function SignupPage() {
                     <div className="flex flex-col gap-1.2">
                       <Label htmlFor="fullName" className="text-[11px] font-semibold text-[var(--m-text-secondary)]/90">Full Name</Label>
                       <Input id="fullName" type="text" placeholder="Enter your name" value={fullName} onChange={(e) => setFullName(e.target.value)} required
-                        className="h-9 px-3 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-emerald-500/70 focus-visible:ring-emerald-500/10 transition-all duration-200" />
+                        className="h-9 px-3 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-orange-500/70 focus-visible:ring-orange-500/10 transition-all duration-200" />
                     </div>
 
                     {/* Email */}
                     <div className="flex flex-col gap-1.2">
                       <Label htmlFor="email" className="text-[11px] font-semibold text-[var(--m-text-secondary)]/90">Email Address</Label>
                       <Input id="email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                        className="h-9 px-3 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-emerald-500/70 focus-visible:ring-emerald-500/10 transition-all duration-200" />
+                        className="h-9 px-3 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-orange-500/70 focus-visible:ring-orange-500/10 transition-all duration-200" />
                     </div>
 
                     {/* Mobile */}
                     <div className="flex flex-col gap-1.2">
                       <Label htmlFor="mobileNumber" className="text-[11px] font-semibold text-[var(--m-text-secondary)]/90">Mobile Number</Label>
                       <Input id="mobileNumber" type="tel" placeholder="Enter mobile number" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} required
-                        className="h-9 px-3 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-emerald-500/70 focus-visible:ring-emerald-500/10 transition-all duration-200" />
+                        className="h-9 px-3 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-orange-500/70 focus-visible:ring-orange-500/10 transition-all duration-200" />
                     </div>
 
                     {/* Business Category */}
@@ -314,7 +314,7 @@ export default function SignupPage() {
                             id="businessCategory"
                             placeholder="Search business category"
                             required
-                            className="h-9 px-3 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-emerald-500/70 focus-visible:ring-emerald-500/10"
+                            className="h-9 px-3 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-orange-500/70 focus-visible:ring-orange-500/10"
                           />
                           {businessCategory && <ComboboxClear />}
                           <ComboboxTrigger />
@@ -351,7 +351,7 @@ export default function SignupPage() {
                             id="selectedPlan"
                             placeholder="Search plan"
                             required
-                            className="h-9 px-3 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-emerald-500/70 focus-visible:ring-emerald-500/10"
+                            className="h-9 px-3 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-orange-500/70 focus-visible:ring-orange-500/10"
                           />
                           <ComboboxTrigger />
                         </ComboboxInputGroup>
@@ -373,7 +373,7 @@ export default function SignupPage() {
                       <Label htmlFor="password" className="text-[11px] font-semibold text-[var(--m-text-secondary)]/90">Password</Label>
                       <div className="relative">
                         <Input id="password" type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required
-                          className="h-9 pl-3 pr-9 w-full border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-emerald-500/70 focus-visible:ring-emerald-500/10 transition-all duration-200" />
+                          className="h-9 pl-3 pr-9 w-full border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-orange-500/70 focus-visible:ring-orange-500/10 transition-all duration-200" />
                         <button type="button" onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-3 top-2 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer" aria-label="Toggle password">
                           {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -386,7 +386,7 @@ export default function SignupPage() {
                       <Label htmlFor="confirmPassword" className="text-[11px] font-semibold text-[var(--m-text-secondary)]/90">Confirm Password</Label>
                       <div className="relative">
                         <Input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Confirm your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required
-                          className="h-9 pl-3 pr-9 w-full border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-emerald-500/70 focus-visible:ring-emerald-500/10 transition-all duration-200" />
+                          className="h-9 pl-3 pr-9 w-full border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] placeholder:text-[var(--m-text-muted)]/50 focus-visible:border-orange-500/70 focus-visible:ring-orange-500/10 transition-all duration-200" />
                         <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           className="absolute right-3 top-2 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer" aria-label="Toggle confirm password">
                           {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -396,14 +396,14 @@ export default function SignupPage() {
                   </div>
 
                   <Button type="submit" disabled={loading}
-                    className="mt-4 h-9 w-full bg-emerald-500 text-white hover:bg-emerald-400 hover:scale-[1.01] active:scale-[0.99] font-bold text-xs transition-all duration-200 border border-emerald-400/20">
+                    className="mt-4 h-9 w-full bg-orange-500 text-white hover:bg-orange-400 hover:scale-[1.01] active:scale-[0.99] font-bold text-xs transition-all duration-200 border border-orange-400/20 shadow-md shadow-orange-500/20 cursor-pointer">
                     {loading ? "Creating account..." : "Create Account & Verify OTP →"}
                   </Button>
                 </form>
 
                 <p className="mt-4.5 text-center text-[11px] text-[var(--m-text-muted)]">
                   Already have an account?{" "}
-                  <Link href="/login" className="text-emerald-500 hover:text-emerald-400 font-bold transition-colors">Sign In</Link>
+                  <Link href="/login" className="text-orange-500 hover:text-orange-400 font-bold transition-colors">Sign In</Link>
                 </p>
               </CardContent>
             </Card>
@@ -454,14 +454,14 @@ export default function SignupPage() {
                       value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                       required
-                      className="h-10 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-center text-md font-bold tracking-[0.2em] text-[var(--m-text-primary)] focus-visible:border-emerald-500/70 focus-visible:ring-emerald-500/10 transition-all duration-200"
+                      className="h-10 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-center text-md font-bold tracking-[0.2em] text-[var(--m-text-primary)] focus-visible:border-orange-500/70 focus-visible:ring-orange-500/10 transition-all duration-200"
                     />
                   </div>
 
                   <Button
                     type="submit"
                     disabled={verifyLoading}
-                    className="h-9 w-full bg-emerald-500 text-white hover:bg-emerald-400 hover:scale-[1.01] active:scale-[0.99] font-bold text-xs transition-all duration-200 border border-emerald-400/20"
+                    className="h-9 w-full bg-orange-500 text-white hover:bg-orange-400 hover:scale-[1.01] active:scale-[0.99] font-bold text-xs transition-all duration-200 border border-orange-400/20 shadow-md shadow-orange-500/20 cursor-pointer"
                   >
                     {verifyLoading ? "Verifying..." : "Verify & Proceed to Payment"}
                   </Button>
@@ -483,8 +483,8 @@ export default function SignupPage() {
           >
             <Card className="border border-[var(--m-border-glass)]/40 bg-[var(--m-bg-glass)]/70 backdrop-blur-xl p-6 md:p-8 shadow-none flex flex-col items-center gap-4">
               <div className="flex flex-col items-center gap-2 text-center">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                  <QrCode className="size-5 text-emerald-400" />
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                  <QrCode className="size-5 text-orange-400" />
                 </div>
                 <h2 className="text-base font-bold text-[var(--m-text-heading)]">Scan & Pay</h2>
                 <p className="text-[11px] text-[var(--m-text-tertiary)] leading-relaxed">
@@ -493,7 +493,7 @@ export default function SignupPage() {
               </div>
 
               {/* plan badge */}
-              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold bg-emerald-500/10 border-emerald-500/30 text-emerald-400`}>
+              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold bg-orange-500/10 border-orange-500/30 text-orange-400`}>
                 <selectedPlan.icon className="size-3" />
                 {selectedPlan.name} Plan — {selectedPlan.price}{selectedPlan.period}
               </div>
@@ -526,13 +526,13 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-emerald-500/40 hover:border-emerald-500/70 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-400 text-[11px] font-semibold transition-all duration-200 cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-orange-500/40 hover:border-orange-500/70 bg-orange-500/5 hover:bg-orange-500/10 text-orange-400 text-[11px] font-semibold transition-all duration-200 cursor-pointer"
                 >
                   <Paperclip className="size-3.5" />
                   {proofFile ? proofFile.name : "Attach Payment Proof (Screenshot)"}
                 </button>
                 {proofFile && (
-                  <p className="text-[10px] text-emerald-400/80 text-center">
+                  <p className="text-[10px] text-orange-400/80 text-center">
                     ✓ {proofFile.name} ready
                   </p>
                 )}
@@ -542,7 +542,7 @@ export default function SignupPage() {
                 type="button"
                 disabled={!proofFile || sending}
                 onClick={handleSendProof}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-[11px] font-bold shadow-md hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-[11px] font-bold shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
               >
                 {sending ? (
                   <>
@@ -571,8 +571,8 @@ export default function SignupPage() {
             className="w-full max-w-sm z-10"
           >
             <Card className="border border-[var(--m-border-glass)]/40 bg-[var(--m-bg-glass)]/70 backdrop-blur-xl p-8 flex flex-col items-center gap-4 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                <PartyPopper className="size-8 text-emerald-400" />
+              <div className="w-16 h-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                <PartyPopper className="size-8 text-orange-400" />
               </div>
 
               <div>
@@ -585,13 +585,13 @@ export default function SignupPage() {
                 </p>
               </div>
 
-              <div className="w-full rounded-xl border border-emerald-500/20 bg-emerald-500/8 px-4 py-3 text-[10px] text-emerald-300/80 leading-relaxed">
-                Our team reviews payments within <span className="font-bold text-emerald-400">24–48 hours</span>.<br />
+              <div className="w-full rounded-xl border border-orange-500/20 bg-orange-500/8 px-4 py-3 text-[10px] text-orange-300/80 leading-relaxed">
+                Our team reviews payments within <span className="font-bold text-orange-400">24–48 hours</span>.<br />
                 You will not be able to log in until activated by the Super Admin.
               </div>
 
               <Link href="/login" className="w-full">
-                <button className="w-full py-2.5 rounded-xl border border-[var(--m-border-glass)]/40 bg-[var(--m-bg-secondary)] hover:bg-[var(--m-bg-tertiary)] text-[var(--m-text-secondary)] text-[11px] font-bold transition-all">
+                <button className="w-full py-2.5 rounded-xl border border-[var(--m-border-glass)]/40 bg-[var(--m-bg-secondary)] hover:bg-[var(--m-bg-tertiary)] text-[var(--m-text-secondary)] text-[11px] font-bold transition-all cursor-pointer">
                   Back to Sign In
                 </button>
               </Link>

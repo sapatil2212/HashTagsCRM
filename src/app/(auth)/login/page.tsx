@@ -107,8 +107,8 @@ function RenewalModal({
         {!done ? (
           <div className="p-6 flex flex-col items-center gap-4">
             <div className="flex flex-col items-center gap-2 text-center">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                <QrCode className="size-5 text-emerald-400" />
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                <QrCode className="size-5 text-orange-400" />
               </div>
               <h2 className="text-base font-bold text-[var(--m-text-heading)]">Renew Subscription</h2>
               <p className="text-[11px] text-[var(--m-text-tertiary)] leading-relaxed">
@@ -141,13 +141,13 @@ function RenewalModal({
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-emerald-500/40 hover:border-emerald-500/70 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-400 text-[11px] font-semibold transition-all duration-200 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-orange-500/40 hover:border-orange-500/70 bg-orange-500/5 hover:bg-orange-500/10 text-orange-400 text-[11px] font-semibold transition-all duration-200 cursor-pointer"
               >
                 <Paperclip className="size-3.5" />
                 {proofFile ? proofFile.name : "Attach Payment Screenshot"}
               </button>
               {proofFile && (
-                <p className="text-[10px] text-emerald-400/80 text-center">
+                <p className="text-[10px] text-orange-400/80 text-center">
                   ✓ {proofFile.name} attached
                 </p>
               )}
@@ -157,7 +157,7 @@ function RenewalModal({
               type="button"
               disabled={!proofFile || sending}
               onClick={handleSendProof}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-[11px] font-bold shadow-md hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-[11px] font-bold shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               {sending ? (
                 <>
@@ -174,20 +174,20 @@ function RenewalModal({
           </div>
         ) : (
           <div className="p-8 flex flex-col items-center gap-4 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-              <PartyPopper className="size-8 text-emerald-400" />
+            <div className="w-16 h-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+              <PartyPopper className="size-8 text-orange-400" />
             </div>
 
             <div>
-              <h2 className="text-lg font-bold text-[var(--m-text-heading)]">Renewal Submitted! 🎉</h2>
+              <h2 className="text-xl font-bold text-[var(--m-text-heading)]">Proof Submitted! 🎉</h2>
               <p className="text-[11px] text-[var(--m-text-tertiary)] mt-2 leading-relaxed">
-                Your payment proof is successfully submitted. You will be notified on WhatsApp/email once your subscription is reactivated.
+                Super Admin will verify your payment within 24–48 hours and activate your account.
               </p>
             </div>
 
             <button
               onClick={onClose}
-              className="w-full py-2.5 rounded-xl border border-[var(--m-border-glass)]/45 bg-[var(--m-bg-secondary)] hover:bg-[var(--m-bg-tertiary)] text-[var(--m-text-secondary)] text-[11px] font-bold transition-all"
+              className="mt-2 w-full py-2 rounded-xl bg-[var(--m-bg-secondary)] hover:bg-[var(--m-bg-tertiary)] text-[var(--m-text-primary)] text-xs font-bold transition-all border border-[var(--m-border-glass)]"
             >
               Close
             </button>
@@ -198,68 +198,59 @@ function RenewalModal({
   );
 }
 
+// ─── LoginPage Component ──────────────────────────────────────────────────────
 function LoginPageInner() {
-  const { mode } = useTheme();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/inbox";
+  const isVerified = searchParams.get("verified") === "true";
+  const errorParam = searchParams.get("error");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const supabase = createClient();
-
-  // Renewal state
   const [showRenewalModal, setShowRenewalModal] = useState(false);
-  const [expiredUserId, setExpiredUserId]       = useState<string | null>(null);
+  const [expiredUserId, setExpiredUserId] = useState<string | null>(null);
+  const [authChecking, setAuthChecking] = useState(true);
 
-  const isVerified = searchParams.get("verified") === "true";
-  const errorParam = searchParams.get("error");
-  const redirectTo = searchParams.get("redirect") || "/dashboard";
-
-  // ── Check if user already has an active session ───────────────
+  // If already logged in, redirect away immediately
   useEffect(() => {
-    let cancelled = false;
-    fetch("/api/auth/session", { cache: "no-store" })
-      .then((res) => {
-        if (cancelled) return;
+    async function checkExistingSession() {
+      try {
+        const res = await fetch("/api/auth/session");
         if (res.ok) {
-          return res.json().then((data) => {
-            if (!cancelled && data?.user) {
-              router.replace(redirectTo);
-            } else {
-              setCheckingSession(false);
-            }
-          });
-        } else {
-          if (!cancelled) setCheckingSession(false);
+          const data = await res.json();
+          if (data?.authenticated && data?.user) {
+            router.replace(redirectTo);
+            return;
+          }
         }
-      })
-      .catch(() => {
-        if (!cancelled) setCheckingSession(false);
-      });
-    return () => {
-      cancelled = true;
-    };
+      } catch {
+        // Not authenticated — stay on login page
+      } finally {
+        setAuthChecking(false);
+      }
+    }
+    checkExistingSession();
   }, [router, redirectTo]);
 
-  if (checkingSession) {
+  if (authChecking) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--m-bg-primary)]">
-        <Loader2 className="size-6 animate-spin text-emerald-500" />
+        <Loader2 className="size-6 animate-spin text-orange-500" />
       </div>
     );
   }
 
-  // ── Handle login ───────────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      // First, fetch the login endpoint directly to check subscription/verification status
+      // 1. Try MySQL-backed JWT authentication first
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -268,35 +259,29 @@ function LoginPageInner() {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        // If subscription is expired, display the QR renewal modal
-        if (data.error === "subscription_expired") {
-          // If we have user ID in response, save it
-          if (data.userId) {
-            setExpiredUserId(data.userId);
-          } else {
-            // Find user ID from database or use email
-            try {
-              const usersRes = await fetch("/api/super-admin/users"); // fallback search
-              if (usersRes.ok) {
-                const usersData = await usersRes.json();
-                const matched = usersData.users?.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
-                if (matched) setExpiredUserId(matched.id);
-              }
-            } catch (err) {
-              console.error(err);
-            }
-          }
-          setError("Your subscription has ended. Please renew using the Subscribe Now option below.");
-          setLoading(false);
-          return;
+      if (res.ok && data.success) {
+        window.location.href = redirectTo;
+        return;
+      }
+
+      // Handle specific error cases from MySQL auth
+      if (res.status === 403 && data.error?.includes("subscription has ended")) {
+        setError(data.error);
+        if (data.userId) {
+          setExpiredUserId(data.userId);
         }
-        setError(data.message || data.error || "Invalid email or password");
         setLoading(false);
         return;
       }
 
-      // Now authenticate via Supabase
+      if (data.error) {
+        setError(data.error);
+        setLoading(false);
+        return;
+      }
+
+      // 2. Fallback to Supabase auth for legacy accounts
+      const supabase = createClient();
       const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -318,8 +303,8 @@ function LoginPageInner() {
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center bg-[var(--m-bg-primary)] px-4 overflow-hidden select-none">
       <InteractiveGrid gridSize={40} className="opacity-20" />
-      <div className="absolute top-[20%] left-[20%] w-[50%] h-[50%] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[20%] right-[20%] w-[50%] h-[50%] rounded-full bg-teal-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[20%] left-[20%] w-[50%] h-[50%] rounded-full bg-orange-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[20%] right-[20%] w-[50%] h-[50%] rounded-full bg-amber-500/5 blur-[120px] pointer-events-none" />
 
       <Link
         href="/"
@@ -341,7 +326,7 @@ function LoginPageInner() {
         <CardContent className="p-0">
           <form onSubmit={handleLogin} className="flex flex-col gap-3.5">
             {isVerified && (
-              <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-[11px] text-emerald-400 text-center">
+              <div className="rounded-lg border border-orange-500/20 bg-orange-500/10 px-3 py-2 text-[11px] text-orange-400 text-center font-medium">
                 Email verified successfully! You can now sign in.
               </div>
             )}
@@ -360,26 +345,12 @@ function LoginPageInner() {
                     type="button"
                     onClick={async () => {
                       if (!expiredUserId) {
-                        try {
-                          const uRes = await fetch("/api/super-admin/users");
-                          if (uRes.ok) {
-                            const uData = await uRes.json();
-                            const matched = uData.users?.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
-                            if (matched) {
-                              setExpiredUserId(matched.id);
-                              setShowRenewalModal(true);
-                              return;
-                            }
-                          }
-                        } catch (err) {
-                          console.error(err);
-                        }
                         alert("Please type your registered email address first.");
                         return;
                       }
                       setShowRenewalModal(true);
                     }}
-                    className="block w-full mt-2 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold text-[10px] uppercase tracking-wider transition-all"
+                    className="block w-full mt-2 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-400 text-white font-bold text-[10px] uppercase tracking-wider transition-all"
                   >
                     Subscribe Now
                   </button>
@@ -398,14 +369,14 @@ function LoginPageInner() {
                 required
                 autoComplete="email"
                 disabled={loading}
-                className="h-8.5 px-3 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] focus-visible:border-emerald-500/70 focus-visible:ring-emerald-500/10 transition-all"
+                className="h-8.5 px-3 border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] focus-visible:border-orange-500/70 focus-visible:ring-orange-500/10 transition-all"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password" className="text-[11px] font-semibold text-[var(--m-text-secondary)]/90">Password</Label>
-                <Link href="/forgot-password" className="text-[10px] text-emerald-500 hover:text-emerald-400 font-medium transition-colors">Forgot password?</Link>
+                <Link href="/forgot-password" className="text-[10px] text-orange-500 hover:text-orange-400 font-medium transition-colors">Forgot password?</Link>
               </div>
               <div className="relative">
                 <Input
@@ -417,7 +388,7 @@ function LoginPageInner() {
                   required
                   autoComplete="current-password"
                   disabled={loading}
-                  className="h-8.5 pl-3 pr-9 w-full border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] focus-visible:border-emerald-500/70 focus-visible:ring-emerald-500/10 transition-all"
+                  className="h-8.5 pl-3 pr-9 w-full border-[var(--m-input-border)] bg-[var(--m-input-bg)] text-[11px] text-[var(--m-text-primary)] focus-visible:border-orange-500/70 focus-visible:ring-orange-500/10 transition-all"
                 />
                 <button
                   type="button"
@@ -433,7 +404,7 @@ function LoginPageInner() {
               type="submit"
               disabled={loading}
               id="sign-in-btn"
-              className="mt-1 h-8.5 w-full bg-emerald-500 text-white hover:bg-emerald-400 font-bold text-[11px] transition-all duration-200 border border-emerald-400/20"
+              className="mt-1 h-8.5 w-full bg-orange-500 text-white hover:bg-orange-400 font-bold text-[11px] transition-all duration-200 border border-orange-400/20 shadow-md shadow-orange-500/20 cursor-pointer"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -448,7 +419,7 @@ function LoginPageInner() {
 
           <p className="mt-4.5 text-center text-[11px] text-[var(--m-text-muted)]">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-emerald-500 hover:text-emerald-400 font-bold transition-colors">Create Account</Link>
+            <Link href="/signup" className="text-orange-500 hover:text-orange-400 font-bold transition-colors">Create Account</Link>
           </p>
         </CardContent>
       </Card>
@@ -472,7 +443,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-[var(--m-bg-primary)]">
-          <Loader2 className="size-6 animate-spin text-emerald-500" />
+          <Loader2 className="size-6 animate-spin text-orange-500" />
         </div>
       }
     >
