@@ -817,13 +817,13 @@ Ensure you populate the "booking_details" object of your JSON output with all de
       const ctrl = new AbortController()
       const timeoutId = setTimeout(() => ctrl.abort(), 5000)
       try {
-        let gemRes = await callGemini('gemini-2.5-flash', ctrl.signal)
-        if (!gemRes.ok && gemRes.status === 503) {
+        let gemRes = await callGemini('gemini-3.6-flash', ctrl.signal)
+        if (!gemRes.ok && (gemRes.status === 503 || gemRes.status === 404)) {
           clearTimeout(timeoutId)
           const ctrl2 = new AbortController()
           const timeout2 = setTimeout(() => ctrl2.abort(), 5000)
           try {
-            gemRes = await callGemini('gemini-2.0-flash', ctrl2.signal)
+            gemRes = await callGemini('gemini-2.5-flash', ctrl2.signal)
           } catch {} finally {
             clearTimeout(timeout2)
           }

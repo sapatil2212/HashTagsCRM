@@ -115,12 +115,12 @@ If the text contains no recognizable questions and answers, return an empty arra
   }
 
   try {
-    let response = await callGemini('gemini-2.5-flash', textToAnalyze)
+    let response = await callGemini('gemini-3.6-flash', textToAnalyze)
 
-    // Fallback to 2.0-flash if 2.5 is unavailable or rate-limited
-    if (!response.ok && (response.status === 503 || response.status === 429)) {
-      console.warn(`[AI FAQs Importer] Model gemini-2.5-flash returned ${response.status}. Falling back to gemini-2.0-flash...`)
-      response = await callGemini('gemini-2.0-flash', textToAnalyze)
+    // Fall back if the primary model is unavailable, rate-limited, or retired for this key
+    if (!response.ok && [404, 429, 503].includes(response.status)) {
+      console.warn(`[AI FAQs Importer] Model gemini-3.6-flash returned ${response.status}. Falling back to gemini-2.5-flash...`)
+      response = await callGemini('gemini-2.5-flash', textToAnalyze)
     }
 
     clearTimeout(timeoutId)

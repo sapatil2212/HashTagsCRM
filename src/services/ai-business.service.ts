@@ -2,9 +2,15 @@
 import { prisma } from '@/lib/prisma'
 import { sendTextMessage } from '@/lib/whatsapp/meta-api'
 import { getBusinessSegment, getTerminology } from '@/lib/business/terminology'
+import { parseJSONFromLLM, GEMINI_MODELS } from '@/lib/ai/llm'
 
 function normalizePhone(p: string): string {
   return p.replace(/\D/g, '')
+}
+
+/** Env values pasted with surrounding quotes would otherwise be sent verbatim. */
+function stripQuotes(v: string | undefined): string {
+  return (v || '').replace(/^["']|["']$/g, '').trim()
 }
 
 interface OpenAIResponse {
@@ -231,81 +237,150 @@ ${faqsContext || 'Answer customer queries politely according to business guideli
     })
   }
 
-  // Calling LLM (Gemini with OpenAI fallback)
+  // Calling LLM: Gemini → OpenRouter → OpenAI cascade (mirrors src/lib/ai/llm.ts)
   async function callLLM(): Promise<string> {
-    const openaiKey = process.env.OPENAI_API_KEY
-    const geminiKey = process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_SECONDARY
+    const geminiKey = stripQuotes(process.env.GEMINI_API_KEY) || stripQuotes(process.env.GEMINI_API_KEY_SECONDARY)
+    const rawOpenaiKey = stripQuotes(process.env.OPENAI_API_KEY)
+    // An sk-or-v1- token in OPENAI_API_KEY is an OpenRouter token, not an OpenAI one.
+    const isOrToken = rawOpenaiKey.startsWith('sk-or-v1-')
+    const openRouterKey = stripQuotes(process.env.OPENROUTER_API_KEY) || (isOrToken ? rawOpenaiKey : '')
+    const openaiKey = isOrToken ? '' : rawOpenaiKey
+
+    if (!geminiKey && !openRouterKey && !openaiKey) {
+      throw new Error(
+        'No LLM API keys configured. Set GEMINI_API_KEY, OPENROUTER_API_KEY or OPENAI_API_KEY.'
+      )
+    }
+
+    const failures: string[] = []
 
     if (geminiKey) {
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            contents: geminiContents,
-            generationConfig: {
-              temperature: 0.2,
-              responseMimeType: 'application/json',
-              responseSchema: {
-                type: 'OBJECT',
-                properties: {
-                  detected_intent: { type: 'STRING' },
-                  ai_response: { type: 'STRING' },
-                  confidence_score: { type: 'NUMBER' },
-                  is_escalation: { type: 'BOOLEAN' },
-                  booking_details: {
-                    type: 'OBJECT',
-                    properties: {
-                      contact_name: { type: 'STRING' },
-                      preferred_date: { type: 'STRING' },
-                      preferred_time: { type: 'STRING' },
-                      notes: { type: 'STRING' },
+      for (const model of GEMINI_MODELS) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: systemPrompt }] },
+              contents: geminiContents,
+              generationConfig: {
+                temperature: 0.2,
+                responseMimeType: 'application/json',
+                responseSchema: {
+                  type: 'OBJECT',
+                  properties: {
+                    detected_intent: { type: 'STRING' },
+                    ai_response: { type: 'STRING' },
+                    confidence_score: { type: 'NUMBER' },
+                    is_escalation: { type: 'BOOLEAN' },
+                    booking_details: {
+                      type: 'OBJECT',
+                      properties: {
+                        contact_name: { type: 'STRING' },
+                        preferred_date: { type: 'STRING' },
+                        preferred_time: { type: 'STRING' },
+                        notes: { type: 'STRING' },
+                      },
                     },
                   },
+                  required: ['detected_intent', 'ai_response', 'confidence_score', 'is_escalation'],
                 },
-                required: ['detected_intent', 'ai_response', 'confidence_score', 'is_escalation'],
               },
-            },
-          }),
-        })
-        if (res.ok) {
-          const data = await res.json()
-          return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+            }),
+          })
+          if (res.ok) {
+            const data = await res.json()
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+            if (text) return text
+            failures.push(`Gemini ${model} -> empty response`)
+          } else {
+            failures.push(`Gemini ${model} -> ${res.status} ${(await res.text()).slice(0, 300)}`)
+          }
+        } catch (err: any) {
+          failures.push(`Gemini ${model} -> ${err?.message || err}`)
         }
-      } catch (err) {
-        console.error('[AI Business] Gemini failed, falling back to OpenAI:', err)
       }
+    }
+
+    // Chat-completions style providers share the same message list + JSON contract.
+    const chatMessages = [
+      ...openaiMessages,
+      {
+        role: 'system',
+        content:
+          'Reply with ONLY a JSON object (no markdown fences) using keys: detected_intent (string), ai_response (string), confidence_score (number 0-1), is_escalation (boolean), booking_details (optional object with contact_name, preferred_date "YYYY-MM-DD", preferred_time "HH:MM", notes).',
+      },
+    ]
+
+    async function callChatCompletions(
+      endpoint: string,
+      key: string,
+      models: string[],
+      extraHeaders: Record<string, string> = {},
+      label = 'OpenAI'
+    ): Promise<string | null> {
+      for (const model of models) {
+        try {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${key}`,
+              ...extraHeaders,
+            },
+            body: JSON.stringify({
+              model,
+              messages: chatMessages,
+              temperature: 0.2,
+              response_format: { type: 'json_object' },
+            }),
+          })
+          if (res.ok) {
+            const data = await res.json()
+            const text = data.choices?.[0]?.message?.content || ''
+            if (text) return text
+            failures.push(`${label} ${model} -> empty response`)
+          } else {
+            failures.push(`${label} ${model} -> ${res.status} ${(await res.text()).slice(0, 300)}`)
+          }
+        } catch (err: any) {
+          failures.push(`${label} ${model} -> ${err?.message || err}`)
+        }
+      }
+      return null
+    }
+
+    if (openRouterKey) {
+      const text = await callChatCompletions(
+        'https://openrouter.ai/api/v1/chat/completions',
+        openRouterKey,
+        ['google/gemini-2.5-flash', 'openai/gpt-4o-mini', 'meta-llama/llama-3.3-70b-instruct'],
+        { 'HTTP-Referer': 'http://localhost:3000', 'X-Title': 'WhatsApp CRM' },
+        'OpenRouter'
+      )
+      if (text) return text
     }
 
     if (openaiKey) {
-      const url = 'https://api.openai.com/v1/chat/completions'
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${openaiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: openaiMessages,
-          temperature: 0.2,
-          response_format: { type: 'json_object' },
-        }),
-      })
-      if (res.ok) {
-        const data = await res.json()
-        return data.choices?.[0]?.message?.content || ''
-      }
+      const text = await callChatCompletions(
+        'https://api.openai.com/v1/chat/completions',
+        openaiKey,
+        ['gpt-4o-mini']
+      )
+      if (text) return text
     }
 
-    throw new Error('No LLM API keys configured.')
+    throw new Error(`All LLM providers failed: ${failures.join(' | ')}`)
   }
 
   try {
     const rawResult = await callLLM()
-    const result: OpenAIResponse = JSON.parse(rawResult)
+    const result = parseJSONFromLLM<OpenAIResponse>(rawResult)
+    if (!result) {
+      console.error('[AI Business] Could not parse LLM JSON response:', rawResult.slice(0, 500))
+      return false
+    }
 
     if (result.confidence_score < 0.6) {
       console.log('[AI Business] Confidence score too low. Skipping automated reply.')

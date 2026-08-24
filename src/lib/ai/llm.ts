@@ -31,6 +31,17 @@ function clean(v: string | undefined): string {
   return (v || "").replace(/^["']|["']$/g, "");
 }
 
+/**
+ * Direct-Gemini model cascade, newest first.
+ *
+ * Google retires older aliases for new API keys (gemini-2.x returns 404
+ * "no longer available to new users"), so keep the newest model first and
+ * allow an env override without a code change.
+ */
+export const GEMINI_MODELS: string[] = clean(process.env.GEMINI_MODEL)
+  ? [clean(process.env.GEMINI_MODEL)]
+  : ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
+
 export function hasAnyLLMKey(): boolean {
   return Boolean(
     clean(process.env.GEMINI_API_KEY) ||
@@ -62,9 +73,7 @@ export async function callLLM(
 
   // 1. Direct Gemini (or if explicitly chosen)
   if (apiKey && (!opts?.provider || opts.provider === 'gemini')) {
-    const directModels = opts?.model
-      ? [opts.model]
-      : ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+    const directModels = opts?.model ? [opts.model] : GEMINI_MODELS;
     for (const model of directModels) {
       if (success) break;
       try {

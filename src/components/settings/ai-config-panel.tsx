@@ -19,7 +19,7 @@ export function AiConfigPanel() {
   const [config, setConfig] = useState<AiConfig>({
     aiProvider: "gemini",
     aiApiKey: "",
-    aiModel: "gemini-2.5-flash",
+    aiModel: "gemini-3.6-flash",
     aiTemperature: 0.7,
     aiSystemPrompt: "",
     aiPersonality: "Helpful, professional, and friendly",
@@ -42,7 +42,7 @@ export function AiConfigPanel() {
             setConfig({
               aiProvider: body.data.aiProvider || "gemini",
               aiApiKey: body.data.aiApiKey || "",
-              aiModel: body.data.aiModel || "gemini-2.5-flash",
+              aiModel: body.data.aiModel || "gemini-3.6-flash",
               aiTemperature: Number(body.data.aiTemperature ?? 0.7),
               aiSystemPrompt: body.data.aiSystemPrompt || "",
               aiPersonality: body.data.aiPersonality || "Helpful, professional, and friendly",
@@ -145,7 +145,7 @@ export function AiConfigPanel() {
                 setConfig({
                   ...config,
                   aiProvider: p,
-                  aiModel: p === "gemini" ? "gemini-2.5-flash" : p === "openai" ? "gpt-4o-mini" : "meta-llama/llama-3.3-70b-instruct:free",
+                  aiModel: p === "gemini" ? "gemini-3.6-flash" : p === "openai" ? "gpt-4o-mini" : "meta-llama/llama-3.3-70b-instruct:free",
                 });
               }}
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -164,7 +164,7 @@ export function AiConfigPanel() {
               type="text"
               value={config.aiModel || ""}
               onChange={(e) => setConfig({ ...config, aiModel: e.target.value })}
-              placeholder={config.aiProvider === "gemini" ? "gemini-2.5-flash" : "gpt-4o-mini"}
+              placeholder={config.aiProvider === "gemini" ? "gemini-3.6-flash" : "gpt-4o-mini"}
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>

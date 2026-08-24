@@ -65,7 +65,7 @@ function buildGeminiBody(parts: object[]) {
   })
 }
 
-async function callGemini(apiKey: string, body: string, signal: AbortSignal, model = 'gemini-2.5-flash') {
+async function callGemini(apiKey: string, body: string, signal: AbortSignal, model = 'gemini-3.6-flash') {
   return fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
     { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal, body }
@@ -165,11 +165,11 @@ export async function POST(request: Request) {
       )
     }
 
-    let response = await callGemini(apiKey, geminiBody, controller.signal, 'gemini-2.5-flash')
+    let response = await callGemini(apiKey, geminiBody, controller.signal, 'gemini-3.6-flash')
 
-    if (!response.ok && (response.status === 503 || response.status === 429)) {
-      console.warn('[FAQ Upload] gemini-2.5-flash unavailable, falling back to gemini-2.0-flash')
-      response = await callGemini(apiKey, geminiBody, controller.signal, 'gemini-2.0-flash')
+    if (!response.ok && [404, 429, 503].includes(response.status)) {
+      console.warn('[FAQ Upload] gemini-3.6-flash unavailable, falling back to gemini-2.5-flash')
+      response = await callGemini(apiKey, geminiBody, controller.signal, 'gemini-2.5-flash')
     }
 
     clearTimeout(timeoutId)

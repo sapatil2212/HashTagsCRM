@@ -104,7 +104,7 @@ Score: start 100, deduct 15 per error, 5 per warning. passed=true only if zero e
 
     // Try direct Gemini first with multiple model fallbacks
     if (apiKey) {
-      const directModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+      const directModels = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
       for (const model of directModels) {
         if (success) break;
         try {
