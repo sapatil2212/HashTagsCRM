@@ -2,6 +2,7 @@
 import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { verifyAccessToken, rotateRefreshToken } from '@/lib/auth'
+import { buildPrismaInclude } from '@/lib/supabase/relation-select'
 
 function toSnakeCase(obj: any): any {
   if (obj === null || obj === undefined) return obj
@@ -46,6 +47,7 @@ class ServerQueryBuilder {
   private singleRequested = false
   private countMode: string | null = null
   private isUpsert = false
+  private selectFields: string | null = null
 
   constructor(table: string) {
     this.table = table
@@ -87,6 +89,9 @@ class ServerQueryBuilder {
 
   select(fields: string = '*', options?: { count?: 'exact' | 'planned' | 'estimated'; head?: boolean }) {
     this.method = 'select'
+    // Kept so embedded relations such as `*, contact:contacts(*)` survive as
+    // a Prisma include instead of silently returning undefined.
+    this.selectFields = fields
     if (options?.count) this.countMode = options.count
     if (options?.head) this.singleRequested = true
     return this
@@ -355,11 +360,14 @@ class ServerQueryBuilder {
 
         const orderBy = this.orderByField ? { [this.orderByField]: this.orderAscending ? 'asc' : 'desc' } : undefined
 
+        const include = buildPrismaInclude(this.modelName, this.selectFields)
+
         result = await client.findMany({
           where: this.where,
           orderBy,
           take: this.limitCount || undefined,
-          skip: this.skipCount || undefined
+          skip: this.skipCount || undefined,
+          ...(include ? { include } : {})
         })
       }
 

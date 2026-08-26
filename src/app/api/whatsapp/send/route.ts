@@ -14,6 +14,7 @@ import {
   rateLimitResponse,
   RATE_LIMITS,
 } from '@/lib/rate-limit'
+import { emitNewMessage } from '@/lib/realtime-inbox'
 
 export async function POST(request: Request) {
   try {
@@ -290,6 +291,11 @@ export async function POST(request: Request) {
         updated_at: new Date().toISOString(),
       })
       .eq('id', conversation_id)
+
+    // Broadcast to every open inbox for this tenant, so a second agent (or
+    // the sender's other tab) sees the reply without refreshing. Emitted
+    // after the conversation update so the list preview is already current.
+    await emitNewMessage(messageRecord.id)
 
     // Pause any active Flow run for this contact — the agent stepping
     // in is the strongest "yield, human is here" signal. See PR #2

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { verifyAccessToken, rotateRefreshToken } from '@/lib/auth'
+import { buildPrismaInclude } from '@/lib/supabase/relation-select'
 
 function toSnakeCase(obj: any): any {
   if (obj === null || obj === undefined) return obj
@@ -42,7 +43,7 @@ function columnToCamel(col: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { table, method, filters, data, order, limit, countMode, single, isUpsert, range } = await req.json()
+    const { table, method, filters, data, order, limit, countMode, single, isUpsert, range, select } = await req.json()
 
     // 1. Authenticate user from session cookies
     const cookieStore = await cookies()
@@ -357,11 +358,15 @@ export async function POST(req: NextRequest) {
         skip = range.from
       }
 
+      // Embedded relations (`*, contact:contacts(*)`) become a Prisma include.
+      const include = buildPrismaInclude(modelName, select)
+
       result = await client.findMany({
         where,
         orderBy,
         take,
-        skip
+        skip,
+        ...(include ? { include } : {})
       })
     }
 

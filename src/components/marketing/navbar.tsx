@@ -11,20 +11,15 @@ import { MagneticButton } from "./magnetic-button";
 import { BookDemoTrigger } from "./book-demo-trigger";
 import { cn } from "@/lib/utils";
 
-function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
-function clamp01(v: number) { return Math.min(1, Math.max(0, v)); }
-const SCROLL_RANGE = 120;
-
 export function GlassNavbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { resolvedTheme } = useMarketingTheme();
   const isLight = resolvedTheme === "light";
   const supabase = createClient();
-  const rafRef = useRef<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -35,11 +30,17 @@ export function GlassNavbar() {
     checkUser();
 
     const onScroll = () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => {
-        setProgress(clamp01(window.scrollY / SCROLL_RANGE));
-      });
+      const scrollY = window.scrollY;
+      if (scrollY > 20) {
+        setIsScrolled(true);
+      } else if (scrollY < 10) {
+        setIsScrolled(false);
+      }
     };
+
+    // Initial check
+    onScroll();
+
     window.addEventListener("scroll", onScroll, { passive: true });
 
     const onClickOutside = (e: MouseEvent) => {
@@ -52,7 +53,6 @@ export function GlassNavbar() {
     return () => {
       window.removeEventListener("scroll", onScroll);
       document.removeEventListener("mousedown", onClickOutside);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [supabase]);
 
@@ -75,32 +75,24 @@ export function GlassNavbar() {
     { name: "Blog Hacks", href: "/blog" },
   ];
 
-  const maxWidth    = lerp(1152, 920,  progress);
-  const radius      = lerp(14,   9999, progress);
-  const padV        = lerp(6,    10,   progress);
-  const padH        = lerp(8,    22,   progress);
-  const bgAlpha     = lerp(0, isLight ? 0.92 : 0.85, progress);
-  const borderAlpha = lerp(0, isLight ? 0.65 : 0.55, progress);
-  const shadowAlpha = lerp(0, isLight ? 0.07 : 0.50, progress);
-  const shadowBlur  = lerp(0, 28, progress);
-  const topPx       = lerp(16, 12, progress);
-
   const pillStyle: React.CSSProperties = {
     width: "100%",
-    maxWidth: `${maxWidth}px`,
-    borderRadius: `${radius}px`,
-    padding: `${padV}px ${padH}px`,
-    backgroundColor: isLight
-      ? `rgba(255,255,255,${bgAlpha})`
-      : `rgba(2,6,23,${bgAlpha})`,
-    border: `1px solid ${
-      isLight
-        ? `rgba(203,213,225,${borderAlpha})`
-        : `rgba(30,41,59,${borderAlpha})`
-    }`,
-    boxShadow: `0 4px ${shadowBlur}px rgba(0,0,0,${shadowAlpha})`,
-    backdropFilter: progress > 0.05 ? "blur(20px)" : "none",
-    WebkitBackdropFilter: progress > 0.05 ? "blur(20px)" : "none",
+    maxWidth: isScrolled ? "920px" : "1152px",
+    borderRadius: isScrolled ? "9999px" : "14px",
+    padding: isScrolled ? "8px 22px" : "6px 12px",
+    backgroundColor: isScrolled
+      ? (isLight ? "rgba(255, 255, 255, 0.92)" : "rgba(2, 6, 23, 0.85)")
+      : "transparent",
+    border: isScrolled
+      ? (isLight ? "1px solid rgba(203, 213, 225, 0.65)" : "1px solid rgba(30, 41, 59, 0.55)")
+      : "1px solid transparent",
+    boxShadow: isScrolled
+      ? (isLight ? "0 4px 28px rgba(0, 0, 0, 0.07)" : "0 4px 28px rgba(0, 0, 0, 0.50)")
+      : "0 0 0 transparent",
+    backdropFilter: isScrolled ? "blur(20px)" : "blur(0px)",
+    WebkitBackdropFilter: isScrolled ? "blur(20px)" : "blur(0px)",
+    transition: "max-width 0.45s cubic-bezier(0.16, 1, 0.3, 1), padding 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.45s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, backdrop-filter 0.4s ease, -webkit-backdrop-filter 0.4s ease",
+    willChange: "max-width, padding, border-radius, background-color, border-color, box-shadow",
   };
 
   const linkCls = "text-[var(--m-text-secondary)] hover:text-[var(--m-text-heading)]";
@@ -108,8 +100,8 @@ export function GlassNavbar() {
   return (
     <>
       <header
-        className="fixed inset-x-0 z-50 flex justify-center pointer-events-none px-4 sm:px-6"
-        style={{ top: `${topPx}px` }}
+        className="fixed inset-x-0 z-50 flex justify-center pointer-events-none px-4 sm:px-6 transition-[top] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style={{ top: isScrolled ? "12px" : "16px" }}
       >
         <div
           className="pointer-events-auto flex items-center justify-between"

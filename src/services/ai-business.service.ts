@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { sendTextMessage } from '@/lib/whatsapp/meta-api'
 import { getBusinessSegment, getTerminology } from '@/lib/business/terminology'
 import { parseJSONFromLLM, GEMINI_MODELS } from '@/lib/ai/llm'
+import { emitNewMessage } from '@/lib/realtime-inbox'
 
 function normalizePhone(p: string): string {
   return p.replace(/\D/g, '')
@@ -431,7 +432,7 @@ ${faqsContext || 'Answer customer queries politely according to business guideli
       })
 
       // Create AI Response Message log in CRM conversation inbox
-      await prisma.message.create({
+      const botMessage = await prisma.message.create({
         data: {
           conversationId,
           senderType: 'bot',
@@ -440,6 +441,18 @@ ${faqsContext || 'Answer customer queries politely according to business guideli
           status: 'sent',
         }
       })
+
+      // Keep the list preview in step with the thread — without this the
+      // inbox row still shows the customer's question as the last message.
+      await prisma.conversation.update({
+        where: { id: conversationId },
+        data: {
+          lastMessageText: result.ai_response,
+          lastMessageAt: new Date(),
+        }
+      })
+
+      await emitNewMessage(botMessage.id)
 
       // Create AI Log Activity record
       await prisma.businessAILog.create({

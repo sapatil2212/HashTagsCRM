@@ -42,6 +42,7 @@ import {
 } from '../validators/conversation.validator';
 import type { TenantDb } from '../kernel';
 import { paged } from './controller-kit';
+import { emitNewMessage, emitConversationChange } from '@/lib/realtime-inbox';
 
 /**
  * Resolves a send-capable service. A tenant that has not connected WhatsApp
@@ -81,8 +82,12 @@ export const conversationController = {
     body: updateConversationBodySchema,
     response: conversationDetailDtoSchema,
     message: 'Conversation updated.',
-    handle: async ({ ctx, db, params, body }) =>
-      ConversationService.create(db, ctx.userId).update(params.id, body),
+    handle: async ({ ctx, db, params, body }) => {
+      const conversation = await ConversationService.create(db, ctx.userId).update(params.id, body);
+      // Status and assignment changes belong on every agent's screen.
+      await emitConversationChange(params.id);
+      return conversation;
+    },
   }),
 
   /** Idempotent. `changed` lets the client skip a needless realtime broadcast. */
@@ -91,8 +96,11 @@ export const conversationController = {
     auth: 'tenant',
     params: conversationParamsSchema,
     response: z.object({ changed: z.boolean() }),
-    handle: async ({ ctx, db, params }) =>
-      ConversationService.create(db, ctx.userId).markRead(params.id),
+    handle: async ({ ctx, db, params }) => {
+      const outcome = await ConversationService.create(db, ctx.userId).markRead(params.id);
+      if (outcome.changed) await emitConversationChange(params.id);
+      return outcome;
+    },
   }),
 
   unreadSummary: createHandler({
@@ -123,8 +131,13 @@ export const conversationController = {
     response: messageDtoSchema,
     status: 201,
     message: 'Message sent.',
-    handle: async ({ ctx, db, params, body }) =>
-      (await sendingService(db, ctx.userId)).sendMessage(params.id, body),
+    handle: async ({ ctx, db, params, body }) => {
+      const message = await (await sendingService(db, ctx.userId)).sendMessage(params.id, body);
+      // Broadcast from the controller rather than the service so the send
+      // logic stays free of transport concerns and unit-testable.
+      await emitNewMessage(message.id);
+      return message;
+    },
   }),
 
   setReaction: createHandler({
