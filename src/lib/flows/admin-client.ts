@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from '@/lib/prisma'
+import { decimalToNumber, isDecimalLike } from '@/lib/decimal'
 
 function toSnakeCase(obj: any): any {
   if (obj === null || obj === undefined) return obj
   if (Array.isArray(obj)) return obj.map(toSnakeCase)
+  if (isDecimalLike(obj)) return decimalToNumber(obj)
   if (typeof obj !== 'object' || obj instanceof Date) return obj
 
   const newObj: any = {}
@@ -17,6 +19,7 @@ function toSnakeCase(obj: any): any {
 function toCamelCase(obj: any): any {
   if (obj === null || obj === undefined) return obj
   if (Array.isArray(obj)) return obj.map(toCamelCase)
+  if (isDecimalLike(obj)) return decimalToNumber(obj)
   if (typeof obj !== 'object' || obj instanceof Date) return obj
 
   const newObj: any = {}

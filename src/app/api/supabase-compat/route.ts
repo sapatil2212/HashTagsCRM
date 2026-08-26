@@ -4,13 +4,12 @@ import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { verifyAccessToken, rotateRefreshToken } from '@/lib/auth'
 import { buildPrismaInclude } from '@/lib/supabase/relation-select'
+import { decimalToNumber, isDecimalLike } from '@/lib/decimal'
 
 function toSnakeCase(obj: any): any {
   if (obj === null || obj === undefined) return obj
   if (Array.isArray(obj)) return obj.map(toSnakeCase)
-  if (obj && obj.constructor && obj.constructor.name === 'Decimal') {
-    return Number(obj.toString())
-  }
+  if (isDecimalLike(obj)) return decimalToNumber(obj)
   if (typeof obj !== 'object' || obj instanceof Date) return obj
 
   const newObj: any = {}
@@ -24,9 +23,7 @@ function toSnakeCase(obj: any): any {
 function toCamelCase(obj: any): any {
   if (obj === null || obj === undefined) return obj
   if (Array.isArray(obj)) return obj.map(toCamelCase)
-  if (obj && obj.constructor && obj.constructor.name === 'Decimal') {
-    return Number(obj.toString())
-  }
+  if (isDecimalLike(obj)) return decimalToNumber(obj)
   if (typeof obj !== 'object' || obj instanceof Date) return obj
 
   const newObj: any = {}

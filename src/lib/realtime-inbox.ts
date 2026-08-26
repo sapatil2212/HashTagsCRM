@@ -17,6 +17,7 @@
  */
 import { prisma } from '@/lib/prisma'
 import { triggerRealtimeEvent } from '@/lib/realtime'
+import { decimalToNumber, isDecimalLike } from '@/lib/decimal'
 
 type EventType = 'INSERT' | 'UPDATE'
 
@@ -24,9 +25,7 @@ function toSnakeCase(value: any): any {
   if (value === null || value === undefined) return value
   if (Array.isArray(value)) return value.map(toSnakeCase)
   if (value instanceof Date) return value.toISOString()
-  if (value && value.constructor && value.constructor.name === 'Decimal') {
-    return Number(value.toString())
-  }
+  if (isDecimalLike(value)) return decimalToNumber(value)
   if (typeof value !== 'object') return value
 
   const out: any = {}

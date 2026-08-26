@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getSocket } from '@/lib/socket'
+import { decimalToNumber, isDecimalLike } from '@/lib/decimal'
 
 function toSnakeCase(obj: any): any {
   if (obj === null || obj === undefined) return obj
   if (Array.isArray(obj)) return obj.map(toSnakeCase)
+  if (isDecimalLike(obj)) return decimalToNumber(obj)
   if (typeof obj !== 'object' || obj instanceof Date) return obj
 
   const newObj: any = {}
