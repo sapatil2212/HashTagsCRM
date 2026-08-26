@@ -7,6 +7,7 @@ import {
   isRecipientNotAllowedError,
 } from '@/lib/whatsapp/phone-utils'
 import { prisma } from '@/lib/prisma'
+import { emitNewMessage } from '@/lib/realtime-inbox'
 
 interface SendTextArgs {
   userId: string
@@ -120,8 +121,9 @@ async function sendViaMeta(input: SendInput): Promise<{ whatsapp_message_id: str
   const template_name = input.kind === 'template' ? input.templateName : null
 
   // 3. Persist sent message
+  let messageRowId: string | null = null
   try {
-    await prisma.message.create({
+    const created = await prisma.message.create({
       data: {
         conversationId: input.conversationId,
         senderType: 'bot',
@@ -132,6 +134,7 @@ async function sendViaMeta(input: SendInput): Promise<{ whatsapp_message_id: str
         status: 'sent',
       }
     })
+    messageRowId = created.id
   } catch (msgErr: any) {
     throw new Error(`sent to Meta but DB insert failed: ${msgErr.message}`)
   }
@@ -145,6 +148,8 @@ async function sendViaMeta(input: SendInput): Promise<{ whatsapp_message_id: str
       updatedAt: new Date()
     }
   })
+
+  if (messageRowId) await emitNewMessage(messageRowId)
 
   return { whatsapp_message_id: waMessageId }
 }

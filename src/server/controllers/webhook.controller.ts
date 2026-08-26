@@ -32,6 +32,7 @@ import { getMediaUrl } from '@/lib/whatsapp/meta-api';
 import { verifyMetaWebhookSignature } from '@/lib/whatsapp/webhook-signature';
 import { getBusinessSegment } from '@/lib/business/terminology';
 import { getInboundRoutingMode } from '@/lib/inbound/routing';
+import { emitNewMessage, emitMessageStatus } from '@/lib/realtime-inbox';
 import { processHealthcareAIMessage } from '@/services/ai-healthcare.service';
 import { processBusinessAIMessage } from '@/services/ai-business.service';
 import { AutomationEngineService } from '../services/automation-engine.service';
@@ -403,13 +404,25 @@ function campaignFeedback(db: TenantDb, userId: string): BroadcastService {
 async function processStatuses(account: Account, statuses: NonNullable<MetaChangeValue['statuses']>) {
   const inbound = InboundService.create(account.db, account.userId, campaignFeedback(account.db, account.userId));
   for (const status of statuses) {
-    await inbound
+    const result = await inbound
       .applyStatus({
         whatsappMessageId: status.id,
         status: status.status,
         at: new Date((Number.parseInt(status.timestamp, 10) || 0) * 1000 || Date.now()),
       })
-      .catch((error: unknown) => log.warn('status update failed', { status: status.status, err: error }));
+      .catch((error: unknown) => {
+        log.warn('status update failed', { status: status.status, err: error });
+        return null;
+      });
+
+    // Delivery receipts are what turn a single tick into a double tick in the
+    // agent's thread, so they need to reach the client too.
+    if (result?.messageUpdated) {
+      const row = await account.db.message
+        .findFirst({ where: { messageId: status.id }, select: { id: true } })
+        .catch(() => null);
+      if (row) await emitMessageStatus(row.id);
+    }
   }
 }
 
@@ -441,6 +454,11 @@ async function processMessages(account: Account, value: MetaChangeValue) {
       ...message,
       profileName: profile?.profile?.name ?? null,
     });
+
+    // Push the customer's message to any open inbox before routing, so the
+    // agent sees it immediately rather than after the AI/flow handlers have
+    // finished (which can take seconds).
+    await emitNewMessage(stored.messageId);
 
     await route({ account, stored, message });
   }

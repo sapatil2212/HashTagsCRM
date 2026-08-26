@@ -11,6 +11,7 @@ import {
   type ClinicContext,
 } from '@/lib/healthcare/clinic-cache'
 import { tryFastPath } from '@/lib/healthcare/fast-path-responder'
+import { emitNewMessage } from '@/lib/realtime-inbox'
 
 function formatDocName(name: string): string {
   if (!name) return ''
@@ -1347,7 +1348,7 @@ async function sendReplyAndSave(options: {
   }
 
   // Parallel writes
-  await Promise.all([
+  const [botMessage] = await Promise.all([
     // Insert Bot message to messages table
     prisma.message.create({
       data: {
@@ -1381,5 +1382,9 @@ async function sendReplyAndSave(options: {
     })
   ]).catch((err) => {
     console.error('[AI Healthcare] DB write failed:', err)
+    return []
   })
+
+  // Stream the bot's reply into any open inbox.
+  if (botMessage?.id) await emitNewMessage(botMessage.id)
 }

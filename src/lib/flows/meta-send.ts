@@ -13,6 +13,7 @@ import {
   isRecipientNotAllowedError,
 } from '@/lib/whatsapp/phone-utils'
 import { prisma } from '@/lib/prisma'
+import { emitNewMessage } from '@/lib/realtime-inbox'
 
 interface SendTextEngineArgs {
   userId: string
@@ -86,8 +87,9 @@ export async function engineSendText(
     })
   }
 
+  let messageRowId: string | null = null
   try {
-    await prisma.message.create({
+    const created = await prisma.message.create({
       data: {
         conversationId: args.conversationId,
         senderType: 'bot',
@@ -97,6 +99,7 @@ export async function engineSendText(
         status: 'sent',
       }
     })
+    messageRowId = created.id
   } catch (msgErr: any) {
     throw new Error(`sent to Meta but DB insert failed: ${msgErr.message}`)
   }
@@ -109,6 +112,8 @@ export async function engineSendText(
       updatedAt: new Date()
     }
   })
+
+  if (messageRowId) await emitNewMessage(messageRowId)
 
   return { whatsapp_message_id: waMessageId }
 }
@@ -231,8 +236,9 @@ async function sendInteractiveViaMeta(
     })
   }
 
+  let messageRowId: string | null = null
   try {
-    await prisma.message.create({
+    const created = await prisma.message.create({
       data: {
         conversationId: input.conversationId,
         senderType: 'bot',
@@ -242,6 +248,7 @@ async function sendInteractiveViaMeta(
         status: 'sent',
       }
     })
+    messageRowId = created.id
   } catch (msgErr: any) {
     throw new Error(`sent to Meta but DB insert failed: ${msgErr.message}`)
   }
@@ -254,6 +261,8 @@ async function sendInteractiveViaMeta(
       updatedAt: new Date()
     }
   })
+
+  if (messageRowId) await emitNewMessage(messageRowId)
 
   return { whatsapp_message_id: waMessageId }
 }

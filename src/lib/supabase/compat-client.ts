@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getSocket } from '@/lib/socket'
+import { decimalToNumber, isDecimalLike } from '@/lib/decimal'
 
 function toSnakeCase(obj: any): any {
   if (obj === null || obj === undefined) return obj
   if (Array.isArray(obj)) return obj.map(toSnakeCase)
+  if (isDecimalLike(obj)) return decimalToNumber(obj)
   if (typeof obj !== 'object' || obj instanceof Date) return obj
 
   const newObj: any = {}
@@ -26,6 +28,7 @@ class SupabaseCompatBuilder {
   private countMode: string | null = null
   private isUpsert = false
   private rangeObj: { from: number; to: number } | null = null
+  private selectFields: string | null = null
 
   constructor(table: string) {
     this.table = table
@@ -38,6 +41,9 @@ class SupabaseCompatBuilder {
     if (this.method === 'select') {
       this.method = 'select'
     }
+    // Forwarded so the server can turn embedded relations such as
+    // `*, contact:contacts(*)` into a Prisma `include`.
+    this.selectFields = fields
     if (options?.count) {
       this.countMode = options.count
     }
@@ -148,7 +154,8 @@ class SupabaseCompatBuilder {
       countMode: this.countMode,
       single: this.singleRequested,
       isUpsert: this.isUpsert,
-      range: this.rangeObj
+      range: this.rangeObj,
+      select: this.selectFields
     }
 
     console.log('[DEBUG compat-client] execute payload:', JSON.stringify(payload))

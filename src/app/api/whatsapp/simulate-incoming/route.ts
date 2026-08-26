@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { verifyAccessToken, rotateRefreshToken } from '@/lib/auth'
 import { decrypt } from '@/lib/whatsapp/encryption'
 import { processHealthcareAIMessage } from '@/services/ai-healthcare.service'
+import { emitNewMessage } from '@/lib/realtime-inbox'
 
 export async function POST(request: NextRequest) {
   try {
@@ -76,6 +77,10 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date(),
       },
     })
+
+    // Same push a real webhook performs, so simulating a customer message
+    // exercises the live inbox rather than just the database.
+    await emitNewMessage(messageRecord.id)
 
     // ── 3. Fetch WhatsApp config ──────────────────────────────────────────────
     const config = await prisma.whatsappConfig.findUnique({
