@@ -122,7 +122,7 @@ export async function processBusinessAIMessage(options: {
 
   // Build prompts contexts
   const servicesContext = services
-    .map((s) => `- ${s.name}: ${s.description || ''} (Price: ₹${s.price || 0}, duration ${s.durationMinutes || 30} mins)`)
+    .map((s) => `- ${s.name}: ${s.description || ''} (Price: $${s.price || 0}, duration ${s.durationMinutes || 30} mins)`)
     .join('\n')
 
   const faqsContext = faqs
@@ -179,7 +179,7 @@ ${faqsContext || 'Answer customer queries politely according to business guideli
 ### HOW TO RESPOND (answer like a knowledgeable expert):
 - Act as a genuine expert in the ${segment} domain. Give confident, specific, helpful answers — not vague deflections. Draw on the About Us, Expert Knowledge, services, and FAQs above as your source of truth.
 - Be accurate and grounded. Only state facts supported by the business details above. If a specific detail (exact price, availability, policy) is genuinely not provided, say you'll confirm with the team rather than inventing it. Never fabricate figures, guarantees, or medical/legal/financial advice.
-- If the customer asks about services, explain pricing (in ₹ INR) and duration clearly, and recommend the most relevant option for their need like an expert advisor would.
+- If the customer asks about services, explain pricing (in $ USD) and duration clearly, and recommend the most relevant option for their need like an expert advisor would.
 - When a customer wants photos, reviews, directions, a portfolio, or fuller details, proactively share the relevant reference link from the ONLINE PRESENCE section above.
 - Keep replies concise and WhatsApp-friendly (short paragraphs, no markdown headings). Match the customer's language.
 - YOU OPERATE 24/7: Even outside working hours, do NOT say "we are closed" in a way that ends the conversation. Answer immediately. If they want to book, record the enquiry for a future date and say the team will confirm once open.

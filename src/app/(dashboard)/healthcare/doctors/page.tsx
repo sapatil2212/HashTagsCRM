@@ -350,10 +350,10 @@ export default function DoctorsManagement() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 flex items-center gap-1">
-                      <span className="text-slate-600 font-semibold">₹</span>
+                      <span className="text-slate-600 font-semibold">$</span>
                       Session Fee:
                     </span>
-                    <span className="text-orange-400 font-bold">₹{doc.consultation_fee || 0}</span>
+                    <span className="text-orange-400 font-bold">${doc.consultation_fee || 0}</span>
                   </div>
                 </div>
 
@@ -463,7 +463,7 @@ export default function DoctorsManagement() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="consultation_fee" className="text-xs text-slate-400">Session / Hourly Fee (₹)</Label>
+                  <Label htmlFor="consultation_fee" className="text-xs text-slate-400">Session / Hourly Fee ($)</Label>
                   <Input
                     id="consultation_fee"
                     type="number"

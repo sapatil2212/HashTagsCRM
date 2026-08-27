@@ -266,9 +266,9 @@ export default function ServicesManagement() {
                     <span className="text-slate-200 font-semibold">{svc.duration} mins</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-slate-400">
-                    <span className="text-slate-500 font-semibold text-sm">₹</span>
+                    <span className="text-slate-500 font-semibold text-sm">$</span>
                     <span>Price:</span>
-                    <span className="text-orange-400 font-bold">₹{svc.starting_price}</span>
+                    <span className="text-orange-400 font-bold">${svc.starting_price}</span>
                   </div>
                 </div>
 
@@ -333,7 +333,7 @@ export default function ServicesManagement() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <Label htmlFor="starting_price" className="text-xs text-slate-400">Starting Price (₹)</Label>
+                  <Label htmlFor="starting_price" className="text-xs text-slate-400">Starting Price ($)</Label>
                   <Input
                     id="starting_price"
                     type="number"

@@ -43,7 +43,7 @@ Output MUST be a valid JSON object matching this schema.
   "faqs": [
     {
       "question": "What is the consultation fee?",
-      "answer": "The standard consultation fee is ₹50.",
+      "answer": "The standard consultation fee is $50.",
       "keywords": "fee, price, consultation, cost, payment"
     }
   ]

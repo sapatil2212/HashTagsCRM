@@ -285,9 +285,9 @@ export function ProfileForm() {
     : false;
 
   const planLabels: Record<string, string> = {
-    starter: '₹799 Starter',
-    professional: '₹1,499 Professional',
-    enterprise: '₹2,999 Enterprise',
+    starter: '$9 Starter',
+    professional: '$15 Professional',
+    enterprise: '$25 Enterprise',
   };
 
   return (

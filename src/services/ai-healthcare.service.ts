@@ -495,12 +495,12 @@ These details are already confirmed and saved in the conversation state. Do NOT 
         })
         .join('; ');
 
-      return `- ${formatDocName(d.doctorName)} (${d.specialization || 'General'}). Fee: ₹${d.consultationFee || 0}. Shifts: ${d.availableDays?.join(', ') || 'None'} from ${d.availableStartTime || 'N/A'} to ${d.availableEndTime || 'N/A'}. Weekly Slots: ${daysWithSlots || 'None'}. Exceptions: ${docExceptions || 'None'}.`;
+      return `- ${formatDocName(d.doctorName)} (${d.specialization || 'General'}). Fee: $${d.consultationFee || 0}. Shifts: ${d.availableDays?.join(', ') || 'None'} from ${d.availableStartTime || 'N/A'} to ${d.availableEndTime || 'N/A'}. Weekly Slots: ${daysWithSlots || 'None'}. Exceptions: ${docExceptions || 'None'}.`;
     })
     .join('\n')
 
   const servicesContext = (services || [])
-    .map((s) => `- ${s.serviceName}: ${s.description || ''} (Starts at ₹${s.startingPrice || 0}, duration ${s.duration || 30} mins)`)
+    .map((s) => `- ${s.serviceName}: ${s.description || ''} (Starts at $${s.startingPrice || 0}, duration ${s.duration || 30} mins)`)
     .join('\n')
 
   const faqsContext = (faqs || [])

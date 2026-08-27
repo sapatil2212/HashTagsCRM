@@ -59,7 +59,7 @@ export default function HomePage() {
     },
     {
       q: "What are the subscription rates and API charges?",
-      a: "Our flat platform subscription starts at ₹2,999/month per WABA number. WhatsApp's conversation-based rates are charged directly by Meta; HashTags CRM passes through these official Meta charges with absolutely 0% markup.",
+      a: "Our flat platform subscription starts at $9/month per WABA number. WhatsApp's conversation-based rates are charged directly by Meta; HashTags CRM passes through these official Meta charges with absolutely 0% markup.",
     },
     {
       q: "How does the AI Assistant resolve queries?",
@@ -71,7 +71,7 @@ export default function HomePage() {
     {
       name: "Starter",
       tag: "Self-Managed Setup",
-      price: "₹799",
+      price: "$9",
       period: "/month",
       desc: "Full platform access for self-service automation, visual flow builders, and shared team inbox.",
       features: [
@@ -88,9 +88,9 @@ export default function HomePage() {
     {
       name: "Growth",
       tag: "Done-With-You Setup",
-      price: "₹1,499",
+      price: "$15",
       period: " first month",
-      renewal: "₹799/month after",
+      renewal: "$9/month after",
       desc: "Perfect for growing teams. We guide your configuration, verify accounts, and deploy core channels.",
       features: [
         "Everything in Starter plan",
@@ -106,9 +106,9 @@ export default function HomePage() {
     {
       name: "Managed",
       tag: "Done-For-You Strategy",
-      price: "₹2,999",
+      price: "$25",
       period: " pilot month",
-      renewal: "₹799/month after",
+      renewal: "$9/month after",
       desc: "Fully managed operations. Our automation experts write templates, design bots, and report results.",
       features: [
         "Everything in Growth plan",
@@ -458,7 +458,7 @@ export default function HomePage() {
             One platform. Flat rates.
           </h2>
           <p className="text-sm text-[var(--m-text-tertiary)]">
-            Active subscriptions are flat ₹2,999/month per WABA number. Select the initial setup tier that fits your team.
+            Active subscriptions are flat $9/month per WABA number. Select the initial setup tier that fits your team.
           </p>
         </div>
 

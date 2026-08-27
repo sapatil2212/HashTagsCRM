@@ -345,10 +345,10 @@ export default function ClinicSetupWizard() {
 
   const downloadSampleTXT = () => {
     const txtContent = "Below is our standard clinic service catalog:\n\n" +
-      "1. Consultation & Diagnosis: A basic diagnostic checkup. Starts at ₹50. Duration is 15 minutes.\n" +
-      "2. Teeth Whitening: Bleaching treatment to whiten teeth. Cost is ₹150 and takes 45 minutes.\n" +
-      "3. Composite Filling: Repairing cavity with tooth-colored filling. Starts from ₹90. Duration: 30 mins.\n" +
-      "4. Tooth Extraction: Simple extraction of damaged tooth. Price is ₹120. Takes 30 minutes.\n";
+      "1. Consultation & Diagnosis: A basic diagnostic checkup. Starts at $50. Duration is 15 minutes.\n" +
+      "2. Teeth Whitening: Bleaching treatment to whiten teeth. Cost is $150 and takes 45 minutes.\n" +
+      "3. Composite Filling: Repairing cavity with tooth-colored filling. Starts from $90. Duration: 30 mins.\n" +
+      "4. Tooth Extraction: Simple extraction of damaged tooth. Price is $120. Takes 30 minutes.\n";
     const blob = new Blob([txtContent], { type: "text/plain;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -458,7 +458,7 @@ export default function ClinicSetupWizard() {
   const downloadSampleFAQCSV = () => {
     const csvContent = "question,answer,keywords\n" +
       "What are the clinic working hours?,\"Our clinic is open Monday to Saturday from 9:00 AM to 6:00 PM. We are closed on Sundays.\",hours,timings,opening,schedule\n" +
-      "Do you offer root canal treatments?,\"Yes, we offer complete endodontic root canal treatments starting at ₹350 depending on the tooth.\",root canal,treatment,endodontics\n" +
+      "Do you offer root canal treatments?,\"Yes, we offer complete endodontic root canal treatments starting at $350 depending on the tooth.\",root canal,treatment,endodontics\n" +
       "Where are you located?,\"We are located at 123 Health Ave, Suite 10, New York, NY 10001. Check our Google Maps link for directions.\",location,address,maps,directions\n" +
       "Who is the lead doctor?,\"Our lead dentist is Dr. Patil, who specializes in Orthodontics and Oral Surgery.\",doctor,dentist,patil,staff\n";
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -478,7 +478,7 @@ export default function ClinicSetupWizard() {
       "Q: How can I book an appointment?\n" +
       "A: You can book an appointment directly here on WhatsApp by typing 'book appointment' or sharing preferred timings. Trigger Keywords: book, appointment, schedule, booking\n\n" +
       "Q: What is the consultation fee?\n" +
-      "A: The general consultation checkup is ₹50. Trigger Keywords: fee, checkup, price, cost\n";
+      "A: The general consultation checkup is $50. Trigger Keywords: fee, checkup, price, cost\n";
     const blob = new Blob([txtContent], { type: "text/plain;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -1189,7 +1189,7 @@ export default function ClinicSetupWizard() {
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <Label className="text-xs text-slate-400">Consultation Fee (₹)</Label>
+                          <Label className="text-xs text-slate-400">Consultation Fee ($)</Label>
                           <Input
                             type="number"
                             value={doc.consultation_fee}
@@ -1652,7 +1652,7 @@ export default function ClinicSetupWizard() {
                         <Textarea
                           value={bulkText}
                           onChange={(e) => setBulkText(e.target.value)}
-                          placeholder="Paste menu catalog, pricing table, or plain description of services...&#10;Example:&#10;- Teeth whitening ₹150, 45 mins. Professional cosmetic bleaching&#10;- Routine Dental scaling at ₹80 taking 30 minutes"
+                          placeholder="Paste menu catalog, pricing table, or plain description of services...&#10;Example:&#10;- Teeth whitening $150, 45 mins. Professional cosmetic bleaching&#10;- Routine Dental scaling at $80 taking 30 minutes"
                           className="bg-slate-950 border-slate-850 text-white min-h-[110px] text-xs leading-relaxed"
                         />
                       </div>
@@ -1703,7 +1703,7 @@ export default function ClinicSetupWizard() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs text-slate-400">Starting Price (₹)</Label>
+                      <Label className="text-xs text-slate-400">Starting Price ($)</Label>
                       <Input
                         type="number"
                         value={svc.starting_price}

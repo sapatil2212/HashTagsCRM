@@ -12,7 +12,7 @@ export default function PricingPage() {
     {
       name: "Starter",
       tagline: "Full control. You run it.",
-      price: "₹799",
+      price: "$9",
       subtext: "/WABA/month",
       setupFee: "No setup fee",
       ctaText: "Get Started",
@@ -24,9 +24,9 @@ export default function PricingPage() {
     {
       name: "Growth",
       tagline: "We launch you. You own it.",
-      price: "₹1,499",
+      price: "$15",
       subtext: "for first month",
-      setupFee: "₹799 /WABA/month after",
+      setupFee: "$9 /WABA/month after",
       ctaText: "Get Started",
       ctaLink: "/signup",
       ctaType: "link",
@@ -37,9 +37,9 @@ export default function PricingPage() {
     {
       name: "Managed",
       tagline: "We run it. You check results.",
-      price: "₹2,999",
+      price: "$25",
       subtext: "for first month",
-      setupFee: "₹799 /WABA/month after",
+      setupFee: "$9 /WABA/month after",
       ctaText: "Get Started",
       ctaLink: "/signup",
       ctaType: "link",
@@ -114,7 +114,7 @@ export default function PricingPage() {
           </span>
         </h1>
         <p className="text-sm text-[var(--m-text-tertiary)] max-w-xl mx-auto">
-          After setup, every plan is ₹799/WABA/month — flat. The difference is how much help you get on day one. You choose your level of support.
+          After setup, every plan is $9/WABA/month — flat. The difference is how much help you get on day one. You choose your level of support.
         </p>
       </div>
 
