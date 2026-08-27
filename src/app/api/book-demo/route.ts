@@ -10,14 +10,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const superAdmin = process.env.SUPER_ADMIN_USERNAME || "admin@hashtagscrm.com";
+    // Env resolution mirrors every other mail route in this app (auth/signup,
+    // auth/verify, auth/reset-password-otp, super-admin/approve,
+    // super-admin/users): accept either the SMTP_* names or the EMAIL_* names
+    // the project actually deploys with, and strip surrounding quotes that
+    // survive .env parsing.
+    //
+    // This route previously read SMTP_* only. Against an EMAIL_*-only
+    // environment `smtpHost` was undefined, so the send block never ran: the
+    // endpoint returned 500 "SMTP host not configured" in production and,
+    // worse, reported success in development while sending nothing. The
+    // quote-stripping matters just as much — EMAIL_PORT is quoted in .env, and
+    // parseInt('"465"') is NaN, which would break the connection even once the
+    // host resolved.
+    const cleanEnv = (val: string | undefined): string => {
+      if (!val) return "";
+      return val.replace(/^["']|["']$/g, "");
+    };
+
+    const superAdmin = cleanEnv(process.env.SUPER_ADMIN_USERNAME) || "admin@hashtagscrm.com";
 
     // Setup SMTP Transporter
-    const smtpHost = process.env.SMTP_HOST;
-    const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587;
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-    const smtpFrom = process.env.SMTP_FROM || smtpUser || "admin@hashtagscrm.com";
+    const smtpHost = cleanEnv(process.env.SMTP_HOST || process.env.EMAIL_HOST);
+    const rawPort = process.env.SMTP_PORT || process.env.EMAIL_PORT;
+    const smtpPort = rawPort ? parseInt(cleanEnv(rawPort)) : 587;
+    const smtpUser = cleanEnv(process.env.SMTP_USER || process.env.EMAIL_USERNAME);
+    const smtpPass = cleanEnv(process.env.SMTP_PASS || process.env.EMAIL_PASSWORD);
+    const smtpFrom = cleanEnv(process.env.SMTP_FROM) || smtpUser || "admin@hashtagscrm.com";
 
     // Developer Fallback: Log demo booking details to terminal console
     console.log(`
