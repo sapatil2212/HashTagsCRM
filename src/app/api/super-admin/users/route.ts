@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { hashPassword, verifySuperAdminToken } from "@/lib/auth";
 import nodemailer from "nodemailer";
 import { emailLayout, emailHeading, emailSubtitle, emailText, emailButton, emailDivider, emailTokens } from "@/lib/email/template";
+import { DEFAULT_PLAN_ID, normalizePlanId } from "@/lib/billing/plans";
+import { tenantDb } from "@/server/kernel";
+import { BillingService } from "@/server/services/billing.service";
 
 async function isAuthed(): Promise<boolean> {
   const cookieStore = await cookies();
@@ -200,13 +203,40 @@ export async function PATCH(req: NextRequest) {
         // Fetch current user verification status
         const currUser = await prisma.user.findUnique({
           where: { id },
-          include: { profile: true }
+          include: { profile: true, tenantsOwned: { select: { id: true } } }
         });
         if (currUser && !currUser.isVerified) {
           shouldSendWelcomeEmail = true;
-          computedExpiry = new Date();
-          computedExpiry.setMonth(computedExpiry.getMonth() + 1); // 1 month
-          userUpdateData.subscriptionExpiresAt = computedExpiry;
+
+          // Manual activation runs through the billing service so the operator
+          // action produces a real `Subscription` row, not just the legacy
+          // columns. Without this, an account an operator had just activated
+          // would still read "no active subscription" in Settings → Billing, and
+          // the expiry sweep would have nothing to expire.
+          const tenantId = currUser.profile?.tenantId ?? currUser.tenantsOwned[0]?.id ?? null;
+          if (tenantId) {
+            const targetPlan =
+              normalizePlanId(typeof plan === "string" ? plan : null) ??
+              normalizePlanId(currUser.selectedPlan) ??
+              DEFAULT_PLAN_ID;
+
+            const subscription = await BillingService.create(tenantDb(tenantId), tenantId).activateManually({
+              planId: targetPlan,
+              billingCycle: "monthly",
+              actor: "super_admin:dashboard",
+            });
+
+            computedExpiry = subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd) : null;
+            // The service already wrote isVerified, subscriptionExpiresAt,
+            // selectedPlan, Tenant.plan and Tenant.isActive.
+            delete userUpdateData.isVerified;
+          } else {
+            // No workspace to activate. Fall back to the legacy behaviour rather
+            // than refusing, so an operator can still unblock a broken signup.
+            computedExpiry = new Date();
+            computedExpiry.setMonth(computedExpiry.getMonth() + 1);
+            userUpdateData.subscriptionExpiresAt = computedExpiry;
+          }
         }
       }
     }
@@ -300,12 +330,25 @@ export async function PATCH(req: NextRequest) {
       await prisma.profile.updateMany({ where: { userId: id }, data: profileUpdateData });
     }
 
-    // Update tenant plan and active status
+    // Update tenant plan and active status.
+    //
+    // `plan` is normalised through the catalogue rather than written raw. This
+    // runs after `activateManually` may already have written the canonical plan
+    // id in the same request, so passing the operator's string straight through
+    // would stomp `essential` with whatever the UI happened to send (`starter`,
+    // `Growth`, `pro`) and desynchronise `Tenant.plan` from `Subscription.planId`.
     if (plan !== undefined || tenantActive !== undefined) {
       const tenantData: Record<string, any> = {};
-      if (plan !== undefined) tenantData.plan = plan;
+      if (plan !== undefined) {
+        const normalized = normalizePlanId(typeof plan === "string" ? plan : null);
+        // An unrecognised value is dropped rather than persisted: writing a plan
+        // id nothing can render is worse than leaving the current one in place.
+        if (normalized) tenantData.plan = normalized;
+      }
       if (tenantActive !== undefined) tenantData.isActive = tenantActive;
-      await prisma.tenant.updateMany({ where: { ownerUserId: id }, data: tenantData });
+      if (Object.keys(tenantData).length > 0) {
+        await prisma.tenant.updateMany({ where: { ownerUserId: id }, data: tenantData });
+      }
     }
 
     return NextResponse.json({ ok: true });

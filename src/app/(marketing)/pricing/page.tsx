@@ -2,86 +2,72 @@
 
 import React from "react";
 import Link from "next/link";
-import { Check, HelpCircle, Sparkles, X } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { SpotlightCard } from "@/components/marketing/spotlight-card";
-import { MagneticButton } from "@/components/marketing/magnetic-button";
 import { BookDemoTrigger } from "@/components/marketing/book-demo-trigger";
+import { PLAN_LIST, annualSavingMinor, formatAmount } from "@/lib/billing/plans";
 
+/**
+ * Prices are read from `@/lib/billing/plans`, which is the same module the
+ * checkout endpoint prices an order with. This page previously carried its own
+ * list ($9 / $15 first month / $25 pilot month) that had drifted from the signup
+ * wizard's and from the settings panel's — tolerable when payment was a bank
+ * transfer and a human check, indefensible now that a card is charged. If the
+ * page and the gateway can disagree, one of them is lying to the customer.
+ */
 export default function PricingPage() {
-  const plans = [
-    {
-      name: "Starter",
-      tagline: "Full control. You run it.",
-      price: "$9",
-      subtext: "/WABA/month",
-      setupFee: "No setup fee",
-      ctaText: "Get Started",
-      ctaLink: "/signup",
-      ctaType: "link",
-      popular: false,
-      footerText: "Access provisioned within 24 hours of payment."
-    },
-    {
-      name: "Growth",
-      tagline: "We launch you. You own it.",
-      price: "$15",
-      subtext: "for first month",
-      setupFee: "$9 /WABA/month after",
-      ctaText: "Get Started",
-      ctaLink: "/signup",
-      ctaType: "link",
-      popular: true,
-      badge: "Recommended • Done For You",
-      footerText: "Onboarding begins within 48 hours. Setup complete within 7 days."
-    },
-    {
-      name: "Managed",
-      tagline: "We run it. You check results.",
-      price: "$25",
-      subtext: "for first month",
-      setupFee: "$9 /WABA/month after",
-      ctaText: "Get Started",
-      ctaLink: "/signup",
-      ctaType: "link",
-      popular: false,
-      badge: "Done For You",
-      footerText: "Application required. Pilot month available — ask us."
-    }
-  ];
+  const plans = PLAN_LIST.map((plan) => ({
+    id: plan.id,
+    name: plan.name,
+    tagline: plan.positioning,
+    coreMessage: plan.coreMessage,
+    monthly: formatAmount(plan.pricing.monthly.priceMinor),
+    annual: formatAmount(plan.pricing.annual.priceMinor),
+    annualSaving: annualSavingMinor(plan.id),
+    setupFee: plan.setupFeeMinor,
+    popular: plan.recommended,
+    badge: plan.recommended ? "Recommended" : undefined,
+    footerText:
+      plan.setupFeeMinor === 0
+        ? "Your workspace unlocks the moment payment clears."
+        : `Onboarding begins within 48 hours of payment. One-time ${formatAmount(plan.setupFeeMinor)} setup covers it.`,
+  }));
 
+  // Matrix keys match the catalogue's plan ids so a column cannot silently point
+  // at a tier that no longer exists.
   const features = {
     platform: {
       title: "The Platform",
       rows: [
-        { name: "No-Code Automation Builder", starter: "check", growth: "check", managed: "check" },
-        { name: "AI Assistant (trained on your docs)", starter: "DIY", growth: "DIY", managed: "We configure it" },
-        { name: "Shared Team Inbox", starter: "check", growth: "check", managed: "check" },
-        { name: "27+ Integrations", starter: "check", growth: "check", managed: "check" },
-        { name: "0% Message Markup", starter: "check", growth: "check", managed: "check" },
-        { name: "Click-to-WhatsApp Ads (CTWA)", starter: "check", growth: "check", managed: "check" }
+        { name: "No-Code Automation Builder", essential: "check", growth: "check", managed: "check" },
+        { name: "AI Assistant (trained on your docs)", essential: "DIY", growth: "DIY", managed: "We configure it" },
+        { name: "Shared Team Inbox", essential: "check", growth: "check", managed: "check" },
+        { name: "27+ Integrations", essential: "check", growth: "check", managed: "check" },
+        { name: "0% Message Markup", essential: "check", growth: "check", managed: "check" },
+        { name: "Click-to-WhatsApp Ads (CTWA)", essential: "check", growth: "check", managed: "check" }
       ]
     },
     setup: {
       title: "Setup & Onboarding",
       rows: [
-        { name: "Meta Business Verification", starter: "DIY", growth: "DIY", managed: "check" },
-        { name: "WhatsApp Number Connection", starter: "DIY", growth: "check", managed: "check" },
-        { name: "WhatsApp Co-existence Setup", starter: "DIY", growth: "check", managed: "check" },
-        { name: "Platform Configuration & Team Access", starter: "DIY", growth: "check", managed: "check" },
-        { name: "Kickoff Meeting", starter: "DIY", growth: "check", managed: "check" },
-        { name: "Automations Built For You", starter: "DIY", growth: "DIY", managed: "2–3 core automations" },
-        { name: "Message Templates Written & Submitted", starter: "DIY", growth: "DIY", managed: "check" },
-        { name: "Integrations Wired In", starter: "DIY", growth: "DIY", managed: "check" }
+        { name: "Meta Business Verification", essential: "DIY", growth: "check", managed: "check" },
+        { name: "WhatsApp Number Connection", essential: "DIY", growth: "check", managed: "check" },
+        { name: "WhatsApp Co-existence Setup", essential: "DIY", growth: "check", managed: "check" },
+        { name: "Platform Configuration & Team Access", essential: "DIY", growth: "check", managed: "check" },
+        { name: "Kickoff Meeting", essential: "DIY", growth: "check", managed: "check" },
+        { name: "Automations Built For You", essential: "DIY", growth: "DIY", managed: "2–3 core automations" },
+        { name: "Message Templates Written & Submitted", essential: "DIY", growth: "DIY", managed: "check" },
+        { name: "Integrations Wired In", essential: "DIY", growth: "check", managed: "check" }
       ]
     },
     support: {
       title: "Support & Strategy",
       rows: [
-        { name: "Priority WhatsApp Support Group", starter: "check", growth: "check", managed: "check" },
-        { name: "Monthly Group Q&A with Lakshit", starter: "check", growth: "check", managed: "check" },
-        { name: "1-on-1 Strategy Call", starter: "DIY", growth: "Onboarding call included", managed: "Monthly deep-dive (60 min)" },
-        { name: "Meta Template Fast-Track Approvals", starter: "DIY", growth: "DIY", managed: "check" },
-        { name: "Dedicated Account Manager", starter: "DIY", growth: "DIY", managed: "check" }
+        { name: "Priority WhatsApp Support Group", essential: "check", growth: "check", managed: "check" },
+        { name: "Monthly Group Q&A with Lakshit", essential: "check", growth: "check", managed: "check" },
+        { name: "1-on-1 Strategy Call", essential: "DIY", growth: "Onboarding call included", managed: "Monthly deep-dive (60 min)" },
+        { name: "Meta Template Fast-Track Approvals", essential: "DIY", growth: "DIY", managed: "check" },
+        { name: "Dedicated Account Manager", essential: "DIY", growth: "DIY", managed: "check" }
       ]
     }
   };
@@ -114,7 +100,8 @@ export default function PricingPage() {
           </span>
         </h1>
         <p className="text-sm text-[var(--m-text-tertiary)] max-w-xl mx-auto">
-          After setup, every plan is $9/WABA/month — flat. The difference is how much help you get on day one. You choose your level of support.
+          Same platform on every plan. What changes is how much of the setup we do for you — and how much
+          strategy you get afterwards. Pay annually and you get two months free.
         </p>
       </div>
 
@@ -136,27 +123,38 @@ export default function PricingPage() {
               <div className="space-y-4">
                 <span className="text-xs font-bold text-[var(--m-text-tertiary)] uppercase tracking-widest">{plan.name}</span>
                 <h4 className="text-sm text-[var(--m-text-secondary)] font-semibold min-h-[20px]">{plan.tagline}</h4>
-                
-                <div className="flex items-baseline gap-1 py-2 border-y border-[var(--m-border-primary)]/50">
-                  <span className="text-3xl sm:text-4xl font-extrabold text-[var(--m-text-heading)]">{plan.price}</span>
-                  <span className="text-xs text-[var(--m-text-muted)]">{plan.subtext}</span>
+
+                <div className="py-2 border-y border-[var(--m-border-primary)]/50">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl sm:text-4xl font-extrabold text-[var(--m-text-heading)]">{plan.monthly}</span>
+                    <span className="text-xs text-[var(--m-text-muted)]">/month</span>
+                  </div>
+                  <div className="mt-1 text-xs text-[var(--m-text-muted)]">
+                    or <span className="font-semibold text-[var(--m-text-secondary)]">{plan.annual}</span>/year
+                    {plan.annualSaving > 0 && (
+                      <span className="ml-1 font-semibold text-emerald-400">
+                        save {formatAmount(plan.annualSaving)}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="text-xs font-medium text-orange-400/90">{plan.setupFee}</div>
+
+                <div className="text-xs font-medium text-orange-400/90">
+                  {plan.setupFee === 0
+                    ? "Setup included — no one-time fee"
+                    : `+ ${formatAmount(plan.setupFee)} one-time setup`}
+                </div>
+
+                <p className="text-xs leading-relaxed text-[var(--m-text-tertiary)]">{plan.coreMessage}</p>
               </div>
 
               <div className="space-y-4 pt-4">
-                {plan.ctaType === "link" ? (
-                  <Link
-                    href={plan.ctaLink || "#"}
-                    className="w-full py-3 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 bg-orange-500 text-white hover:bg-orange-400 shadow-[0_0_12px_rgba(255,165,0,0.2)]"
-                  >
-                    {plan.ctaText}
-                  </Link>
-                ) : (
-                  <BookDemoTrigger className="w-full py-3 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 bg-[var(--m-bg-secondary)] border border-[var(--m-border-primary)] hover:bg-[var(--m-bg-tertiary)] text-[var(--m-text-secondary)]">
-                    {plan.ctaText}
-                  </BookDemoTrigger>
-                )}
+                <Link
+                  href={`/signup?plan=${plan.id}`}
+                  className="w-full py-3 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 bg-orange-500 text-white hover:bg-orange-400 shadow-[0_0_12px_rgba(255,165,0,0.2)]"
+                >
+                  Get Started
+                </Link>
                 <div className="text-[10px] text-[var(--m-text-muted)] text-center leading-relaxed">{plan.footerText}</div>
               </div>
             </div>
@@ -179,10 +177,10 @@ export default function PricingPage() {
           <table className="w-full min-w-[600px] border-collapse text-left">
             <thead>
               <tr className="border-b border-[var(--m-border-primary)] bg-[var(--m-bg-secondary)]/40 text-[var(--m-text-secondary)] font-bold text-xs">
-                <th className="p-4 w-[40%]">All plans · per WABA/month</th>
-                <th className="p-4 text-center w-[20%]">Starter</th>
-                <th className="p-4 text-center w-[20%]">Growth</th>
-                <th className="p-4 text-center w-[20%]">Managed</th>
+                <th className="p-4 w-[40%]">Capability</th>
+                {PLAN_LIST.map((plan) => (
+                  <th key={plan.id} className="p-4 text-center w-[20%]">{plan.name}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -199,7 +197,7 @@ export default function PricingPage() {
                       className="border-b border-[var(--m-border-primary)]/50 hover:bg-[var(--m-bg-secondary)]/15 transition-colors duration-150"
                     >
                       <td className="p-4 text-xs font-semibold text-[var(--m-text-secondary)]">{row.name}</td>
-                      <td className="p-4 text-center">{renderValue(row.starter)}</td>
+                      <td className="p-4 text-center">{renderValue(row.essential)}</td>
                       <td className="p-4 text-center">{renderValue(row.growth)}</td>
                       <td className="p-4 text-center">{renderValue(row.managed)}</td>
                     </tr>

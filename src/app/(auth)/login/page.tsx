@@ -1,9 +1,8 @@
 "use client";
 
-import { Suspense, useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,188 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ArrowLeft, Loader2, Eye, EyeOff, QrCode,
-  Paperclip, CheckCircle, X, PartyPopper, Zap, TrendingUp, Crown
-} from "lucide-react";
+import { ArrowLeft, Loader2, Eye, EyeOff, CreditCard } from "lucide-react";
 import { InteractiveGrid } from "@/components/marketing/interactive-grid";
-import { useTheme } from "@/hooks/use-theme";
-import { AnimatePresence, motion } from "framer-motion";
-
-const WHATSAPP_CONTACT = "923161122339";
-
-// ─── Renewal Payment QR Modal ──────────────────────────────────────────────────
-function RenewalModal({
-  userId,
-  userEmail,
-  onClose,
-}: {
-  userId: string;
-  userEmail: string;
-  onClose: () => void;
-}) {
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [proofFile, setProofFile] = useState<File | null>(null);
-  const [sending, setSending]     = useState(false);
-  const [done, setDone]           = useState(false);
-  const [error, setError]         = useState("");
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProofFile(e.target.files?.[0] ?? null);
-  };
-
-  const handleSendProof = async () => {
-    setSending(true);
-    setError("");
-
-    try {
-      // Mark payment proof as attached for renewal
-      const res = await fetch("/api/auth/payment-proof", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      });
-
-      if (!res.ok) throw new Error("Could not submit renewal status.");
-
-      const message = encodeURIComponent(
-        `🧾 *Subscription Renewal Proof*\n\n` +
-        `Hello! My subscription ended and I have completed renewal payment.\n\n` +
-        `*Email:* ${userEmail}\n` +
-        `*Proof File:* ${proofFile?.name ?? "Attached"}\n\n` +
-        `Please reactivate my workspace. Thank you! 🙏`
-      );
-
-      await new Promise((r) => setTimeout(r, 650));
-      window.open(`https://wa.me/${WHATSAPP_CONTACT}?text=${message}`, "_blank");
-      setDone(true);
-    } catch (err: any) {
-      setError(err.message || "Failed to submit renewal proof.");
-    } finally {
-      setSending(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black/75 backdrop-blur-md"
-        onClick={onClose}
-      />
-
-      <motion.div
-        initial={{ opacity: 0, scale: 0.93, y: 15 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.93 }}
-        transition={{ type: "spring", stiffness: 300, damping: 28 }}
-        className="relative w-full max-w-sm rounded-2xl border border-[var(--m-border-glass)]/50 bg-[var(--m-bg-glass)]/95 backdrop-blur-2xl shadow-2xl overflow-hidden z-10"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {!done && (
-          <button
-            onClick={onClose}
-            className="absolute top-3.5 right-3.5 z-10 w-7 h-7 rounded-xl flex items-center justify-center text-[var(--m-text-muted)] hover:bg-white/10 hover:text-[var(--m-text-primary)] transition-all duration-200 cursor-pointer"
-          >
-            <X className="size-3.5" />
-          </button>
-        )}
-
-        {!done ? (
-          <div className="p-6 flex flex-col items-center gap-4">
-            <div className="flex flex-col items-center gap-2 text-center">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
-                <QrCode className="size-5 text-orange-400" />
-              </div>
-              <h2 className="text-base font-bold text-[var(--m-text-heading)]">Renew Subscription</h2>
-              <p className="text-[11px] text-[var(--m-text-tertiary)] leading-relaxed">
-                Scan the QR code below to pay. Upload your confirmation screenshot to activate your account.
-              </p>
-            </div>
-
-            <div className="relative w-52 h-52 rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg bg-white p-1.5">
-              <Image
-                src="/images/payment-qr.png"
-                alt="Payment QR Code"
-                fill
-                className="object-contain"
-                priority
-                unoptimized
-              />
-            </div>
-
-            <div className="w-full space-y-2">
-              {error && (
-                <p className="text-[10px] text-red-400 text-center font-bold">{error}</p>
-              )}
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*,application/pdf"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-orange-500/40 hover:border-orange-500/70 bg-orange-500/5 hover:bg-orange-500/10 text-orange-400 text-[11px] font-semibold transition-all duration-200 cursor-pointer"
-              >
-                <Paperclip className="size-3.5" />
-                {proofFile ? proofFile.name : "Attach Payment Screenshot"}
-              </button>
-              {proofFile && (
-                <p className="text-[10px] text-orange-400/80 text-center">
-                  ✓ {proofFile.name} attached
-                </p>
-              )}
-            </div>
-
-            <button
-              type="button"
-              disabled={!proofFile || sending}
-              onClick={handleSendProof}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-[11px] font-bold shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-            >
-              {sending ? (
-                <>
-                  <Loader2 className="size-3.5 animate-spin" />
-                  Sending Renewal proof...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="size-3.5" />
-                  Pay Done — Submit Screenshot
-                </>
-              )}
-            </button>
-          </div>
-        ) : (
-          <div className="p-8 flex flex-col items-center gap-4 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
-              <PartyPopper className="size-8 text-orange-400" />
-            </div>
-
-            <div>
-              <h2 className="text-xl font-bold text-[var(--m-text-heading)]">Proof Submitted! 🎉</h2>
-              <p className="text-[11px] text-[var(--m-text-tertiary)] mt-2 leading-relaxed">
-                Super Admin will verify your payment within 24–48 hours and activate your account.
-              </p>
-            </div>
-
-            <button
-              onClick={onClose}
-              className="mt-2 w-full py-2 rounded-xl bg-[var(--m-bg-secondary)] hover:bg-[var(--m-bg-tertiary)] text-[var(--m-text-primary)] text-xs font-bold transition-all border border-[var(--m-border-glass)]"
-            >
-              Close
-            </button>
-          </div>
-        )}
-      </motion.div>
-    </div>
-  );
-}
 
 // ─── LoginPage Component ──────────────────────────────────────────────────────
 function LoginPageInner() {
@@ -211,8 +30,10 @@ function LoginPageInner() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showRenewalModal, setShowRenewalModal] = useState(false);
-  const [expiredUserId, setExpiredUserId] = useState<string | null>(null);
+  // Set when the password was correct but the account needs paying for. Holds
+  // the URL to send them to, supplied by the API so the routing rule lives in
+  // one place rather than being re-derived from an error string here.
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [authChecking, setAuthChecking] = useState(true);
 
   // If already logged in, redirect away immediately
@@ -259,23 +80,27 @@ function LoginPageInner() {
 
       const data = await res.json();
 
-      if (res.ok && data.success) {
+      // A successful login returns the user object and has already set the auth
+      // cookies. A full navigation rather than a client-side push, so the proxy
+      // re-runs and sees the new cookies.
+      if (res.ok && data.user) {
         window.location.href = redirectTo;
         return;
       }
 
-      // Handle specific error cases from MySQL auth
-      if (res.status === 403 && data.error?.includes("subscription has ended")) {
-        setError(data.error);
-        if (data.userId) {
-          setExpiredUserId(data.userId);
-        }
+      // 402 Payment Required: the password was correct, but the workspace needs
+      // a subscription — either it was never paid for or the period lapsed. The
+      // API has already issued a short-lived checkout grant cookie, so the
+      // billing page is reachable without a session.
+      if (res.status === 402 && typeof data.redirectTo === "string") {
+        setCheckoutUrl(data.redirectTo);
+        setError(data.message ?? "This workspace needs an active subscription.");
         setLoading(false);
         return;
       }
 
-      if (data.error) {
-        setError(data.error);
+      if (data.message || data.error) {
+        setError(data.message ?? data.error);
         setLoading(false);
         return;
       }
@@ -294,8 +119,10 @@ function LoginPageInner() {
       }
 
       router.replace(redirectTo);
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred. Please try again.");
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred. Please try again.",
+      );
       setLoading(false);
     }
   };
@@ -338,22 +165,23 @@ function LoginPageInner() {
               </div>
             )}
             {error && (
-              <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-[11px] text-red-400 text-center leading-relaxed">
+              <div
+                className={
+                  checkoutUrl
+                    ? "rounded-lg border border-orange-500/20 bg-orange-500/10 px-3 py-2 text-[11px] text-orange-400 text-center leading-relaxed"
+                    : "rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-[11px] text-red-400 text-center leading-relaxed"
+                }
+                role={checkoutUrl ? "status" : "alert"}
+              >
                 {error}
-                {error.includes("subscription has ended") && (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (!expiredUserId) {
-                        alert("Please type your registered email address first.");
-                        return;
-                      }
-                      setShowRenewalModal(true);
-                    }}
-                    className="block w-full mt-2 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-400 text-white font-bold text-[10px] uppercase tracking-wider transition-all"
+                {checkoutUrl && (
+                  <Link
+                    href={checkoutUrl}
+                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg bg-orange-500 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white transition-all hover:bg-orange-400"
                   >
-                    Subscribe Now
-                  </button>
+                    <CreditCard className="size-3" aria-hidden="true" />
+                    Choose a plan &amp; pay
+                  </Link>
                 )}
               </div>
             )}
@@ -424,16 +252,6 @@ function LoginPageInner() {
         </CardContent>
       </Card>
 
-      {/* Renewal Modal */}
-      <AnimatePresence>
-        {showRenewalModal && expiredUserId && (
-          <RenewalModal
-            userId={expiredUserId}
-            userEmail={email}
-            onClose={() => setShowRenewalModal(false)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }

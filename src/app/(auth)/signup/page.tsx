@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,14 +13,17 @@ import {
   ComboboxInput, ComboboxInputGroup, ComboboxItem, ComboboxList, ComboboxTrigger,
 } from "@/components/ui/combobox";
 import {
-  ArrowLeft, CheckCircle, Eye, EyeOff,
-  QrCode, Loader2, PartyPopper, Paperclip,
-  Zap, TrendingUp, Crown, Check,
+  ArrowLeft, CheckCircle, Eye, EyeOff, CreditCard,
+  Loader2, PartyPopper, ShieldCheck,
 } from "lucide-react";
 import { InteractiveGrid } from "@/components/marketing/interactive-grid";
 import { motion, AnimatePresence } from "framer-motion";
-
-const WHATSAPP_CONTACT = "923161122339";
+import {
+  DEFAULT_PLAN_ID, PLAN_LIST, cycleSuffix, formatAmount, getPlan, isBillingCycle, normalizePlanId,
+  type BillingCycle, type PlanId,
+} from "@/lib/billing/plans";
+import { BillingCycleToggle, PlanCards } from "@/components/billing/plan-cards";
+import { useCheckout } from "@/components/billing/use-checkout";
 
 // ─── Business Categories ──────────────────────────────────────────────────────
 const BUSINESS_CATEGORIES = [
@@ -36,80 +39,34 @@ const BUSINESS_CATEGORIES = [
   "Other",
 ];
 
-// ─── Pricing Plans ────────────────────────────────────────────────────────────
-type Plan = {
-  id: string;
-  name: string;
-  tagline: string;
-  price: string;
-  period: string;
-  renewal: string | null;
-  icon: typeof Zap;
-  color: string;
-  popular: boolean;
-  features: string[];
-};
+/**
+ * Plans come from `@/lib/billing/plans`, not from a list declared here.
+ *
+ * This file used to own its own `PLANS` array — Starter $9 / Growth $15 first
+ * month / Managed $25 pilot month — which disagreed with the marketing pricing
+ * page, with `profile-form`'s labels, and with `Tenant.plan`'s vocabulary. Once
+ * a real gateway is charging cards, the number shown at signup has to be the
+ * number the card is debited, so there can only be one list.
+ */
 
-const PLANS: Plan[] = [
-  {
-    id: "starter",
-    name: "Starter",
-    tagline: "Self-Managed Setup",
-    price: "$9",
-    period: "/month",
-    renewal: null,
-    icon: Zap,
-    color: "orange",
-    popular: false,
-    features: [
-      "Official WhatsApp Business API",
-      "Visual Flow & Chatbot Builder",
-      "Shared Collaborative Inbox",
-      "27+ Native Integrations",
-      "0% Markup on Meta API fees",
-    ],
-  },
-  {
-    id: "growth",
-    name: "Growth",
-    tagline: "Done-With-You Setup",
-    price: "$15",
-    period: " first month",
-    renewal: "$9/month after",
-    icon: TrendingUp,
-    color: "violet",
-    popular: true,
-    features: [
-      "Everything in Starter plan",
-      "Meta Business Verification Assistance",
-      "WhatsApp Co-existence Configuration",
-      "Custom Integrations Wired In",
-      "Dedicated Account Setup Session",
-    ],
-  },
-  {
-    id: "managed",
-    name: "Managed",
-    tagline: "Done-For-You Strategy",
-    price: "$25",
-    period: " pilot month",
-    renewal: "$9/month after",
-    icon: Crown,
-    color: "amber",
-    popular: false,
-    features: [
-      "Everything in Growth plan",
-      "2–3 Custom Automations built for you",
-      "Message Templates written & approved",
-      "Dedicated Account Manager",
-      "Monthly 1-on-1 Strategy Calls",
-    ],
-  },
-];
-
+/**
+ * `done` is now only reached when checkout could not be started at all — a
+ * gateway with no credentials, or a signup whose tenant was never provisioned.
+ * The normal path leaves this page entirely for Safepay's hosted checkout and
+ * returns to `/billing/result`.
+ */
 type Step = "form" | "otp" | "payment" | "done";
 
-export default function SignupPage() {
+function SignupPageInner() {
+  // The pricing page links here as `/signup?plan=growth&cycle=annual`, so a
+  // customer who already chose on the marketing site does not have to choose
+  // again. Both params are validated against the catalogue — an unknown value
+  // falls back to the default rather than putting an invalid plan into state.
+  const searchParams = useSearchParams();
+  const requestedPlan = normalizePlanId(searchParams.get("plan"));
+  const requestedCycleParam = searchParams.get("cycle");
+  const requestedCycle: BillingCycle = isBillingCycle(requestedCycleParam) ? requestedCycleParam : "monthly";
+
   const [fullName, setFullName]                     = useState("");
   const [email, setEmail]                           = useState("");
   const [mobileNumber, setMobileNumber]             = useState("");
@@ -125,14 +82,22 @@ export default function SignupPage() {
   const [step, setStep]                             = useState<Step>("form");
   const [otp, setOtp]                               = useState("");
   const [verifyLoading, setVerifyLoading]           = useState(false);
-  const [registeredUserId, setRegisteredUserId]     = useState<string | null>(null);
 
-  const [selectedPlan, setSelectedPlan]             = useState<(typeof PLANS)[0]>(PLANS[1]); // Default Growth
-  const [proofFile, setProofFile]                   = useState<File | null>(null);
-  const [sending, setSending]                       = useState(false);
+  const [selectedPlanId, setSelectedPlanId]         = useState<PlanId>(requestedPlan ?? DEFAULT_PLAN_ID);
+  const [billingCycle, setBillingCycle]             = useState<BillingCycle>(requestedCycle);
+  /**
+   * False when the verify step reported that no checkout can be opened for this
+   * account — almost always a tenant that failed to provision. The payment step
+   * then explains the manual path instead of offering a button that cannot work.
+   */
+  const [canCheckout, setCanCheckout]               = useState(true);
 
-  const fileRef = useRef<HTMLInputElement>(null);
+  const checkout = useCheckout();
   const supabase = createClient();
+
+  const selectedPlan = getPlan(selectedPlanId);
+  const setupFeeDue = selectedPlan.setupFeeMinor;
+  const dueTodayMinor = selectedPlan.pricing[billingCycle].priceMinor + setupFeeDue;
 
   const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,7 +108,7 @@ export default function SignupPage() {
 
     setLoading(true);
 
-    const { data, error: signupError } = await supabase.auth.signUp({
+    const { error: signupError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -151,7 +116,7 @@ export default function SignupPage() {
           full_name: fullName,
           business_category: businessCategory,
           phone_number: mobileNumber,
-          selected_plan: selectedPlan.id,
+          selected_plan: selectedPlanId,
         },
       },
     });
@@ -163,10 +128,6 @@ export default function SignupPage() {
       return;
     }
 
-    // Save registered user info
-    if (data?.user) {
-      setRegisteredUserId(data.user.id);
-    }
     setStep("otp");
   };
 
@@ -188,53 +149,34 @@ export default function SignupPage() {
       return;
     }
 
-    // Save user ID if returned from verify
-    if (data?.user) {
-      setRegisteredUserId(data.user.id);
+    // The user id is deliberately not kept. Nothing on the client needs it any
+    // more: checkout is authorised by the httpOnly grant cookie below, not by a
+    // user id in a request body — which is exactly how the old payment-proof
+    // endpoint was forgeable.
+    //
+    // Verifying the OTP also sets a short-lived, httpOnly checkout grant cookie,
+    // which is what lets the next step open a payment session without a session
+    // token. `canCheckout` is false only when the account has no tenant to bill.
+    if (data && typeof data === "object" && "canCheckout" in data) {
+      setCanCheckout(Boolean((data as { canCheckout?: unknown }).canCheckout));
     }
+
     setStep("payment");
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProofFile(e.target.files?.[0] ?? null);
-  };
-
-  const handleSendProof = async () => {
-    if (!registeredUserId) {
-      setError("Session expired. Please sign up again.");
-      setStep("form");
+  /**
+   * Hands off to Safepay. On success the browser leaves this page entirely and
+   * comes back to `/billing/result`, so there is no "success" state to render
+   * here — which is the point: settlement is confirmed by a signed callback, not
+   * by the customer telling us they paid.
+   */
+  const handlePay = async () => {
+    if (!canCheckout) {
+      setStep("done");
       return;
     }
-    setSending(true);
-
-    try {
-      // Mark as payment proof attached in the database
-      const res = await fetch("/api/auth/payment-proof", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: registeredUserId }),
-      });
-
-      if (!res.ok) throw new Error("Could not update payment proof status.");
-
-      const message = encodeURIComponent(
-        `🧾 *Payment Confirmation*\n\n` +
-        `Hello! I have completed the payment for HashTags CRM.\n\n` +
-        `*Name:* ${fullName}\n` +
-        `*Email:* ${email}\n` +
-        `*Plan Selected:* ${selectedPlan.name} (${selectedPlan.price}${selectedPlan.period})\n` +
-        `*Proof File:* ${proofFile?.name ?? "Attached"}\n\n` +
-        `Please activate my account. Thank you! 🙏`
-      );
-
-      await new Promise((r) => setTimeout(r, 600));
-      window.open(`https://wa.me/${WHATSAPP_CONTACT}?text=${message}`, "_blank");
-      setStep("done");
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
-    } finally {
-      setSending(false);
-    }
+    setError(null);
+    await checkout.start({ planId: selectedPlanId, billingCycle });
   };
 
   return (
@@ -336,14 +278,16 @@ export default function SignupPage() {
                     <div className="flex flex-col gap-1.2 sm:col-span-2">
                       <Label htmlFor="selectedPlan" className="text-[11px] font-semibold text-[var(--m-text-secondary)]/90">Select Plan</Label>
                       <Combobox
-                        items={PLANS}
+                        items={[...PLAN_LIST]}
                         value={selectedPlan}
                         itemToStringLabel={(plan) =>
-                          `${plan.name} (${plan.price}${plan.period}${plan.renewal ? `, ${plan.renewal}` : ""})`
+                          `${plan.name} — ${formatAmount(plan.pricing[billingCycle].priceMinor)}${cycleSuffix(billingCycle)}${
+                            plan.setupFeeMinor > 0 ? ` + ${formatAmount(plan.setupFeeMinor)} setup` : ""
+                          }`
                         }
                         isItemEqualToValue={(item, value) => item.id === value.id}
                         onValueChange={(plan) => {
-                          if (plan) setSelectedPlan(plan);
+                          if (plan) setSelectedPlanId(plan.id);
                         }}
                       >
                         <ComboboxInputGroup>
@@ -358,14 +302,19 @@ export default function SignupPage() {
                         <ComboboxContent className="border border-[var(--m-border-glass)]/40 bg-[var(--m-bg-secondary)] text-[11px]">
                           <ComboboxEmpty>No plan found.</ComboboxEmpty>
                           <ComboboxList>
-                            {(plan: (typeof PLANS)[0]) => (
+                            {(plan: (typeof PLAN_LIST)[number]) => (
                               <ComboboxItem key={plan.id} value={plan} className="text-[11px] text-[var(--m-text-primary)]">
-                                {plan.name} ({plan.price}{plan.period}{plan.renewal ? `, ${plan.renewal}` : ""})
+                                {plan.name} — {formatAmount(plan.pricing[billingCycle].priceMinor)}
+                                {cycleSuffix(billingCycle)}
+                                {plan.setupFeeMinor > 0 && ` + ${formatAmount(plan.setupFeeMinor)} setup`}
                               </ComboboxItem>
                             )}
                           </ComboboxList>
                         </ComboboxContent>
                       </Combobox>
+                      <p className="text-[10px] text-[var(--m-text-muted)]">
+                        {selectedPlan.positioning} — {selectedPlan.coreMessage} You can change this before paying.
+                      </p>
                     </div>
 
                     {/* Password */}
@@ -471,7 +420,7 @@ export default function SignupPage() {
           </motion.div>
         )}
 
-        {/* ─── STEP 3: Payment QR & Proof ──────────────────────────────────── */}
+        {/* ─── STEP 3: Pay with Safepay ─────────────────────────────────────── */}
         {step === "payment" && (
           <motion.div
             key="payment"
@@ -479,83 +428,101 @@ export default function SignupPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.25 }}
-            className="w-full max-w-sm z-10"
+            className="w-full max-w-3xl z-10"
           >
-            <Card className="border border-[var(--m-border-glass)]/40 bg-[var(--m-bg-glass)]/70 backdrop-blur-xl p-6 md:p-8 shadow-none flex flex-col items-center gap-4">
+            <Card className="border border-[var(--m-border-glass)]/40 bg-[var(--m-bg-glass)]/70 backdrop-blur-xl p-6 md:p-8 shadow-none flex flex-col gap-5">
               <div className="flex flex-col items-center gap-2 text-center">
                 <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
-                  <QrCode className="size-5 text-orange-400" />
+                  <CheckCircle className="size-5 text-orange-400" aria-hidden="true" />
                 </div>
-                <h2 className="text-base font-bold text-[var(--m-text-heading)]">Scan & Pay</h2>
-                <p className="text-[11px] text-[var(--m-text-tertiary)] leading-relaxed">
-                  Scan the QR below to pay. Then upload proof and send to activate.
+                <h2 className="text-base font-bold text-[var(--m-text-heading)]">Email verified — one step left</h2>
+                <p className="text-[11px] text-[var(--m-text-tertiary)] leading-relaxed max-w-md">
+                  Confirm your plan and pay securely. Your workspace unlocks the moment the payment clears —
+                  no waiting for a manual review.
                 </p>
               </div>
 
-              {/* plan badge */}
-              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold bg-orange-500/10 border-orange-500/30 text-orange-400`}>
-                <selectedPlan.icon className="size-3" />
-                {selectedPlan.name} Plan — {selectedPlan.price}{selectedPlan.period}
-              </div>
-
-              {/* QR Image */}
-              <div className="relative w-52 h-52 rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg bg-white p-1.5">
-                <Image
-                  src="/images/payment-qr.png"
-                  alt="Payment QR Code"
-                  fill
-                  className="object-contain"
-                  priority
-                  unoptimized
+              <div className="flex justify-center">
+                <BillingCycleToggle
+                  value={billingCycle}
+                  onChange={setBillingCycle}
+                  disabled={checkout.isRedirecting}
                 />
               </div>
 
-              <div className="w-full space-y-2">
-                {error && (
-                  <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-[11px] text-red-400 text-center">
-                    {error}
+              <PlanCards
+                billingCycle={billingCycle}
+                selectedPlanId={selectedPlanId}
+                onSelect={setSelectedPlanId}
+                disabled={checkout.isRedirecting}
+              />
+
+              <div className="rounded-xl border border-[var(--m-border-glass)] bg-[var(--m-bg-secondary)]/50 p-4 flex flex-col gap-2">
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="text-[11px] text-[var(--m-text-secondary)]">
+                    {selectedPlan.name} — {billingCycle === "annual" ? "12 months" : "1 month"}
+                  </span>
+                  <span className="text-[11px] font-semibold text-[var(--m-text-primary)]">
+                    {formatAmount(selectedPlan.pricing[billingCycle].priceMinor)}
+                  </span>
+                </div>
+                {setupFeeDue > 0 && (
+                  <div className="flex items-baseline justify-between gap-4">
+                    <span className="text-[11px] text-[var(--m-text-secondary)]">
+                      {selectedPlan.name} onboarding (one-time)
+                    </span>
+                    <span className="text-[11px] font-semibold text-[var(--m-text-primary)]">
+                      {formatAmount(setupFeeDue)}
+                    </span>
                   </div>
                 )}
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*,application/pdf"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-orange-500/40 hover:border-orange-500/70 bg-orange-500/5 hover:bg-orange-500/10 text-orange-400 text-[11px] font-semibold transition-all duration-200 cursor-pointer"
-                >
-                  <Paperclip className="size-3.5" />
-                  {proofFile ? proofFile.name : "Attach Payment Proof (Screenshot)"}
-                </button>
-                {proofFile && (
-                  <p className="text-[10px] text-orange-400/80 text-center">
-                    ✓ {proofFile.name} ready
-                  </p>
-                )}
+                <div className="flex items-baseline justify-between gap-4 border-t border-[var(--m-border-glass)]/60 pt-2">
+                  <span className="text-[11px] font-bold text-[var(--m-text-heading)]">Due today</span>
+                  <span className="text-base font-bold text-[var(--m-text-heading)]">
+                    {formatAmount(dueTodayMinor)}
+                  </span>
+                </div>
               </div>
+
+              {(error || checkout.error) && (
+                <div
+                  role="alert"
+                  className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-[11px] text-red-400 text-center leading-relaxed"
+                >
+                  {error ?? checkout.error}
+                </div>
+              )}
+
+              {!canCheckout && (
+                <div className="rounded-lg border border-orange-500/20 bg-orange-500/10 px-3 py-2 text-[11px] text-orange-400 text-center leading-relaxed">
+                  Online payment is unavailable for this account. Continue and our team will activate you
+                  manually.
+                </div>
+              )}
 
               <button
                 type="button"
-                disabled={!proofFile || sending}
-                onClick={handleSendProof}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-[11px] font-bold shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
+                disabled={checkout.isRedirecting}
+                onClick={handlePay}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-[11px] font-bold shadow-md shadow-orange-500/20 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
               >
-                {sending ? (
+                {checkout.isRedirecting ? (
                   <>
-                    <Loader2 className="size-3.5 animate-spin" />
-                    Submitting Proof...
+                    <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                    Opening secure checkout…
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="size-3.5" />
-                    Payment Done — Send Proof on WhatsApp
+                    <CreditCard className="size-3.5" aria-hidden="true" />
+                    {canCheckout ? `Pay ${formatAmount(dueTodayMinor)} with Safepay` : "Continue"}
                   </>
                 )}
               </button>
+
+              <p className="flex items-center justify-center gap-1.5 text-[10px] text-[var(--m-text-muted)]">
+                <ShieldCheck className="size-3" aria-hidden="true" />
+                Card details are entered on Safepay and never reach our servers.
+              </p>
             </Card>
           </motion.div>
         )}
@@ -576,18 +543,20 @@ export default function SignupPage() {
               </div>
 
               <div>
-                <h2 className="text-xl font-bold text-[var(--m-text-heading)]">Account Registration Done! 🎉</h2>
+                <h2 className="text-xl font-bold text-[var(--m-text-heading)]">Registration complete 🎉</h2>
                 <p className="text-[11px] text-[var(--m-text-tertiary)] mt-2 leading-relaxed">
                   <span className="text-[var(--m-text-primary)] font-semibold">
-                    Payment confirmation is under process.
+                    Your account needs to be activated manually.
                   </span>{" "}
-                  You will get notified on your email/WhatsApp when your account gets activated.
+                  We could not open an online payment for this workspace, so our team will be in touch by
+                  email to finish setting you up.
                 </p>
               </div>
 
               <div className="w-full rounded-xl border border-orange-500/20 bg-orange-500/8 px-4 py-3 text-[10px] text-orange-300/80 leading-relaxed">
-                Our team reviews payments within <span className="font-bold text-orange-400">24–48 hours</span>.<br />
-                You will not be able to log in until activated by the Super Admin.
+                Manual activations are handled within{" "}
+                <span className="font-bold text-orange-400">24–48 hours</span>.<br />
+                You will not be able to sign in until your workspace is active.
               </div>
 
               <Link href="/login" className="w-full">
@@ -600,5 +569,23 @@ export default function SignupPage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+/**
+ * `useSearchParams` suspends during prerendering, so the page needs a boundary
+ * or the whole route opts out of static generation with a build-time error.
+ */
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[var(--m-bg-primary)]">
+          <Loader2 className="size-6 animate-spin text-orange-500" />
+        </div>
+      }
+    >
+      <SignupPageInner />
+    </Suspense>
   );
 }

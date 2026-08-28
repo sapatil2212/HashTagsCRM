@@ -98,6 +98,9 @@ model Tenant {
   clinics        Clinic[]
   businessProfs  BusinessProfile[]
   portfolioItems PortfolioItem[]
+  subscription   Subscription?
+  paymentOrders  PaymentOrder[]
+  paymentEvents  PaymentEvent[]
 
   @@index([ownerUserId])
 }
@@ -1115,4 +1118,153 @@ model MessageReaction {
   @@unique([messageId, actorType, actorId])
   @@index([conversationId])
   @@index([messageId])
+}
+
+// ==========================================
+// BILLING & PAYMENTS
+// ==========================================
+//
+// Three tables: what the tenant is entitled to (Subscription), each attempt to
+// pay for it (PaymentOrder), and an append-only log of everything the gateway
+// told us (PaymentEvent).
+//
+// Money is stored as an integer count of **minor units** (US cents) rather than
+// the `Decimal(12,2)` used by Deal.value and the clinic fee columns. That is a
+// deliberate departure. Amounts here are compared for equality against values
+// returned by a payment processor, summed into totals that must reconcile to
+// the cent, and serialised to JSON — and `Decimal` reaches the wire as `{}`
+// unless every read remembers to call `toNumber`. An integer cent count has
+// none of those hazards, is exact by construction, and is what payment
+// processors themselves use. The `currency` column travels with every amount so
+// a figure is never ambiguous.
+//
+// Following the schema's existing convention, status-style columns are `String`
+// with the permitted values in a trailing comment rather than Prisma enums.
+
+/// Current entitlement for one tenant. Exactly one row per tenant.
+model Subscription {
+  id                 String       @id @default(uuid())
+  tenantId           String       @unique
+  tenant             Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  planId             String       // essential, growth, managed
+  billingCycle       String       @default("monthly") // monthly, annual
+  status             String       @default("incomplete") // incomplete, active, past_due, canceled, expired
+  currency           String       @default("USD")
+
+  /// Start of the paid window. Null until the first payment settles.
+  currentPeriodStart DateTime?
+  /// End of the paid window — the authoritative expiry. Null until first payment.
+  currentPeriodEnd   DateTime?
+
+  /// Set when the customer asks not to be renewed; access runs to period end.
+  cancelAtPeriodEnd  Boolean      @default(false)
+  canceledAt         DateTime?
+
+  /// Which tier's one-time onboarding fee has been settled. Null means none,
+  /// so the next order for a fee-bearing tier charges it.
+  setupFeePaidPlanId String?
+  setupFeePaidAt     DateTime?
+
+  /// Most recent settled order, for "last payment" display without a join.
+  lastPaymentAt      DateTime?
+
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  orders             PaymentOrder[]
+
+  /// Drives the expiry sweep: find active subscriptions past their period end.
+  @@index([status, currentPeriodEnd])
+}
+
+/// One attempt to pay. Created before the customer leaves for the gateway, so
+/// an abandoned checkout is still visible and auditable.
+model PaymentOrder {
+  id             String        @id @default(uuid())
+  tenantId       String
+  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subscriptionId String?
+  /// SetNull, not Cascade: a payment record must outlive the subscription it
+  /// paid for, or the financial history disappears with it.
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  /// Public identifier. Sent to Safepay as `order_id` and echoed back on the
+  /// redirect, so it is how a callback is matched to an order.
+  reference      String        @unique @db.VarChar(64)
+
+  /// Who started checkout. No relation: User is a global (non-tenant-scoped)
+  /// model, and the guarded client cannot traverse into it.
+  userId         String?
+
+  planId         String        // essential, growth, managed
+  billingCycle   String        // monthly, annual
+  status         String        @default("pending") // pending, paid, failed, canceled, expired
+
+  currency        String
+  /// Recurring portion, in minor units.
+  planAmountMinor Int
+  /// One-time onboarding portion, in minor units. Zero when not applicable.
+  setupFeeMinor   Int          @default(0)
+  /// Total authorised with the gateway. Always plan + setup fee.
+  amountMinor     Int
+  /// Frozen copy of the priced line items, so a later catalogue price change
+  /// cannot rewrite what an issued receipt says.
+  lineItems       Json
+
+  gateway            String    @default("safepay")
+  gatewayEnvironment String    // sandbox, production
+
+  /// Safepay tracker ("beacon") token. Unique so one payment session can never
+  /// settle two orders.
+  tracker        String?       @unique @db.VarChar(128)
+  /// Safepay's own transaction reference, for reconciling against their dashboard.
+  referenceCode  String?       @db.VarChar(128)
+
+  paidAt         DateTime?
+  failureReason  String?       @db.Text
+
+  /// Period this order bought, resolved at settlement.
+  periodStart    DateTime?
+  periodEnd      DateTime?
+
+  /// After this, an unsettled order is swept to `expired` by the billing cron.
+  expiresAt      DateTime
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  events         PaymentEvent[]
+
+  @@index([tenantId, createdAt(sort: Desc)])
+  @@index([subscriptionId])
+  @@index([status, expiresAt])
+}
+
+/// Append-only audit trail for gateway interactions.
+///
+/// `dedupeKey` is the idempotency mechanism: it is inserted *before* any
+/// subscription state changes, and its UNIQUE constraint makes the database —
+/// not application logic — the thing that guarantees a redelivered webhook
+/// cannot extend a subscription twice. Payment providers retry until they see a
+/// 2xx, so this is load-bearing rather than defensive.
+model PaymentEvent {
+  id        String        @id @default(uuid())
+  tenantId  String
+  tenant    Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderId   String?
+  order     PaymentOrder? @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  source    String        // checkout, webhook, redirect, cron, admin
+  eventType String        // order.created, payment.succeeded, payment.failed, payment.canceled, order.expired, signature.rejected, subscription.activated, subscription.expired
+
+  dedupeKey String        @unique @db.VarChar(191)
+
+  /// Redacted provider payload. Never contains a secret or a signature.
+  payload   Json
+
+  createdAt DateTime      @default(now())
+
+  @@index([orderId, createdAt(sort: Desc)])
+  @@index([tenantId, createdAt(sort: Desc)])
 }

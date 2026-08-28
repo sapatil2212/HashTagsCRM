@@ -323,7 +323,17 @@ export function createClient() {
           })
           if (res.ok) {
             const data = await res.json()
-            return { data: { user: data.user, session: { user: data.user } }, error: null }
+            // `/api/auth/verify` answers with `{ userId, email, canCheckout }`,
+            // not a `user` object — reading `data.user` here always yielded
+            // undefined. It is reconstructed so the Supabase-shaped return is
+            // honest, and `canCheckout` is forwarded because the signup wizard
+            // needs it to decide whether an online payment can be opened at all;
+            // dropping it silently disabled the manual-activation fallback.
+            const user = data.user ?? (data.userId ? { id: data.userId, email: data.email } : null)
+            return {
+              data: { user, session: user ? { user } : null, canCheckout: data.canCheckout !== false },
+              error: null
+            }
           }
           const err = await res.json()
           return { data: { user: null, session: null }, error: { message: err.error || 'Verification failed' } }
