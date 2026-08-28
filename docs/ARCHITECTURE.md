@@ -65,6 +65,11 @@ reachable from a tenant:
 | `scalarParent` | Owner column exists but has no Prisma relation (`BusinessAILog`). | `where.<fk> = { in: ownedIds }`. |
 | `global` | Genuinely cross-tenant (`User`, `RefreshToken`, `Tenant`). | Rejected — `tenantDb` throws. |
 
+`Subscription`, `PaymentOrder` and `PaymentEvent` are all `direct`. They carry
+their own `tenantId` rather than hanging off `Subscription`, so a payment record
+stays inside the guard — and stays reachable — even after the subscription row it
+referenced is gone.
+
 Three properties matter:
 
 1. **Deny by default.** A model missing from `TENANT_SCOPES` throws instead of
@@ -164,7 +169,7 @@ only module that knows how Zod and Prisma failures map onto it.
 | `RATE_LIMITED` | 429 | yes | Throttled (`Retry-After` set) |
 | `NOT_IMPLEMENTED` | 501 | yes | Route exists, capability does not |
 | `DATABASE_ERROR` | 500 | **no** | Driver/constraint failures |
-| `EXTERNAL_API_ERROR` | 502 | yes | Meta, Gemini, SMTP |
+| `EXTERNAL_API_ERROR` | 502 | yes | Meta, Gemini, SMTP, Safepay |
 | `INTERNAL_ERROR` | 500 | **no** | Anything unanticipated |
 
 Non-exposed errors return a generic message and withhold `details`; the real
@@ -218,6 +223,7 @@ Never log message bodies — pass lengths or ids. Customer text is PII.
 | Domain: business verticals | **Done** — includes the `scalarParent`-guarded `BusinessAILog` |
 | Domain: portfolio | Repository only |
 | Domain: profiles | Repository only (tenant-membership checks) |
+| Domain: billing + Safepay gateway | **Done** — catalogue, quoting, checkout, dual signed settlement paths, expiry/reconcile sweep. See `docs/SAFEPAY_SETUP.md` |
 | **Step 1.2 complete** | 14 domains · 22 repositories · 16 services · 11 validator modules · 11 DTO modules |
 | Engine: automations | **Done** (step 1.3) — canonical config keys, real wait queue, round-robin, `close_conversation` |
 | Engine: flows | **Done** (step 1.3) — idempotency via the webhook, one-active-run guard, per-flow timeouts |
@@ -226,6 +232,31 @@ Never log message bodies — pass lengths or ids. Customer text is PII.
 | Controllers: contacts, tags, pipelines, dashboard, broadcasts, templates, clinic, business, portfolio | Not started (step 1.3, remainder) |
 | Browser typed API client | Not started (step 1.4) |
 | `src/lib/supabase/*`, `lib/{automations,flows}/admin-client`, `/api/supabase-compat` | **Present.** 39 client files + 14 server files pending migration |
+
+### Billing settlement
+
+Two callbacks settle a payment — Safepay's server-to-server webhook
+(`X-SFPY-SIGNATURE`, HMAC-SHA512) and the browser's return POST (`sig`,
+HMAC-SHA256 over the tracker). Both are authenticated by our own secret, both
+converge on one idempotent `settle()`, and neither is trusted for anything beyond
+"Safepay processed this tracker": the amount, plan, cycle and period always come
+from our own `PaymentOrder` row.
+
+Idempotency is enforced twice, because providers retry until they see a 2xx and a
+duplicate activation gives away a billing period:
+
+1. `PaymentEvent.dedupeKey` — a UNIQUE index claimed **before any state changes**,
+   so the database arbitrates concurrent deliveries rather than a check-then-act
+   query.
+2. `status = 'pending'` in the settlement `UPDATE`'s `WHERE`, so an order can
+   leave `pending` exactly once.
+
+`Subscription` is the source of truth; `User.isVerified`,
+`User.subscriptionExpiresAt`, `Tenant.plan` and `Tenant.isActive` are a projection
+written on every activation, so the pre-existing access checks keep working
+unchanged. The projection cannot share a transaction with the order write (one
+goes through `tenantDb`, the other must use `systemDb`), so `/api/billing/cron`
+reconciles the window between them.
 
 ### The webhook
 

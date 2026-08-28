@@ -8,6 +8,7 @@ import {
   ExternalLink, MailCheck, ShieldAlert
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getPlan, normalizePlanId, type PlanId } from "@/lib/billing/plans";
 import { SuperAdminShell } from "../super-admin-shell";
 
 interface User {
@@ -27,11 +28,22 @@ interface User {
   createdAt: string;
 }
 
-const PLAN_BADGES: Record<string, { bg: string; text: string; border: string }> = {
-  starter: { bg: "bg-orange-50", text: "text-orange-700", border: "border-orange-100" },
-  growth:  { bg: "bg-violet-50",  text: "text-violet-700",  border: "border-violet-100" },
-  managed: { bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-100" },
+/**
+ * Badge styling per plan, keyed on the catalogue's ids.
+ *
+ * These were keyed on `starter | growth | managed`, so once the tiers were
+ * renamed an Essential signup fell through to the default and rendered with
+ * Growth's colours and the raw id as its label. Both the key set and the label
+ * now come from `@/lib/billing/plans`, and `normalizePlanId` maps the legacy ids
+ * still present on older `User.selectedPlan` rows.
+ */
+const PLAN_BADGES: Record<PlanId, { bg: string; text: string; border: string }> = {
+  essential: { bg: "bg-orange-50", text: "text-orange-700", border: "border-orange-100" },
+  growth:    { bg: "bg-violet-50", text: "text-violet-700", border: "border-violet-100" },
+  managed:   { bg: "bg-amber-50",  text: "text-amber-700",  border: "border-amber-100" },
 };
+
+const NO_PLAN_BADGE = { bg: "bg-slate-50", text: "text-slate-600", border: "border-slate-200" };
 
 export default function NewUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -181,7 +193,9 @@ export default function NewUsersPage() {
                 <tbody className="divide-y divide-slate-50 font-medium text-slate-700">
                   <AnimatePresence>
                     {pendingUsers.map((u) => {
-                      const badge = PLAN_BADGES[u.selectedPlan.toLowerCase()] || PLAN_BADGES.starter;
+                      const planId = normalizePlanId(u.selectedPlan);
+                      const badge = planId ? PLAN_BADGES[planId] : NO_PLAN_BADGE;
+                      const planLabel = planId ? getPlan(planId).name : "No plan";
                       return (
                         <motion.tr
                           key={u.id}
@@ -216,7 +230,7 @@ export default function NewUsersPage() {
                               "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold border capitalize",
                               badge.bg, badge.text, badge.border
                             )}>
-                              {u.selectedPlan}
+                              {planLabel}
                             </span>
                           </td>
 

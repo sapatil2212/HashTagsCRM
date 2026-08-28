@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import nodemailer from 'nodemailer'
 import { emailLayout, emailHeading, emailSubtitle, emailDetails, emailButton, emailText } from '@/lib/email/template'
+import {
+  CHECKOUT_GRANT_COOKIE,
+  checkoutGrantCookieOptions,
+  issueCheckoutGrant,
+} from '@/lib/billing/grant'
+import { createApprovalToken } from '@/lib/admin/approval-token'
 
 export async function POST(req: NextRequest) {
   try {
@@ -53,10 +59,16 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    // Notify Super Admin via Email
+    // Notify Super Admin via Email.
+    //
+    // The approve link carries a signed, expiring token. It used to be just
+    // `?userId=<uuid>` against an endpoint with no auth check, which meant
+    // anyone holding a user id could activate a paid account.
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
     const superAdminEmail = process.env.SUPER_ADMIN_USERNAME || 'test@gmail.com'
-    const approveUrl = `${siteUrl}/api/super-admin/approve?userId=${user.id}`
+    const approveUrl = `${siteUrl}/api/super-admin/approve?userId=${user.id}&token=${encodeURIComponent(
+      createApprovalToken(user.id),
+    )}`
 
     const cleanEnv = (val: string | undefined): string => {
       if (!val) return "";
@@ -86,8 +98,10 @@ export async function POST(req: NextRequest) {
           preview: `${user.profile?.fullName || user.email} is awaiting approval`,
           center: false,
           contentHtml:
-            emailHeading("New user awaiting approval") +
-            emailSubtitle("A new tenant registered, completed OTP verification, and needs a payment review.") +
+            emailHeading("New signup awaiting payment") +
+            emailSubtitle(
+              "A new tenant registered and verified their email. Their workspace activates automatically once Safepay confirms payment — approve manually only if they settled out of band."
+            ) +
             emailDetails([
               { label: "Name", value: user.profile?.fullName || "N/A" },
               { label: "Email", value: user.email },
@@ -118,12 +132,33 @@ export async function POST(req: NextRequest) {
       console.log(`[VERIFY MOCK] Admin approval link: ${approveUrl}`);
     }
 
-    return NextResponse.json({
+    // Hand the signup wizard a checkout grant so its payment step can open a
+    // Safepay session. The user has proven control of the mailbox but is still
+    // `isVerified: false`, so they cannot hold a session — and the grant
+    // authorises billing operations only. See src/lib/billing/grant.ts.
+    const response = NextResponse.json({
       success: true,
-      message: 'Email OTP code verified successfully. Please proceed to payment step.',
+      message: 'Email verified. Continue to payment to activate your workspace.',
       userId: updatedUser.id,
-      email: updatedUser.email
+      email: updatedUser.email,
+      // Tells the client a checkout session can be opened. Absent when signup
+      // never provisioned a tenant, in which case there is nothing to bill.
+      canCheckout: Boolean(user.profile?.tenantId),
     })
+
+    if (user.profile?.tenantId) {
+      response.cookies.set(
+        CHECKOUT_GRANT_COOKIE,
+        issueCheckoutGrant({
+          userId: updatedUser.id,
+          tenantId: user.profile.tenantId,
+          email: updatedUser.email,
+        }),
+        checkoutGrantCookieOptions(),
+      )
+    }
+
+    return response
 
   } catch (error: any) {
     console.error('[verify] Error:', error)

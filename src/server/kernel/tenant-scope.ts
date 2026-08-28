@@ -85,6 +85,12 @@ export const TENANT_SCOPES: Readonly<Record<ModelName, TenantScope>> = {
   Clinic: direct(),
   BusinessProfile: direct(),
   PortfolioItem: direct(),
+  // Billing. All three carry their own tenantId rather than hanging off
+  // Subscription, so a payment record stays reachable — and stays inside the
+  // guard — even after the subscription row it referenced is gone.
+  Subscription: direct(),
+  PaymentOrder: direct(),
+  PaymentEvent: direct(),
 
   // ── guarded through a relation ────────────────────────────────────
   WorkspaceMember: parent('workspace', 'workspaceId', 'Workspace'),

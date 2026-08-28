@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 
 import { useAuth } from '@/hooks/use-auth';
+import { cycleSuffix, formatAmount, getPlan, normalizePlanId } from '@/lib/billing/plans';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -284,11 +285,21 @@ export function ProfileForm() {
     ? new Date(account.subscriptionExpiresAt) > new Date()
     : false;
 
-  const planLabels: Record<string, string> = {
-    starter: '$9 Starter',
-    professional: '$15 Professional',
-    enterprise: '$25 Enterprise',
-  };
+  /**
+   * Plan label, resolved through the catalogue.
+   *
+   * This used to be a local `planLabels` map reading `$9 Starter` /
+   * `$15 Professional` / `$25 Enterprise` — prices that no longer exist, keyed
+   * partly on plan ids (`professional`) that nothing else ever wrote.
+   * `normalizePlanId` also translates the legacy ids still sitting in
+   * `User.selectedPlan` on older rows, so an account that signed up as
+   * `starter` now reads as Essential instead of falling through to the raw
+   * string.
+   */
+  const selectedPlanId = normalizePlanId(account?.selectedPlan);
+  const planLabel = selectedPlanId
+    ? `${getPlan(selectedPlanId).name} — ${formatAmount(getPlan(selectedPlanId).pricing.monthly.priceMinor)}${cycleSuffix('monthly')}`
+    : 'No plan';
 
   return (
     <div className="space-y-6">
@@ -512,7 +523,7 @@ export function ProfileForm() {
                 Plan
               </p>
               <p className="text-sm font-semibold text-slate-200">
-                {account?.selectedPlan ? planLabels[account.selectedPlan] || account.selectedPlan : 'No Plan'}
+                {planLabel}
               </p>
             </div>
 
