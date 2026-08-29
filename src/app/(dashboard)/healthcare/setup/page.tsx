@@ -736,7 +736,7 @@ export default function ClinicSetupWizard() {
                   value={clinicInfo.clinic_name}
                   onChange={handleClinicInfoChange}
                   className="bg-slate-950 border-slate-800 text-white"
-                  placeholder="E.g. HashTags CRM Support Agency"
+                  placeholder="E.g. Hashtags CRM Support Agency"
                 />
               </div>
               <div className="space-y-2">

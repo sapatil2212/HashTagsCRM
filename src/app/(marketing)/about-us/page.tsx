@@ -58,10 +58,10 @@ export default function AboutUsPage() {
           <Sparkles className="size-3 animate-pulse" /> our profile
         </div>
         <h1 className="text-4xl sm:text-6xl font-extrabold text-[var(--m-text-heading)] tracking-tight leading-[1.1]">
-          About <span className="bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">HashTags CRM</span>
+          About <span className="bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">Hashtags CRM</span>
         </h1>
         <p className="text-sm text-[var(--m-text-tertiary)] max-w-xl mx-auto leading-relaxed mt-4">
-          HashTags CRM is an AI-powered WhatsApp CRM platform helping businesses automate customer communication, manage leads, improve customer support, and streamline operations using the official WhatsApp Business API in accordance with Meta guidelines.
+          Hashtags CRM is an AI-powered WhatsApp CRM platform helping businesses automate customer communication, manage leads, improve customer support, and streamline operations using the official WhatsApp Business API in accordance with Meta guidelines.
         </p>
       </div>
 

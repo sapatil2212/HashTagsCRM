@@ -210,7 +210,7 @@ function SignupPageInner() {
                   Create Account
                 </CardTitle>
                 <CardDescription className="text-xs text-[var(--m-text-tertiary)] mt-1">
-                  Get started with HashTags CRM for WhatsApp
+                  Get started with Hashtags CRM for WhatsApp
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">

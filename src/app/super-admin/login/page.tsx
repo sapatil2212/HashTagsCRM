@@ -60,7 +60,7 @@ export default function SuperAdminLoginPage() {
               </div>
             </div>
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Portal Access</h1>
-            <p className="text-sm text-slate-500 mt-1">HashTags CRM Super Admin</p>
+            <p className="text-sm text-slate-500 mt-1">Hashtags CRM Super Admin</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

@@ -63,10 +63,10 @@ Notification sent to Super Admin: ${superAdmin}
       const userMailOptions = {
         from: smtpFrom,
         to: email,
-        subject: "HashTags CRM Product Demo Confirmed!",
-        text: `Hi ${name},\n\nYour HashTags CRM product walkthrough has been scheduled for ${date} at ${time}.\n\nMeeting link: Google Meet (the link will be attached to your calendar invite).\n\nBest regards,\nThe HashTags CRM Team`,
+        subject: "Hashtags CRM Product Demo Confirmed!",
+        text: `Hi ${name},\n\nYour Hashtags CRM product walkthrough has been scheduled for ${date} at ${time}.\n\nMeeting link: Google Meet (the link will be attached to your calendar invite).\n\nBest regards,\nThe Hashtags CRM Team`,
         html: emailLayout({
-          title: "Your HashTags CRM demo is confirmed",
+          title: "Your Hashtags CRM demo is confirmed",
           preview: `Your demo is booked for ${date} at ${time}`,
           center: false,
           contentHtml:
@@ -86,14 +86,14 @@ Notification sent to Super Admin: ${superAdmin}
         from: smtpFrom,
         to: superAdmin,
         subject: `New Demo Walkthrough Booked: ${name}`,
-        text: `New HashTags CRM product demo booking.\n\nDetails:\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nSlot: ${date} at ${time}`,
+        text: `New Hashtags CRM product demo booking.\n\nDetails:\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nSlot: ${date} at ${time}`,
         html: emailLayout({
           title: "New demo booking",
           preview: `${name} booked a demo for ${date} at ${time}`,
           center: false,
           contentHtml:
             emailHeading("New demo booking") +
-            emailSubtitle("A client scheduled a HashTags CRM product walkthrough. Lead details:") +
+            emailSubtitle("A client scheduled a Hashtags CRM product walkthrough. Lead details:") +
             emailDetails([
               { label: "Name", value: name },
               { label: "Email", value: `<a href="mailto:${email}" style="color:#059669;text-decoration:none;">${email}</a>` },

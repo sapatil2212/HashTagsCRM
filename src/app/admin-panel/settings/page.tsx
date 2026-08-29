@@ -13,7 +13,7 @@ export default function AdminSettingsPage() {
   const [form, setForm] = useState({
     adminEmail: "admin@agency.com",
     adminPassword: "",
-    agencyName: "HashTags CRM Technologies",
+    agencyName: "Hashtags CRM Technologies",
     supportEmail: "admin@hashtagscrm.com",
     notifyNewClient: true,
     notifyChurn: true,

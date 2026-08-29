@@ -4,14 +4,14 @@
  * All transactional emails (OTP verification, password reset, account
  * activation, admin notifications, demo bookings) are built from these
  * helpers so they share one consistent, modern look:
- *  - centered HashTags CRM logo (light-mode navbar logo)
+ *  - centered Hashtags CRM logo (light-mode navbar logo)
  *  - faint gray border card on a soft gray background
  *  - compact typography and OTP digits
  *
  * Styles are inlined on every element for maximum email-client compatibility.
  */
 
-// The logo is a HashTags CRM brand asset and must load from a publicly reachable
+// The logo is a Hashtags CRM brand asset and must load from a publicly reachable
 // URL in every recipient's inbox. It intentionally uses the canonical brand
 // domain (matching the OG image host in app/layout.tsx) rather than a
 // per-deployment NEXT_PUBLIC_SITE_URL, which may be a private/placeholder host.
@@ -140,7 +140,7 @@ export function emailLayout(opts: {
             <td style="padding:36px 36px 32px 36px;text-align:${align};">
               <!-- Logo -->
               <div style="text-align:center;margin-bottom:26px;">
-                <img src="${LOGO_URL}" alt="HashTags CRM" height="30" style="height:30px;width:auto;display:inline-block;border:0;outline:none;text-decoration:none;">
+                <img src="${LOGO_URL}" alt="Hashtags CRM" height="30" style="height:30px;width:auto;display:inline-block;border:0;outline:none;text-decoration:none;">
               </div>
               ${opts.contentHtml}
             </td>
@@ -150,7 +150,7 @@ export function emailLayout(opts: {
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="480" style="width:480px;max-width:100%;">
           <tr>
             <td style="padding:18px 36px 0 36px;text-align:center;font-family:${FONT};font-size:11px;line-height:1.6;color:${C.muted};">
-              This is an automated email from HashTags CRM.<br>
+              This is an automated email from Hashtags CRM.<br>
               Need help? Reach us at <a href="mailto:${SUPPORT_EMAIL}" style="color:${C.brand};text-decoration:none;">${SUPPORT_EMAIL}</a>.
             </td>
           </tr>

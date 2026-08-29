@@ -45,7 +45,7 @@ export const THEMES: ReadonlyArray<ThemeMeta> = [
   {
     id: "orange",
     name: "Brand Orange",
-    tagline: "The official HashTags CRM brand color — energetic, warm, and distinctive.",
+    tagline: "The official Hashtags CRM brand color — energetic, warm, and distinctive.",
     swatch: "oklch(0.745 0.17 65)",
   },
   {

@@ -119,7 +119,7 @@ export function BookDemoModal({ open, onClose }: BookDemoModalProps) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={handleClose}
-            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm"
           />
 
           {/* Modal */}
@@ -132,7 +132,14 @@ export function BookDemoModal({ open, onClose }: BookDemoModalProps) {
             className="fixed top-0 left-0 w-full h-full min-h-screen z-[61] flex items-center justify-center p-4 pointer-events-none"
           >
             <div
-              className="pointer-events-auto w-full max-w-lg rounded-2xl border border-m-border-primary bg-m-bg-surface backdrop-blur-xl text-m-text-primary shadow-2xl overflow-hidden transition-colors duration-200"
+              /* Solid surface, not the translucent `--m-bg-surface` (85% white /
+                 80% slate). Over the dimmed backdrop that token let the page
+                 bleed through and washed the dialog out. `--m-bg-secondary` is
+                 fully opaque (#fff / #0f172a); with the theme-aware border and a
+                 deep shadow the panel now reads clearly in both themes. (A
+                 `dark:` ring would be dead here — the marketing theme keys off
+                 `data-mtheme`, not Tailwind's `.dark` class.) */
+              className="pointer-events-auto w-full max-w-lg rounded-2xl border border-m-border-primary bg-m-bg-secondary text-m-text-primary shadow-2xl overflow-hidden transition-colors duration-200"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}

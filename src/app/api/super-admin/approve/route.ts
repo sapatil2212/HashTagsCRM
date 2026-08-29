@@ -159,11 +159,11 @@ export async function GET(req: NextRequest) {
         });
 
         const htmlContent = emailLayout({
-          title: "Your HashTags CRM account is activated",
+          title: "Your Hashtags CRM account is activated",
           preview: "Your workspace is active and ready to use.",
           contentHtml:
             emailHeading("Account activated 🎉") +
-            emailSubtitle(`Welcome to HashTags CRM, ${fullName}!`) +
+            emailSubtitle(`Welcome to Hashtags CRM, ${fullName}!`) +
             emailDivider() +
             emailText(
               "Your payment has been confirmed and your 1-month subscription has started. Your workspace is fully active and ready to use."
@@ -176,9 +176,9 @@ export async function GET(req: NextRequest) {
         });
 
         await transporter.sendMail({
-          from: `"HashTags CRM Support" <${smtpUser}>`,
+          from: `"Hashtags CRM Support" <${smtpUser}>`,
           to: user.email,
-          subject: "🎉 Account Activated! Your HashTags CRM Workspace is Ready",
+          subject: "🎉 Account Activated! Your Hashtags CRM Workspace is Ready",
           text: `Welcome, ${fullName}! Your account has been activated. Subscription valid until ${subscriptionExpiresAt.toLocaleDateString()}. Login here: ${dashboardUrl}`,
           html: htmlContent
         });

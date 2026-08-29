@@ -13,18 +13,18 @@ export default function DataDeletionPage() {
         <h1 className="text-3xl sm:text-5xl font-extrabold text-[var(--m-text-heading)] tracking-tight">
           User Data Deletion Instructions
         </h1>
-        <p className="text-xs text-[var(--m-text-muted)]">HashTags CRM Platform Guidelines</p>
+        <p className="text-xs text-[var(--m-text-muted)]">Hashtags CRM Platform Guidelines</p>
       </div>
 
       <div className="space-y-8 text-xs sm:text-sm text-[var(--m-text-secondary)] leading-relaxed">
         <p>
-          If you want to delete your personal data from the HashTags CRM platform, you can request data deletion using the steps below.
+          If you want to delete your personal data from the Hashtags CRM platform, you can request data deletion using the steps below.
         </p>
 
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">How to request data deletion</h3>
           <ol className="list-decimal pl-5 space-y-2 text-[var(--m-text-tertiary)]">
-            <li>Log in to your account on the HashTags CRM platform.</li>
+            <li>Log in to your account on the Hashtags CRM platform.</li>
             <li>Go to your Account Settings.</li>
             <li>Click on Delete Account or request account deletion.</li>
             <li>You can also contact our support team to request deletion of your data.</li>

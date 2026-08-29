@@ -12,25 +12,25 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "HashTags CRM - AI Powered WhatsApp CRM & Automation Platform",
-    template: "%s — HashTags CRM",
+    default: "Hashtags CRM - AI Powered WhatsApp CRM & Automation Platform",
+    template: "%s — Hashtags CRM",
   },
-  description: "Manage leads, automate customer communication, and grow your business with HashTags CRM's AI-powered WhatsApp CRM platform.",
+  description: "Manage leads, automate customer communication, and grow your business with Hashtags CRM's AI-powered WhatsApp CRM platform.",
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "HashTags CRM - AI Powered WhatsApp CRM & Automation Platform",
-    description: "Manage leads, automate customer communication, and grow your business with HashTags CRM's AI-powered WhatsApp CRM platform.",
+    title: "Hashtags CRM - AI Powered WhatsApp CRM & Automation Platform",
+    description: "Manage leads, automate customer communication, and grow your business with Hashtags CRM's AI-powered WhatsApp CRM platform.",
     url: "https://hashtagscrm.com",
-    siteName: "HashTags CRM",
+    siteName: "Hashtags CRM",
     images: [
       {
         url: "https://hashtagscrm.com/images/logo/chatnexgen-logo.png",
         width: 1200,
         height: 630,
-        alt: "HashTags CRM Logo",
+        alt: "Hashtags CRM Logo",
       },
     ],
     locale: "en_US",
@@ -38,12 +38,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "HashTags CRM - AI Powered WhatsApp CRM & Automation Platform",
-    description: "Manage leads, automate customer communication, and grow your business with HashTags CRM's AI-powered WhatsApp CRM platform.",
+    title: "Hashtags CRM - AI Powered WhatsApp CRM & Automation Platform",
+    description: "Manage leads, automate customer communication, and grow your business with Hashtags CRM's AI-powered WhatsApp CRM platform.",
     images: ["https://hashtagscrm.com/images/logo/chatnexgen-logo.png"],
-  },
-  icons: {
-    icon: [{ url: "/favicon.png", type: "image/png" }],
   },
   formatDetection: {
     email: false,
@@ -129,8 +126,8 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              "name": "HashTags CRM Technologies",
-              "alternateName": "HashTags CRM",
+              "name": "Hashtags CRM Technologies",
+              "alternateName": "Hashtags CRM",
               "url": "https://hashtagscrm.com",
               "logo": "https://hashtagscrm.com/images/logo/chatnexgen-logo.png",
               "email": "admin@hashtagscrm.com",

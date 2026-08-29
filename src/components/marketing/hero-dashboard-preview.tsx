@@ -104,7 +104,7 @@ export function HeroDashboardPreview() {
   return (
     <div
       role="img"
-      aria-label="The HashTags CRM dashboard, showing active conversations, new contacts, open deals value and messages sent today, alongside a conversations-over-time chart and a pipeline value breakdown by stage."
+      aria-label="The Hashtags CRM dashboard, showing active conversations, new contacts, open deals value and messages sent today, alongside a conversations-over-time chart and a pipeline value breakdown by stage."
       className="relative flex h-[430px] select-none overflow-hidden bg-background text-foreground sm:h-[520px] lg:h-[620px]"
     >
       {/* ---------------- Sidebar (lg+ only, mirroring the real app's

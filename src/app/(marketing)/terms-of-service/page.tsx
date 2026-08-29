@@ -18,20 +18,20 @@ export default function TermsOfServicePage() {
 
       <div className="space-y-8 text-xs sm:text-sm text-[var(--m-text-secondary)] leading-relaxed">
         <p>
-          These Terms of Service (&quot;Terms&quot;) govern your use of HashTags CRM (the &quot;Platform&quot;), a WhatsApp automation SaaS, and any content, services, or features offered on or through the Platform. By accessing or using HashTags CRM, you agree to be bound by these Terms, our Privacy Policy, and any other policies referenced herein. If you do not agree, please do not use the Platform.
+          These Terms of Service (&quot;Terms&quot;) govern your use of Hashtags CRM (the &quot;Platform&quot;), a WhatsApp automation SaaS, and any content, services, or features offered on or through the Platform. By accessing or using Hashtags CRM, you agree to be bound by these Terms, our Privacy Policy, and any other policies referenced herein. If you do not agree, please do not use the Platform.
         </p>
 
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">1. Access and Registration</h3>
           <p>
-            You must be at least 18 years old, or have parental/guardian consent if between 13 and 18, to use HashTags CRM. By registering, you represent that all information provided is accurate and complete. You are responsible for maintaining the confidentiality of your account and password.
+            You must be at least 18 years old, or have parental/guardian consent if between 13 and 18, to use Hashtags CRM. By registering, you represent that all information provided is accurate and complete. You are responsible for maintaining the confidentiality of your account and password.
           </p>
         </section>
 
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">2. License to Use</h3>
           <p>
-            HashTags CRM grants you a limited, non-exclusive, non-transferable license to access and use the Platform for your personal or business WhatsApp account(s), subject to these Terms. You may not:
+            Hashtags CRM grants you a limited, non-exclusive, non-transferable license to access and use the Platform for your personal or business WhatsApp account(s), subject to these Terms. You may not:
           </p>
           <ul className="list-disc pl-5 space-y-2 text-[var(--m-text-tertiary)]">
             <li>Resell, sublicense, or transfer your access to any third party.</li>
@@ -45,7 +45,7 @@ export default function TermsOfServicePage() {
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">3. User Content & Conduct</h3>
           <p>
-            You are solely responsible for any content, messages, or data you send or automate using HashTags CRM. You agree not to use the Platform to harass, threaten, or violate the rights of others, or to post or transmit any unlawful, harmful, or offensive material. We reserve the right to suspend or terminate accounts for violations.
+            You are solely responsible for any content, messages, or data you send or automate using Hashtags CRM. You agree not to use the Platform to harass, threaten, or violate the rights of others, or to post or transmit any unlawful, harmful, or offensive material. We reserve the right to suspend or terminate accounts for violations.
           </p>
         </section>
 
@@ -59,7 +59,7 @@ export default function TermsOfServicePage() {
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">5. Intellectual Property</h3>
           <p>
-            All content, software, trademarks, and materials on HashTags CRM are the property of HashTags CRM or its licensors. You may not use, reproduce, or distribute any part of the Platform except as expressly permitted by these Terms.
+            All content, software, trademarks, and materials on Hashtags CRM are the property of Hashtags CRM or its licensors. You may not use, reproduce, or distribute any part of the Platform except as expressly permitted by these Terms.
           </p>
         </section>
 
@@ -73,21 +73,21 @@ export default function TermsOfServicePage() {
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">7. Limitation of Liability</h3>
           <p>
-            To the maximum extent permitted by law, HashTags CRM shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or data, arising from your use of the Platform.
+            To the maximum extent permitted by law, Hashtags CRM shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or data, arising from your use of the Platform.
           </p>
         </section>
 
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">8. Indemnity</h3>
           <p>
-            You agree to indemnify and hold harmless HashTags CRM, its officers, directors, and employees from any claims, damages, or expenses arising from your use of the Platform or violation of these Terms.
+            You agree to indemnify and hold harmless Hashtags CRM, its officers, directors, and employees from any claims, damages, or expenses arising from your use of the Platform or violation of these Terms.
           </p>
         </section>
 
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">9. Changes to Terms</h3>
           <p>
-            We may update these Terms at any time. Continued use of HashTags CRM after changes constitutes acceptance of the new Terms. Please review this page periodically.
+            We may update these Terms at any time. Continued use of Hashtags CRM after changes constitutes acceptance of the new Terms. Please review this page periodically.
           </p>
         </section>
 

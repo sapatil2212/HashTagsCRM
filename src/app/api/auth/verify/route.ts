@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
         });
 
         await transporter.sendMail({
-          from: `"HashTags CRM Notification" <${smtpUser}>`,
+          from: `"Hashtags CRM Notification" <${smtpUser}>`,
           to: superAdminEmail,
           subject: `🔔 New User Awaiting Approval: ${user.profile?.fullName || user.email}`,
           text: `A new user has registered and is awaiting approval: ${user.email}. Selected plan: ${user.selectedPlan || 'starter'}. Approve here: ${approveUrl}`,

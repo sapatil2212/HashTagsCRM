@@ -22,44 +22,44 @@ export default function HomePage() {
 
   const testimonials = [
     {
-      name: "Dr. Ananya Sharma",
+      name: "Dr. Layla Haddad",
       role: "Clinic Operations Director",
-      company: "Aura Health Clinics",
-      content: "Switching to HashTags CRM automated our patient booking flow. Clients schedule check-ups directly on WhatsApp, and the AI resolves clinic FAQs instantly. Handovers to our front desk are perfectly seamless.",
+      company: "Aura Health Clinics · Dubai",
+      content: "Switching to Hashtags CRM automated our patient booking flow. Clients schedule check-ups directly on WhatsApp, and the AI resolves clinic FAQs instantly. Handovers to our front desk are perfectly seamless.",
       stars: 5,
     },
     {
-      name: "Rohan Mehta",
+      name: "Marcus Bennett",
       role: "Founder & CEO",
-      company: "CraftedThreads E-Commerce",
-      content: "Our customer engagement rates skyrocketed with HashTags CRM's automated order status and shipping alerts. Using the official WhatsApp Business API ensures we maintain a solid reputation and perfect compliance.",
+      company: "CraftedThreads E-Commerce · London",
+      content: "Our customer engagement rates skyrocketed with Hashtags CRM's automated order status and shipping alerts. Using the official WhatsApp Business API ensures we maintain a solid reputation and perfect compliance.",
       stars: 5,
     },
     {
-      name: "Sneha Nair",
+      name: "Mei Chen",
       role: "Lead Product Owner",
-      company: "VentureScale SaaS",
-      content: "HashTags CRM's visual pipeline editor is custom-built for chat threads. We easily classify inbound leads, auto-assign tickets to support agents, and monitor drop-offs with absolute visual clarity.",
+      company: "VentureScale SaaS · Singapore",
+      content: "Hashtags CRM's visual pipeline editor is custom-built for chat threads. We easily classify inbound leads, auto-assign tickets to support agents, and monitor drop-offs with absolute visual clarity.",
       stars: 5,
     },
   ];
 
   const faqs: FAQItem[] = [
     {
-      q: "What is HashTags CRM and how does it work?",
-      a: "HashTags CRM is an AI-powered WhatsApp CRM and customer support platform that integrates with the official WhatsApp Business API. It allows your team to manage conversations in a shared inbox, automate responses via custom AI agents, track leads through kanban pipelines, and sync schedules directly via WhatsApp.",
+      q: "What is Hashtags CRM and how does it work?",
+      a: "Hashtags CRM is an AI-powered WhatsApp CRM and customer support platform that integrates with the official WhatsApp Business API. It allows your team to manage conversations in a shared inbox, automate responses via custom AI agents, track leads through kanban pipelines, and sync schedules directly via WhatsApp.",
     },
     {
-      q: "Is HashTags CRM compliant with WhatsApp policies?",
-      a: "Yes. HashTags CRM is fully compliant with Meta and WhatsApp Business Platform policies. We exclusively utilize official WhatsApp Business API endpoints. We do not support bulk messaging spam, contact scraping, or blast tools, ensuring your business number maintains high reliability.",
+      q: "Is Hashtags CRM compliant with WhatsApp policies?",
+      a: "Yes. Hashtags CRM is fully compliant with Meta and WhatsApp Business Platform policies. We exclusively utilize official WhatsApp Business API endpoints. We do not support bulk messaging spam, contact scraping, or blast tools, ensuring your business number maintains high reliability.",
     },
     {
       q: "Do I need a WhatsApp Business Account (WABA)?",
-      a: "Yes. To run active automation, you need a verified Meta Business Account and a clean phone number. HashTags CRM's support team guides you through the entire Meta Business Verification process to establish your official partner status.",
+      a: "Yes. To run active automation, you need a verified Meta Business Account and a clean phone number. Hashtags CRM's support team guides you through the entire Meta Business Verification process to establish your official partner status.",
     },
     {
       q: "What are the subscription rates and API charges?",
-      a: "Our flat platform subscription starts at $9/month per WABA number. WhatsApp's conversation-based rates are charged directly by Meta; HashTags CRM passes through these official Meta charges with absolutely 0% markup.",
+      a: "Our flat platform subscription starts at $9/month per WABA number. WhatsApp's conversation-based rates are charged directly by Meta; Hashtags CRM passes through these official Meta charges with absolutely 0% markup.",
     },
     {
       q: "How does the AI Assistant resolve queries?",

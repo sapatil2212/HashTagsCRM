@@ -111,7 +111,7 @@ export function GlassNavbar() {
           <Link href="/" className="flex items-center gap-2 group shrink-0">
             <img
               src={isLight ? "/images/logo/chatnexgen-logo-light.png" : "/images/logo/chatnexgen-logo.png"}
-              alt="HashTags CRM Logo"
+              alt="Hashtags CRM Logo"
               className="h-8 w-auto object-contain group-hover:scale-110 transition-transform"
             />
           </Link>

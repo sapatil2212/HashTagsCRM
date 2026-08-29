@@ -69,7 +69,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
           </div>
           <div>
             <p className="text-sm font-bold text-slate-900 leading-none">Super Admin</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">HashTags CRM Portal</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Hashtags CRM Portal</p>
           </div>
           <button onClick={onClose} className="ml-auto lg:hidden text-slate-400 hover:text-slate-600 transition-colors">
             <X className="size-4" />
@@ -171,7 +171,7 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
             </button>
             <div className="flex items-center gap-1.5 text-xs text-slate-400">
               <Building2 className="size-3.5" />
-              <span>HashTags CRM</span>
+              <span>Hashtags CRM</span>
               <ChevronRight className="size-3" />
               <span className="text-slate-700 font-semibold capitalize">
                 {pathname.split("/").pop()?.replace("-", " ") || "Overview"}

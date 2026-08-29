@@ -12,7 +12,7 @@ export default function SuperAdminSettingsPage() {
   const [notifyNewUser,   setNotifyNewUser]   = useState(true);
   const [notifyChurn,     setNotifyChurn]     = useState(true);
   const [notifyTrial,     setNotifyTrial]     = useState(false);
-  const [agencyName,      setAgencyName]      = useState("HashTags CRM Technologies");
+  const [agencyName,      setAgencyName]      = useState("Hashtags CRM Technologies");
   const [supportEmail,    setSupportEmail]    = useState("admin@hashtagscrm.com");
   const [siteUrl,         setSiteUrl]         = useState(process.env.NEXT_PUBLIC_SITE_URL ?? "https://crm.example.com");
 

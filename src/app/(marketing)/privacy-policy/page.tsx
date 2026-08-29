@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
 
       <div className="space-y-8 text-xs sm:text-sm text-[var(--m-text-secondary)] leading-relaxed">
         <p>
-          This Privacy Policy (the &quot;Policy&quot;) describes how HashTags CRM Technologies (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, maintains, and discloses information from users of our Platform. By accessing or using the HashTags CRM SaaS platform, you consent to the practices described in this Policy. If you do not agree, please do not use the Platform.
+          This Privacy Policy (the &quot;Policy&quot;) describes how Hashtags CRM Technologies (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, maintains, and discloses information from users of our Platform. By accessing or using the Hashtags CRM SaaS platform, you consent to the practices described in this Policy. If you do not agree, please do not use the Platform.
         </p>
 
         <section className="space-y-3">
@@ -64,7 +64,7 @@ export default function PrivacyPolicyPage() {
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">6. Security Practices</h3>
           <p>
-            Security is central to the HashTags CRM architecture. All data transfers between the browser and our servers are encrypted using TLS 1.3 (HTTPS). Core databases are isolated, and payment transactions are offloaded entirely to PCI-DSS compliant third-party payment gateways (e.g., Razorpay).
+            Security is central to the Hashtags CRM architecture. All data transfers between the browser and our servers are encrypted using TLS 1.3 (HTTPS). Core databases are isolated, and payment transactions are offloaded entirely to PCI-DSS compliant third-party payment gateways (e.g., Razorpay).
           </p>
         </section>
 
@@ -85,17 +85,17 @@ export default function PrivacyPolicyPage() {
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">9. Third-Party Integrations</h3>
           <p>
-            HashTags CRM integrates with third-party software (such as e-commerce systems, spreadsheet tools, and messaging networks). We are not responsible for the privacy policies of these external platforms. We advise checking their independent terms before configuring webhook endpoints or sync permissions.
+            Hashtags CRM integrates with third-party software (such as e-commerce systems, spreadsheet tools, and messaging networks). We are not responsible for the privacy policies of these external platforms. We advise checking their independent terms before configuring webhook endpoints or sync permissions.
           </p>
         </section>
 
         <section className="space-y-3 text-center pt-8 border-t border-[var(--m-border-primary)]/50">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">10. Contact & Regulatory Information</h3>
           <p>
-            For questions or requests regarding your data, contact HashTags CRM Technologies:
+            For questions or requests regarding your data, contact Hashtags CRM Technologies:
           </p>
           <div className="text-xs text-[var(--m-text-tertiary)] mt-3 space-y-1">
-            <p className="font-bold text-[var(--m-text-primary)]">HashTags CRM Technologies</p>
+            <p className="font-bold text-[var(--m-text-primary)]">Hashtags CRM Technologies</p>
             <p>Compliance Department</p>
             <p>Phone: +92 316 1122339</p>
             <p>

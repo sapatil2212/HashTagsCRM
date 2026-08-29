@@ -18,7 +18,7 @@ export default function RefundPolicyPage() {
 
       <div className="space-y-8 text-xs sm:text-sm text-[var(--m-text-secondary)] leading-relaxed">
         <p>
-          At HashTags CRM, we deliver professional WhatsApp CRM and communication automation services. This policy clarifies terms regarding recurring subscriptions, setup configurations, custom developments, consulting sessions, and billing queries.
+          At Hashtags CRM, we deliver professional WhatsApp CRM and communication automation services. This policy clarifies terms regarding recurring subscriptions, setup configurations, custom developments, consulting sessions, and billing queries.
         </p>
 
         <section className="space-y-3">
@@ -77,7 +77,7 @@ export default function RefundPolicyPage() {
             For any queries regarding billing, invoice breakdowns, or cancellations, please contact our support desk:
           </p>
           <div className="text-xs text-[var(--m-text-tertiary)] mt-3">
-            <p className="font-bold text-[var(--m-text-primary)]">HashTags CRM Technologies</p>
+            <p className="font-bold text-[var(--m-text-primary)]">Hashtags CRM Technologies</p>
             <p className="mt-1">Phone: +92 316 1122339</p>
             <p className="mt-1">
               Email: <a href="mailto:admin@hashtagscrm.com" className="text-orange-400 hover:underline">admin@hashtagscrm.com</a>

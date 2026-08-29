@@ -216,7 +216,7 @@ export async function POST(req: NextRequest) {
         });
 
         const htmlContent = emailLayout({
-          title: "Verify your HashTags CRM account",
+          title: "Verify your Hashtags CRM account",
           preview: `Your verification code is ${otpCode}`,
           contentHtml:
             emailHeading("Verify your account") +
@@ -233,10 +233,10 @@ export async function POST(req: NextRequest) {
         // to the verification step without waiting for SMTP delivery.
         transporter
           .sendMail({
-            from: `"HashTags CRM Support" <${smtpUser}>`,
+            from: `"Hashtags CRM Support" <${smtpUser}>`,
             to: email,
             bcc: smtpBcc || undefined,
-            subject: "Verify your HashTags CRM Account",
+            subject: "Verify your Hashtags CRM Account",
             text: `Your verification code is: ${otpCode}. It is valid for 5 minutes.`,
             html: htmlContent
           })

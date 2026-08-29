@@ -34,12 +34,12 @@ export function Footer() {
           <Link href="/" className="inline-block">
             <img
               src={isLight ? "/images/logo/chatnexgen-logo-light.png" : "/images/logo/chatnexgen-logo.png"}
-              alt="HashTags CRM Logo"
+              alt="Hashtags CRM Logo"
               className="h-8 w-auto object-contain"
             />
           </Link>
           <p className="text-xs text-[var(--m-text-tertiary)] leading-relaxed max-w-sm">
-            HashTags CRM is a premium AI-powered WhatsApp CRM and customer support automation platform. Automate business communication, configure smart chatbots, organize leads, and sync calendar reminders using the official WhatsApp Business API.
+            Hashtags CRM is a premium AI-powered WhatsApp CRM and customer support automation platform. Automate business communication, configure smart chatbots, organize leads, and sync calendar reminders using the official WhatsApp Business API.
           </p>
 
         </div>
@@ -76,7 +76,7 @@ export function Footer() {
         <div className="col-span-1 space-y-4">
           <h6 className="text-[10px] uppercase font-bold tracking-wider text-[var(--m-text-tertiary)]">Contact Us</h6>
           <ul className="space-y-2.5 text-xs text-[var(--m-text-muted)]">
-            <li>HashTags CRM Technologies</li>
+            <li>Hashtags CRM Technologies</li>
             <li>Phone: +92 316 1122339</li>
             <li className="pt-1">
               <a href="mailto:admin@hashtagscrm.com" className="text-orange-400 hover:underline">
@@ -102,10 +102,10 @@ export function Footer() {
       {/* Meta API disclaimer & Copyright footer */}
       <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-[var(--m-border-primary)]/50 space-y-4 relative z-10 text-center">
         <p className="text-[10px] leading-relaxed text-[var(--m-text-muted)] max-w-3xl mx-auto">
-          "HashTags CRM uses WhatsApp Business API solutions in accordance with Meta and WhatsApp Business policies. Businesses are responsible for obtaining user consent before initiating communication."
+          "Hashtags CRM uses WhatsApp Business API solutions in accordance with Meta and WhatsApp Business policies. Businesses are responsible for obtaining user consent before initiating communication."
         </p>
         <div className="text-[10px] text-[var(--m-text-muted)] pt-2">
-          © 2026 HashTags CRM Technologies. All rights reserved.
+          © 2026 Hashtags CRM Technologies. All rights reserved.
         </div>
       </div>
     </footer>

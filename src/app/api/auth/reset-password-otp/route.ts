@@ -78,12 +78,12 @@ export async function POST(req: NextRequest) {
       });
 
       await transporter.sendMail({
-        from: `"HashTags CRM Support" <${smtpUser}>`,
+        from: `"Hashtags CRM Support" <${smtpUser}>`,
         to: email,
-        subject: "HashTags CRM Password Reset Code",
+        subject: "Hashtags CRM Password Reset Code",
         text: `Your password reset code is: ${code}. It expires in 10 minutes.`,
         html: emailLayout({
-          title: "Reset your HashTags CRM password",
+          title: "Reset your Hashtags CRM password",
           preview: `Your password reset code is ${code}`,
           contentHtml:
             emailHeading("Reset your password") +
