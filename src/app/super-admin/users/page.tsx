@@ -10,7 +10,6 @@ import {
   Edit2, MessageSquare, Radio, Zap, Crown, LogIn, Sliders, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SuperAdminShell } from "../super-admin-shell";
 
 interface User {
   id: string;
@@ -41,7 +40,7 @@ type FilterStatus = "all" | "verified" | "unverified" | "wa_connected";
 type FilterPlan = "all" | "free" | "starter" | "pro" | "enterprise";
 
 const PLAN_COLOR: Record<string, string> = {
-  free:       "bg-slate-50 border-slate-255 text-slate-600",
+  free:       "bg-slate-50 border-slate-200 text-slate-600",
   starter:    "bg-blue-50 border-blue-100 text-blue-600",
   pro:        "bg-violet-50 border-violet-100 text-violet-600",
   enterprise: "bg-amber-50 border-amber-100 text-amber-600",
@@ -215,13 +214,13 @@ function UserModal({
           </div>
 
           {error && (
-            <div className="rounded-xl bg-red-50 border border-red-150 px-4 py-3">
+            <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3">
               <p className="text-xs text-red-600">{error}</p>
             </div>
           )}
 
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-500 hover:bg-slate-50 hover:border-slate-350 hover:text-slate-700 shadow-sm active:scale-[0.98] transition-all duration-200">
+            <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-500 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700 shadow-sm active:scale-[0.98] transition-all duration-200">
               Cancel
             </button>
             <button type="submit" disabled={loading} className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 disabled:opacity-50 text-white text-sm font-bold shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
@@ -443,9 +442,8 @@ export default function SuperAdminUsersPage() {
   };
 
   return (
-    <SuperAdminShell>
-      <div className="space-y-6">
-        {/* Header */}
+    <div className="space-y-6">
+      {/* Header */}
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -456,7 +454,7 @@ export default function SuperAdminUsersPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={load} className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-slate-800 hover:bg-slate-50 hover:border-slate-350 shadow-sm text-xs font-semibold active:scale-[0.97] transition-all duration-200">
+            <button onClick={load} className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-slate-800 hover:bg-slate-50 hover:border-slate-300 shadow-sm text-xs font-semibold active:scale-[0.97] transition-all duration-200">
               <RefreshCw className="size-3.5" /> Refresh
             </button>
             <button
@@ -554,13 +552,13 @@ export default function SuperAdminUsersPage() {
                         </td>
                         <td className="px-4 py-3">
                           {u.isVerified
-                            ? <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-orange-50 border-orange-100 text-orange-600"><CheckCircle className="size-2.5" />Active</span>
+                            ? <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-emerald-50 border-emerald-100 text-emerald-600"><CheckCircle className="size-2.5" />Active</span>
                             : <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-red-50 border-red-100 text-red-600"><XCircle className="size-2.5" />Blocked</span>
                           }
                         </td>
                         <td className="px-4 py-3">
                           {u.waConnected
-                            ? <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-orange-50 border-orange-100 text-orange-600"><Wifi className="size-2.5" />Connected</span>
+                            ? <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-emerald-50 border-emerald-100 text-emerald-600"><Wifi className="size-2.5" />Connected</span>
                             : <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-slate-50 border-slate-100 text-slate-400"><WifiOff className="size-2.5" />None</span>
                           }
                         </td>
@@ -624,7 +622,7 @@ export default function SuperAdminUsersPage() {
                     </button>
                     <button onClick={() => { toggleAccess(u); setOpenMenu(null); }}
                       className={cn("flex items-center gap-2.5 w-full px-3.5 py-2.5 text-xs font-semibold transition-all duration-200",
-                        u.isVerified ? "text-amber-600 hover:bg-amber-50" : "text-orange-600 hover:bg-orange-50")}>
+                        u.isVerified ? "text-amber-600 hover:bg-amber-50" : "text-emerald-600 hover:bg-emerald-50")}>
                       {toggling === u.id ? <Loader2 className="size-3.5 animate-spin" /> : u.isVerified ? <ShieldOff className="size-3.5" /> : <ShieldCheck className="size-3.5" />}
                       {u.isVerified ? "Block Access" : "Grant Access"}
                     </button>
@@ -673,7 +671,7 @@ export default function SuperAdminUsersPage() {
                           {detail.plan.toUpperCase()}
                         </span>
                         <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border",
-                          detail.isVerified ? "bg-orange-50 border-orange-100 text-orange-600" : "bg-red-50 border-red-100 text-red-600"
+                          detail.isVerified ? "bg-emerald-50 border-emerald-100 text-emerald-600" : "bg-red-50 border-red-100 text-red-600"
                         )}>
                           {detail.isVerified ? "Active" : "Blocked"}
                         </span>
@@ -718,7 +716,7 @@ export default function SuperAdminUsersPage() {
                     <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">WhatsApp</p>
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-slate-500 font-medium">Status</span>
-                      <span className={cn("font-semibold", detail.waConnected ? "text-orange-600" : "text-slate-400")}>
+                      <span className={cn("font-semibold", detail.waConnected ? "text-emerald-600" : "text-slate-400")}>
                         {detail.waStatus}
                       </span>
                     </div>
@@ -759,14 +757,14 @@ export default function SuperAdminUsersPage() {
                     <button onClick={() => toggleAccess(detail)} disabled={toggling === detail.id}
                       className={cn("w-full py-2.5 rounded-xl border text-xs font-bold shadow-sm active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2",
                         detail.isVerified
-                          ? "bg-amber-55 border-amber-100 text-amber-700 hover:bg-amber-100"
-                          : "bg-orange-50 border-orange-100 text-orange-700 hover:bg-orange-100"
+                          ? "bg-amber-50 border-amber-100 text-amber-700 hover:bg-amber-100"
+                          : "bg-emerald-50 border-emerald-100 text-emerald-700 hover:bg-emerald-100"
                       )}>
                       {toggling === detail.id ? <Loader2 className="size-3.5 animate-spin" /> : detail.isVerified ? <ShieldOff className="size-3.5" /> : <ShieldCheck className="size-3.5" />}
                       {detail.isVerified ? "Block Dashboard Access" : "Grant Dashboard Access"}
                     </button>
                     <button onClick={() => { setDelId(detail.id); setDetail(null); }}
-                      className="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 hover:border-red-200 border border-red-150 text-red-600 text-xs font-bold shadow-sm active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
+                      className="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 hover:border-red-200 border border-red-200 text-red-600 text-xs font-bold shadow-sm active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
                       <Trash2 className="size-3.5" /> Delete User
                     </button>
                   </div>
@@ -822,7 +820,6 @@ export default function SuperAdminUsersPage() {
             />
           )}
         </AnimatePresence>
-      </div>
-    </SuperAdminShell>
+    </div>
   );
 }

@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Users, Wifi, MessageSquare, TrendingUp, Activity,
-  ArrowRight, Loader2, Contact,
+  ArrowRight, Loader2, Contact, AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { SuperAdminShell } from "./super-admin-shell";
 
 interface Stats {
   totalUsers: number;
@@ -48,31 +47,43 @@ export default function SuperAdminOverviewPage() {
   const [stats,   setStats]   = useState<Stats | null>(null);
   const [users,   setUsers]   = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/super-admin/stats").then((r) => r.json()),
+      fetch("/api/super-admin/stats").then(async (r) => {
+        // On failure the endpoint returns `{ error }`, not the metrics shape.
+        // Setting that object as `stats` left every `value` undefined and crashed
+        // the cards on `.toLocaleString()`. Surface it as an error state instead.
+        if (!r.ok) {
+          const body = await r.json().catch(() => null);
+          throw new Error(body?.error || `Stats request failed (${r.status})`);
+        }
+        return r.json();
+      }),
       fetch("/api/super-admin/users").then((r) => r.json()),
-    ]).then(([s, u]) => {
-      setStats(s);
-      setUsers((u.users ?? []).slice(0, 8));
-    }).finally(() => setLoading(false));
+    ])
+      .then(([s, u]) => {
+        setStats(s);
+        setUsers((u.users ?? []).slice(0, 8));
+      })
+      .catch((e) => setError(e?.message || "Failed to load dashboard data."))
+      .finally(() => setLoading(false));
   }, []);
 
   const signups = stats?.monthlySignups ?? [];
   const maxSignup = Math.max(...signups.map((m) => m.count), 1);
 
   const STAT_CARDS = stats ? [
-    { label: "Total Users",       value: stats.totalUsers,       sub: `${stats.verifiedUsers} verified`,      icon: Users,        color: "from-violet-600 to-indigo-600", shadow: "shadow-violet-200/50" },
-    { label: "WA Connected",      value: stats.waConnected,      sub: "active integrations",                  icon: Wifi,         color: "from-orange-500 to-amber-600",  shadow: "shadow-orange-200/50" },
-    { label: "Total Contacts",    value: stats.totalContacts,    sub: "across all accounts",                  icon: Contact,      color: "from-blue-500 to-cyan-600",     shadow: "shadow-blue-200/50" },
-    { label: "Open Conversations",value: stats.openConversations,sub: `${stats.totalConversations} total`,   icon: MessageSquare,color: "from-amber-500 to-orange-600",  shadow: "shadow-amber-200/50" },
+    { label: "Total Users",       value: stats.totalUsers ?? 0,       sub: `${stats.verifiedUsers ?? 0} verified`,    icon: Users,        color: "from-violet-600 to-indigo-600", shadow: "shadow-violet-200/50" },
+    { label: "WA Connected",      value: stats.waConnected ?? 0,      sub: "active integrations",                     icon: Wifi,         color: "from-orange-500 to-amber-600",  shadow: "shadow-orange-200/50" },
+    { label: "Total Contacts",    value: stats.totalContacts ?? 0,    sub: "across all accounts",                     icon: Contact,      color: "from-blue-500 to-cyan-600",     shadow: "shadow-blue-200/50" },
+    { label: "Open Conversations",value: stats.openConversations ?? 0,sub: `${stats.totalConversations ?? 0} total`, icon: MessageSquare,color: "from-amber-500 to-orange-600",  shadow: "shadow-amber-200/50" },
   ] : [];
 
   return (
-    <SuperAdminShell>
-      <div className="space-y-6">
-        {/* Page header */}
+    <div className="space-y-6">
+      {/* Page header */}
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Overview</h1>
           <p className="mt-1 text-sm text-slate-500">Live agency-wide metrics from your database.</p>
@@ -83,6 +94,16 @@ export default function SuperAdminOverviewPage() {
             <div className="text-center space-y-3">
               <Loader2 className="size-8 text-violet-600 animate-spin mx-auto" />
               <p className="text-sm text-slate-400">Loading dashboard data...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-5">
+            <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
+              <AlertCircle className="size-4 text-red-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-red-800">Unable to load dashboard data</p>
+              <p className="text-xs text-red-600 mt-0.5">{error}</p>
             </div>
           </div>
         ) : (
@@ -124,7 +145,7 @@ export default function SuperAdminOverviewPage() {
                     <p className="text-xs text-slate-400 mt-0.5">Last 12 months</p>
                   </div>
                   <span className="text-xs bg-violet-50 border border-violet-100 text-violet-600 px-2.5 py-1 rounded-full font-bold">
-                    {stats?.totalUsers} total
+                    {stats?.totalUsers ?? 0} total
                   </span>
                 </div>
                 <div className="flex items-end gap-1.5 h-28">
@@ -137,8 +158,8 @@ export default function SuperAdminOverviewPage() {
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-between mt-2 text-[10px] text-slate-400 font-medium">
-                  {signups.map((m) => <span key={m.month}>{m.month}</span>)}
+                <div className="flex gap-1.5 mt-2 text-[10px] text-slate-400 font-medium">
+                  {signups.map((m) => <span key={m.month} className="flex-1 text-center">{m.month}</span>)}
                 </div>
               </motion.div>
 
@@ -224,7 +245,7 @@ export default function SuperAdminOverviewPage() {
                         <td className="px-4 py-3">
                           <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border",
                             u.isVerified
-                              ? "bg-orange-50 border-orange-250 text-orange-700"
+                              ? "bg-emerald-50 border-emerald-200 text-emerald-700"
                               : "bg-slate-50 border-slate-200 text-slate-500"
                           )}>
                             {u.isVerified ? "Verified" : "Unverified"}
@@ -249,7 +270,6 @@ export default function SuperAdminOverviewPage() {
             </motion.div>
           </>
         )}
-      </div>
-    </SuperAdminShell>
+    </div>
   );
 }

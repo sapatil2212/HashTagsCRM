@@ -39,7 +39,7 @@ export default function SuperAdminLoginPage() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 relative overflow-hidden">
       {/* Subtle colorful blur blobs in background */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-200/50 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-indigo-150/40 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-indigo-200/40 blur-[100px] rounded-full pointer-events-none" />
 
       {/* Grid pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(100,116,139,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(100,116,139,0.03)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none" />
@@ -105,7 +105,7 @@ export default function SuperAdminLoginPage() {
 
             {/* Error */}
             {error && (
-              <div className="rounded-xl bg-red-50 border border-red-150 px-4 py-3">
+              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3">
                 <p className="text-xs text-red-600">{error}</p>
               </div>
             )}

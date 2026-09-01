@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Sparkles, Calendar, Clock, Video, CheckCircle, User, Mail, Phone, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,30 @@ export function BookDemoModal({ open, onClose }: BookDemoModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // The dialog is portalled to <body> so it renders outside the navbar's
+  // stacking context. The navbar pill sets a `backdrop-filter`, which creates a
+  // stacking context that used to trap this backdrop — leaving the logo and nav
+  // links painted crisply on top of the dim overlay. `mounted` guards the portal
+  // against SSR, where `document` does not exist.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // While the dialog is open, freeze background scroll and allow Escape to close.
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   // Generate 6 upcoming business days dynamically
   const dates = useMemo(() => {
@@ -107,7 +132,9 @@ export function BookDemoModal({ open, onClose }: BookDemoModalProps) {
 
   const isFormComplete = name && email && phone && selectedDate && selectedTime;
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
@@ -119,7 +146,7 @@ export function BookDemoModal({ open, onClose }: BookDemoModalProps) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={handleClose}
-            className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-md"
           />
 
           {/* Modal */}
@@ -129,7 +156,7 @@ export function BookDemoModal({ open, onClose }: BookDemoModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 16 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            className="fixed top-0 left-0 w-full h-full min-h-screen z-[61] flex items-center justify-center p-4 pointer-events-none"
+            className="fixed top-0 left-0 w-full h-full min-h-screen z-[101] flex items-center justify-center p-4 pointer-events-none"
           >
             <div
               /* Solid surface, not the translucent `--m-bg-surface` (85% white /
@@ -345,6 +372,7 @@ export function BookDemoModal({ open, onClose }: BookDemoModalProps) {
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

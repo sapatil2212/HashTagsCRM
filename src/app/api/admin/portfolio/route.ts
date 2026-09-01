@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { verifyAccessToken, rotateRefreshToken } from "@/lib/auth";
+import { deleteStoredUpload } from "@/lib/storage/local-storage";
 
 async function isAuthorized(): Promise<boolean> {
   // Check Access Token Cookie
@@ -144,6 +145,12 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "ID and Title are required" }, { status: 400 });
     }
 
+    // Capture the current thumbnail so a replaced one can be removed from disk.
+    const previous = await prisma.portfolioItem.findUnique({
+      where: { id },
+      select: { thumbnailUrl: true },
+    });
+
     const item = await prisma.portfolioItem.update({
       where: { id },
       data: {
@@ -155,6 +162,12 @@ export async function PUT(req: NextRequest) {
         previewMedia: preview_media || []
       }
     });
+
+    // Best-effort cleanup of the old thumbnail if it changed. Ignores external
+    // URLs (old Cloudinary links, pasted URLs) — only our own files are removed.
+    if (previous?.thumbnailUrl && previous.thumbnailUrl !== item.thumbnailUrl) {
+      await deleteStoredUpload(previous.thumbnailUrl);
+    }
 
     return NextResponse.json({ item: mapToSnakeCase(item) });
   } catch (error: any) {
@@ -177,9 +190,13 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "ID parameter is required" }, { status: 400 });
     }
 
-    await prisma.portfolioItem.delete({
+    const removed = await prisma.portfolioItem.delete({
       where: { id }
     });
+
+    // Remove the thumbnail file too, so deleting an item does not orphan its
+    // image on disk. Best-effort; external/pasted URLs are left alone.
+    await deleteStoredUpload(removed.thumbnailUrl);
 
     return NextResponse.json({ ok: true });
   } catch (error: any) {

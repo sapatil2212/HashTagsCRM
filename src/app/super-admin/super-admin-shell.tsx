@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Shield, Users, BarChart2, Settings, LogOut,
+  Users, BarChart2, Settings, LogOut,
   Menu, X, ChevronRight, Building2, Loader2, UserPlus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -63,14 +63,20 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         "lg:static lg:translate-x-0 lg:z-0"
       )}>
         {/* Logo */}
-        <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center shadow-md shadow-violet-500/20">
-            <Shield className="size-5 text-white" />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-slate-900 leading-none">Super Admin</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Hashtags CRM Portal</p>
-          </div>
+        <div className="flex h-16 items-center gap-2 border-b border-slate-200 px-5">
+          <Link href="/super-admin" onClick={onClose} className="flex items-center">
+            {/* Light-background wordmark — the sidebar is white, so this matches
+                the variant the marketing navbar/footer use in light mode. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/logo/chatnexgen-logo-light.png"
+              alt="Hashtags CRM"
+              className="h-9 w-auto object-contain"
+            />
+          </Link>
+          <span className="rounded-md border border-violet-100 bg-violet-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-violet-600">
+            Admin
+          </span>
           <button onClick={onClose} className="ml-auto lg:hidden text-slate-400 hover:text-slate-600 transition-colors">
             <X className="size-4" />
           </button>
@@ -88,7 +94,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                   isActive
-                    ? "bg-violet-50 text-violet-600 shadow-sm border border-violet-100/50"
+                    ? "bg-violet-50 text-violet-600 border border-violet-100/50"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 )}
               >
@@ -125,6 +131,16 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
   const [checking,    setChecking]    = useState(true);
   const pathname = usePathname();
   const router   = useRouter();
+
+  // Breadcrumb label resolved from the nav table (longest matching href wins)
+  // so it reads "Overview" / "New Users" rather than the raw slug — the old
+  // `split("/").pop().replace("-"," ")` showed "super admin" on the root route
+  // and only ever replaced the first hyphen.
+  const currentLabel =
+    [...NAV]
+      .sort((a, b) => b.href.length - a.href.length)
+      .find((n) => (n.href === "/super-admin" ? pathname === "/super-admin" : pathname.startsWith(n.href)))
+      ?.label ?? "Overview";
 
   const checkAuth = useCallback(async () => {
     if (pathname === "/super-admin/login") {
@@ -173,8 +189,8 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
               <Building2 className="size-3.5" />
               <span>Hashtags CRM</span>
               <ChevronRight className="size-3" />
-              <span className="text-slate-700 font-semibold capitalize">
-                {pathname.split("/").pop()?.replace("-", " ") || "Overview"}
+              <span className="text-slate-700 font-semibold">
+                {currentLabel}
               </span>
             </div>
           </div>

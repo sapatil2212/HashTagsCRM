@@ -11,6 +11,7 @@ import { AIChatSimulation } from "@/components/marketing/ai-chat-simulation";
 import { ReferenceDashboard } from "@/components/marketing/reference-dashboard";
 import { SocialProofMetrics } from "@/components/marketing/social-proof-metrics";
 import { BookDemoTrigger } from "@/components/marketing/book-demo-trigger";
+import { PLAN_LIST, formatAmount } from "@/lib/billing/plans";
 
 interface FAQItem {
   q: string;
@@ -59,7 +60,7 @@ export default function HomePage() {
     },
     {
       q: "What are the subscription rates and API charges?",
-      a: "Our flat platform subscription starts at $9/month per WABA number. WhatsApp's conversation-based rates are charged directly by Meta; Hashtags CRM passes through these official Meta charges with absolutely 0% markup.",
+      a: "Our platform subscriptions start at $19/month for the Essential plan, with Guided Setup (Growth) and Done-for-You (Managed) tiers available. WhatsApp's conversation-based rates are charged directly by Meta; Hashtags CRM passes through these official Meta charges with absolutely 0% markup.",
     },
     {
       q: "How does the AI Assistant resolve queries?",
@@ -67,61 +68,24 @@ export default function HomePage() {
     },
   ];
 
-  const pricingCards = [
-    {
-      name: "Starter",
-      tag: "Self-Managed Setup",
-      price: "$9",
-      period: "/month",
-      desc: "Full platform access for self-service automation, visual flow builders, and shared team inbox.",
-      features: [
-        "Official WhatsApp Business API",
-        "Visual Flow & Chatbot Builder",
-        "Shared Collaborative Inbox",
-        "27+ Native Integrations",
-        "0% Markup on Meta API fees",
-      ],
-      cta: "Get Started",
-      link: "/signup",
-      primary: false,
-    },
-    {
-      name: "Growth",
-      tag: "Done-With-You Setup",
-      price: "$15",
-      period: " first month",
-      renewal: "$9/month after",
-      desc: "Perfect for growing teams. We guide your configuration, verify accounts, and deploy core channels.",
-      features: [
-        "Everything in Starter plan",
-        "Meta Business Verification Assistance",
-        "WhatsApp Co-existence Configuration",
-        "Custom Integrations Wired In",
-        "Dedicated Account Setup Session",
-      ],
-      cta: "Get Started",
-      link: "/signup",
-      primary: true,
-    },
-    {
-      name: "Managed",
-      tag: "Done-For-You Strategy",
-      price: "$25",
-      period: " pilot month",
-      renewal: "$9/month after",
-      desc: "Fully managed operations. Our automation experts write templates, design bots, and report results.",
-      features: [
-        "Everything in Growth plan",
-        "2-3 Custom Automations built for you",
-        "Message Templates written & approved",
-        "Dedicated Account Manager",
-        "Monthly 1-on-1 Strategy Calls",
-      ],
-      cta: "Get Started",
-      link: "/signup",
-      primary: false,
-    },
-  ];
+  // Pricing preview is derived from the same catalogue the /pricing page and
+  // the checkout endpoint use (`@/lib/billing/plans`), so the home page can
+  // never quote a price the gateway won't honour.
+  const pricingCards = PLAN_LIST.map((plan) => ({
+    name: plan.name,
+    tag: plan.positioning,
+    price: formatAmount(plan.pricing.monthly.priceMinor),
+    period: "/month",
+    renewal:
+      plan.setupFeeMinor === 0
+        ? undefined
+        : `+ ${formatAmount(plan.setupFeeMinor)} one-time setup`,
+    desc: plan.coreMessage,
+    features: plan.features,
+    cta: "Get Started",
+    link: `/signup?plan=${plan.id}`,
+    primary: plan.recommended,
+  }));
 
   const toggleFaq = (index: number) => {
     setActiveFaq(activeFaq === index ? null : index);
@@ -455,10 +419,10 @@ export default function HomePage() {
             <Landmark className="size-3.5" /> Pricing Options
           </div>
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[var(--m-text-heading)]">
-            One platform. Flat rates.
+            One platform. Three ways to start.
           </h2>
           <p className="text-sm text-[var(--m-text-tertiary)]">
-            Active subscriptions are flat $9/month per WABA number. Select the initial setup tier that fits your team.
+            Same platform on every plan. What changes is how much of the setup we handle for you. Pick the tier that fits your team.
           </p>
         </div>
 

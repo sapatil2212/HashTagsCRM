@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getPlan, normalizePlanId, type PlanId } from "@/lib/billing/plans";
-import { SuperAdminShell } from "../super-admin-shell";
 
 interface User {
   id: string;
@@ -116,9 +115,8 @@ export default function NewUsersPage() {
   };
 
   return (
-    <SuperAdminShell>
-      <div className="space-y-6">
-        {/* Header */}
+    <div className="space-y-6">
+      {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
@@ -240,7 +238,7 @@ export default function NewUsersPage() {
                               href={`https://wa.me/${u.phoneNumber}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-orange-600 hover:text-orange-500 font-bold"
+                              className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-500 font-bold"
                             >
                               {u.phoneNumber}
                               <ExternalLink className="size-3" />
@@ -297,7 +295,6 @@ export default function NewUsersPage() {
             </div>
           </div>
         )}
-      </div>
-    </SuperAdminShell>
+    </div>
   );
 }

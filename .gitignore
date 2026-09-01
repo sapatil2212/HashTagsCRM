@@ -45,3 +45,9 @@ next-env.d.ts
 
 # scratch
 scratch/
+
+# user uploads (avatars, portfolio thumbnails) written to disk at runtime.
+# The directory itself is tracked via public/uploads/.gitkeep so it exists on
+# a fresh clone/deploy; its contents are per-server data and never committed.
+/public/uploads/*
+!/public/uploads/.gitkeep

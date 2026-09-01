@@ -112,7 +112,7 @@ export function GlassNavbar() {
             <img
               src={isLight ? "/images/logo/chatnexgen-logo-light.png" : "/images/logo/chatnexgen-logo.png"}
               alt="Hashtags CRM Logo"
-              className="h-8 w-auto object-contain group-hover:scale-110 transition-transform"
+              className="h-10 md:h-11 w-auto object-contain group-hover:scale-110 transition-transform"
             />
           </Link>
 

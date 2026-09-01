@@ -1,0 +1,7 @@
+# Keeps public/uploads/ present in the repo so runtime uploads have a target
+# directory on a fresh clone or deploy. Uploaded files live here but are
+# gitignored (see .gitignore) — they are per-server data, not source.
+#
+# Files are written by src/lib/storage/local-storage.ts under
+# public/uploads/<kind>/ (avatars, portfolio) and served by Next.js at
+# /uploads/<kind>/<file>. Override the location with UPLOAD_DIR.

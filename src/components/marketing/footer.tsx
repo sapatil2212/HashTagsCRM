@@ -35,7 +35,7 @@ export function Footer() {
             <img
               src={isLight ? "/images/logo/chatnexgen-logo-light.png" : "/images/logo/chatnexgen-logo.png"}
               alt="Hashtags CRM Logo"
-              className="h-8 w-auto object-contain"
+              className="h-11 md:h-12 w-auto object-contain"
             />
           </Link>
           <p className="text-xs text-[var(--m-text-tertiary)] leading-relaxed max-w-sm">

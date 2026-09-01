@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Settings, Tag, User, Palette, Sparkles, Users, CreditCard } from 'lucide-react';
+import { Settings, Tag, User, Palette, Sparkles, CreditCard } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { WhatsAppConfig } from '@/components/settings/whatsapp-config';
 import { TagManager } from '@/components/settings/tag-manager';
@@ -10,13 +10,11 @@ import { PasswordForm } from '@/components/settings/password-form';
 import { SessionsCard } from '@/components/settings/sessions-card';
 import { AppearancePanel } from '@/components/settings/appearance-panel';
 import { AiConfigPanel } from '@/components/settings/ai-config-panel';
-import { TeamManager } from '@/components/settings/team-manager';
 import { BillingPanel } from '@/components/settings/billing-panel';
 
 const TAB_VALUES = [
   'profile',
   'billing',
-  'team',
   'whatsapp',
   'ai',
   'tags',
@@ -50,7 +48,7 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Settings</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Manage your profile, subscription, team members, WhatsApp® integration, AI assistant, and workspace
+          Manage your profile, subscription, WhatsApp® integration, AI assistant, and workspace
           preferences.
         </p>
       </div>
@@ -70,13 +68,6 @@ export default function SettingsPage() {
           >
             <CreditCard className="size-4" />
             Billing
-          </TabsTrigger>
-          <TabsTrigger
-            value="team"
-            className="data-active:bg-white dark:data-active:bg-slate-800 data-active:text-primary text-slate-600 dark:text-slate-400 data-active:shadow-sm transition-all duration-200"
-          >
-            <Users className="size-4" />
-            Team
           </TabsTrigger>
           <TabsTrigger
             value="whatsapp"
@@ -116,10 +107,6 @@ export default function SettingsPage() {
 
         <TabsContent value="billing">
           <BillingPanel />
-        </TabsContent>
-
-        <TabsContent value="team">
-          <TeamManager />
         </TabsContent>
 
         <TabsContent value="whatsapp">

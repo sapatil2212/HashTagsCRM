@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { verifyAccessToken, rotateRefreshToken } from '@/lib/auth'
+import { deleteStoredUpload } from '@/lib/storage/local-storage'
 
 /**
  * Shared helper: resolves the authenticated user from JWT cookies.
@@ -130,13 +131,32 @@ export async function PATCH(req: NextRequest) {
     }
     if (businessType !== undefined) profileData.businessType = businessType.trim() || null
     if (phoneNumber !== undefined) profileData.phoneNumber = phoneNumber.trim() || null
-    if (avatarUrl !== undefined) profileData.avatarUrl = avatarUrl
+
+    // When the avatar changes, remember the previous URL so its file can be
+    // removed from disk after the update succeeds. The old Cloudinary flow
+    // never cleaned up replaced avatars; on a fixed VPS disk that would leak.
+    let previousAvatarUrl: string | null = null
+    if (avatarUrl !== undefined) {
+      profileData.avatarUrl = avatarUrl
+      const existing = await prisma.profile.findUnique({
+        where: { userId: payload.userId },
+        select: { avatarUrl: true },
+      })
+      previousAvatarUrl = existing?.avatarUrl ?? null
+    }
 
     if (Object.keys(profileData).length > 0) {
       await prisma.profile.update({
         where: { userId: payload.userId },
         data: profileData,
       })
+    }
+
+    // Best-effort, and only after the DB write committed — deleting a file the
+    // record still points at would be the worse failure. `deleteStoredUpload`
+    // ignores anything that is not one of our own local files.
+    if (avatarUrl !== undefined && previousAvatarUrl && previousAvatarUrl !== avatarUrl) {
+      await deleteStoredUpload(previousAvatarUrl)
     }
 
     return NextResponse.json({ success: true })

@@ -60,6 +60,10 @@ cp .env.example .env
 | `META_APP_SECRET` | Used to verify HMAC signatures of incoming WhatsApp webhooks. |
 | `NEXT_PUBLIC_SOCKET_URL` | URL of the Socket.io WebSocket server. |
 
+> Connecting a WhatsApp number: follow [docs/META_WHATSAPP_SETUP.md](docs/META_WHATSAPP_SETUP.md)
+> for the full Meta-side walkthrough (Phone Number ID, WABA ID, permanent access
+> token, app secret, verify token and webhook callback URL).
+
 ### Optional AI & Integration Keys
 
 | Key | Description |

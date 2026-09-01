@@ -171,7 +171,7 @@ function ShowcaseModal({ item, onSave, onClose }: ShowcaseModalProps) {
     setPreviews(prev => prev.filter(p => p !== urlToRemove));
   };
 
-  // Handle Cloudinary Upload
+  // Handle thumbnail upload (stored on the server's own disk)
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
@@ -203,10 +203,10 @@ function ShowcaseModal({ item, onSave, onClose }: ShowcaseModalProps) {
 
       const data = await response.json();
       setThumbnailUrl(data.url);
-      toast.success("Thumbnail uploaded to Cloudinary!");
+      toast.success("Thumbnail uploaded.");
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Failed to upload to Cloudinary. Make sure environment config is loaded.");
+      toast.error(err.message || "Failed to upload thumbnail. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -263,7 +263,7 @@ function ShowcaseModal({ item, onSave, onClose }: ShowcaseModalProps) {
               {item?.id ? "Edit Showcase Item" : "Create Showcase Item"}
             </h2>
             <p className="text-xs text-muted-foreground mt-1">
-              Provide project details, tags, urls, and Cloudinary uploads.
+              Provide project details, tags, urls, and thumbnail uploads.
             </p>
           </div>
           <button
@@ -306,10 +306,10 @@ function ShowcaseModal({ item, onSave, onClose }: ShowcaseModalProps) {
               </div>
             </div>
 
-            {/* Cloudinary Thumbnail Upload */}
+            {/* Thumbnail Upload */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-                Thumbnail Asset (Cloudinary Upload)
+                Thumbnail Asset
               </label>
 
               <div
@@ -330,7 +330,7 @@ function ShowcaseModal({ item, onSave, onClose }: ShowcaseModalProps) {
                 {uploading ? (
                   <div className="flex flex-col items-center gap-2">
                     <Loader2 className="size-8 text-primary animate-spin" />
-                    <p className="text-xs text-slate-400">Uploading to Cloudinary...</p>
+                    <p className="text-xs text-slate-400">Uploading...</p>
                   </div>
                 ) : thumbnailUrl ? (
                   <>
@@ -796,7 +796,7 @@ export default function AdminPortfolioPage() {
             Showcase Portfolio
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Configure metadata tags, preview links, screenshots, and upload thumbnails to Cloudinary.
+            Configure metadata tags, preview links, screenshots, and upload thumbnails.
           </p>
         </div>
 
@@ -849,7 +849,7 @@ export default function AdminPortfolioPage() {
             <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Media Uploads</p>
             <p className="text-sm font-semibold mt-1 text-orange-400 flex items-center gap-1">
               <CloudLightning className="size-3.5 text-orange-400 animate-pulse" />
-              Cloudinary Online
+              Server Storage
             </p>
           </div>
           <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">

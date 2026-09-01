@@ -13,7 +13,11 @@ interface MetricProps {
 function Counter({ value, suffix = "", decimals = 0, duration = 2 }: MetricProps) {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  // `amount: 0.2` fires when 20% of the number is visible with no viewport-edge
+  // inset. The previous `margin: "-100px"` required the element to sit 100px
+  // inside every edge at once, which short mobile viewports rarely satisfy, so
+  // the counter never animated and stayed stuck at 0.
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   useEffect(() => {
     if (!isInView) return;
