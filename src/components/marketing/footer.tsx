@@ -100,12 +100,30 @@ export function Footer() {
       </div>
 
       {/* Meta API disclaimer & Copyright footer */}
-      <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-[var(--m-border-primary)]/50 space-y-4 relative z-10 text-center">
-        <p className="text-[10px] leading-relaxed text-[var(--m-text-muted)] max-w-3xl mx-auto">
-          "Hashtags CRM uses WhatsApp Business API solutions in accordance with Meta and WhatsApp Business policies. Businesses are responsible for obtaining user consent before initiating communication."
+      <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-[var(--m-border-primary)]/50 space-y-6 relative z-10 flex flex-col items-center">
+        <p className="text-[10px] leading-relaxed text-[var(--m-text-muted)] max-w-3xl mx-auto text-center">
+          &quot;Hashtags CRM uses WhatsApp Business API solutions in accordance with Meta and WhatsApp Business policies. Businesses are responsible for obtaining user consent before initiating communication.&quot;
         </p>
-        <div className="text-[10px] text-[var(--m-text-muted)] pt-2">
-          © 2026 Hashtags CRM Technologies. All rights reserved.
+
+        {/* Minimal Footer Style bar (Option 3) */}
+        <div
+          className={`w-full max-w-4xl mx-auto rounded-2xl border px-6 py-3.5 sm:py-3 shadow-lg backdrop-blur-md flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 transition-all duration-300 ${
+            isLight
+              ? "bg-slate-100/90 border-slate-200/80 shadow-slate-200/40 text-slate-600"
+              : "bg-[#0e121a]/95 border-slate-800/80 shadow-black/50 text-slate-300"
+          }`}
+        >
+          <img
+            src={isLight ? "/images/logo/hashtags-tech-light.png" : "/images/logo/hashtags-tech-dark.png"}
+            alt="Hashtags Technology"
+            className="h-7 sm:h-8 w-auto object-contain shrink-0"
+          />
+          <p className={`text-xs sm:text-[13px] font-normal text-center sm:text-left leading-normal ${
+            isLight ? "text-slate-600" : "text-slate-300"
+          }`}>
+            © 2026 Hashtags CRM Technologies™ | A Product of{" "}
+            <span className="text-[#ff4359] font-medium">Hashtags Technologies</span> | All Rights Reserved.
+          </p>
         </div>
       </div>
     </footer>
