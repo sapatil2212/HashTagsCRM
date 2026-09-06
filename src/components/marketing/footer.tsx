@@ -113,16 +113,32 @@ export function Footer() {
               : "bg-[#0e121a]/95 border-slate-800/80 shadow-black/50 text-slate-300"
           }`}
         >
-          <img
-            src={isLight ? "/images/logo/hashtags-tech-light.png" : "/images/logo/hashtags-tech-dark.png"}
-            alt="Hashtags Technology"
-            className="h-7 sm:h-8 w-auto object-contain shrink-0"
-          />
+          <a
+            href="https://hashtagstech.com/en"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 transition-opacity hover:opacity-80 inline-flex items-center"
+            title="Hashtags Technologies"
+          >
+            <img
+              src={isLight ? "/images/logo/hashtags-tech-light.png" : "/images/logo/hashtags-tech-dark.png"}
+              alt="Hashtags Technologies"
+              className="h-7 sm:h-8 w-auto object-contain shrink-0"
+            />
+          </a>
           <p className={`text-xs sm:text-[13px] font-normal text-center sm:text-left leading-normal ${
             isLight ? "text-slate-600" : "text-slate-300"
           }`}>
             © 2026 Hashtags CRM Technologies™ | A Product of{" "}
-            <span className="text-[#ff4359] font-medium">Hashtags Technologies</span> | All Rights Reserved.
+            <a
+              href="https://hashtagstech.com/en"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#ff4359] font-medium hover:underline inline-flex items-center transition-colors"
+            >
+              Hashtags Technologies
+            </a>{" "}
+            | All Rights Reserved.
           </p>
         </div>
       </div>
