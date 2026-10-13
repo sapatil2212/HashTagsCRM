@@ -2,8 +2,14 @@
 
 import React from "react";
 import { Trash2 } from "lucide-react";
+import { useSiteConfig } from "@/context/site-config-context";
 
 export default function DataDeletionPage() {
+  const { config } = useSiteConfig();
+  const brand = config.siteName || "Hashtags CRM";
+  const contactEmail = config.contactEmail || "admin@hashtagscrm.com";
+  const contactPhone = config.contactPhone || "+92 316 1122339";
+
   return (
     <div className="w-full max-w-4xl mx-auto px-4 md:px-6 py-20 space-y-10">
       <div className="space-y-4 border-b border-[var(--m-border-primary)] pb-8">
@@ -13,18 +19,18 @@ export default function DataDeletionPage() {
         <h1 className="text-3xl sm:text-5xl font-extrabold text-[var(--m-text-heading)] tracking-tight">
           User Data Deletion Instructions
         </h1>
-        <p className="text-xs text-[var(--m-text-muted)]">Hashtags CRM Platform Guidelines</p>
+        <p className="text-xs text-[var(--m-text-muted)]">{brand} Platform Guidelines</p>
       </div>
 
       <div className="space-y-8 text-xs sm:text-sm text-[var(--m-text-secondary)] leading-relaxed">
         <p>
-          If you want to delete your personal data from the Hashtags CRM platform, you can request data deletion using the steps below.
+          If you want to delete your personal data from the {brand} platform, you can request data deletion using the steps below.
         </p>
 
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">How to request data deletion</h3>
           <ol className="list-decimal pl-5 space-y-2 text-[var(--m-text-tertiary)]">
-            <li>Log in to your account on the Hashtags CRM platform.</li>
+            <li>Log in to your account on the {brand} platform.</li>
             <li>Go to your Account Settings.</li>
             <li>Click on Delete Account or request account deletion.</li>
             <li>You can also contact our support team to request deletion of your data.</li>
@@ -37,15 +43,17 @@ export default function DataDeletionPage() {
             <div className="bg-[var(--m-bg-secondary)] border border-[var(--m-border-primary)] rounded-xl p-4 text-center space-y-2">
               <span className="text-[10px] uppercase font-bold text-[var(--m-text-muted)]">Support Email</span>
               <p className="font-semibold text-[var(--m-text-primary)]">
-                <a href="mailto:admin@hashtagscrm.com" className="text-orange-400 hover:underline">
-                  admin@hashtagscrm.com
+                <a href={`mailto:${contactEmail}`} className="text-orange-400 hover:underline">
+                  {contactEmail}
                 </a>
               </p>
             </div>
             <div className="bg-[var(--m-bg-secondary)] border border-[var(--m-border-primary)] rounded-xl p-4 text-center space-y-2">
               <span className="text-[10px] uppercase font-bold text-[var(--m-text-muted)]">WhatsApp Support</span>
               <p className="font-semibold text-orange-400">
-                +92 316 1122339
+                <a href={`tel:${contactPhone.replace(/\s+/g, "")}`} className="hover:underline">
+                  {contactPhone}
+                </a>
               </p>
             </div>
           </div>

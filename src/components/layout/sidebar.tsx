@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useTotalUnread } from "@/hooks/use-total-unread";
 import { useTheme } from "@/hooks/use-theme";
+import { useSiteConfig } from "@/context/site-config-context";
 import { getBusinessSegment, getTerminology } from "@/lib/business/terminology";
 import {
   LayoutDashboard,
@@ -93,6 +94,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
   const { profile, signOut } = useAuth();
   const totalUnread = useTotalUnread();
   const { mode } = useTheme();
+  const { config } = useSiteConfig();
   const isLight = mode === "light";
 
   const segment = getBusinessSegment(profile?.business_type);
@@ -167,8 +169,12 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
         <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-sidebar-border px-4">
           <Link href="/dashboard" className="flex items-center gap-2">
             <img
-              src={isLight ? "/images/logo/chatnexgen-logo-light.png" : "/images/logo/chatnexgen-logo.png"}
-              alt="Hashtags CRM Logo"
+              src={
+                isLight
+                  ? (config.logoUrl || "/images/logo/chatnexgen-logo-light.png")
+                  : (config.logoDarkUrl || config.logoUrl || "/images/logo/chatnexgen-logo.png")
+              }
+              alt={`${config.siteName} Logo`}
               className="h-8 w-auto object-contain"
             />
           </Link>

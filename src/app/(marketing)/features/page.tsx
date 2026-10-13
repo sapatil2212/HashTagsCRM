@@ -23,8 +23,11 @@ import {
   BarChart3,
   Bot
 } from "lucide-react";
+import { useSiteConfig } from "@/context/site-config-context";
 
 export default function FeaturesPage() {
+  const { config } = useSiteConfig();
+  const brand = config.siteName || "Hashtags CRM";
   const capabilities = [
     {
       name: "Contact & Segment Management",
@@ -58,7 +61,7 @@ export default function FeaturesPage() {
     },
     {
       name: "Projects & Tasks",
-      desc: "Stay organized without switching tools. Create, assign, and track follow-up tasks inside Hashtags CRM — so nothing slips, no matter how fast your business moves.",
+      desc: `Stay organized without switching tools. Create, assign, and track follow-up tasks inside ${brand} — so nothing slips, no matter how fast your business moves.`,
       icon: <CheckSquare className="size-5 text-amber-400" />
     },
     {
@@ -163,7 +166,7 @@ export default function FeaturesPage() {
             How it works
           </h2>
           <p className="text-sm text-[var(--m-text-tertiary)] transition-colors duration-300">
-            Getting started with Hashtags CRM takes minutes, not months.
+            Getting started with {brand} takes minutes, not months.
           </p>
         </motion.div>
 
@@ -254,7 +257,7 @@ export default function FeaturesPage() {
               Built on the official WhatsApp Business API
             </h4>
             <p className="text-xs md:text-sm leading-relaxed text-[var(--m-text-tertiary)]">
-              Hashtags CRM connects to the official WhatsApp Business API through Meta Business. Every message you send — automated chatbot replies, customer updates, and notifications — is delivered with enterprise-grade reliability and full Meta compliance. No workarounds. No grey-area tools.
+              {brand} connects to the official WhatsApp Business API through Meta Business. Every message you send — automated chatbot replies, customer updates, and notifications — is delivered with enterprise-grade reliability and full Meta compliance. No workarounds. No grey-area tools.
             </p>
           </div>
           <div className="pt-2">

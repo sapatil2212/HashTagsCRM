@@ -26,6 +26,7 @@ import {
   type Plan,
   type PlanId,
 } from "@/lib/billing/plans";
+import { useSiteConfig } from "@/context/site-config-context";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<Plan["icon"], LucideIcon> = {
@@ -75,11 +76,10 @@ export interface BillingCycleToggleProps {
 
 /** Monthly / annual switch, with the annual saving stated rather than implied. */
 export function BillingCycleToggle({ value, onChange, disabled }: BillingCycleToggleProps) {
-  // Every plan is priced at ten months for a year, so the headline is the same
-  // for all three. Derived from the catalogue so a pricing change updates the
-  // copy instead of leaving it stale.
+  const { plans } = useSiteConfig();
+  const growth = plans.growth;
   const savingMonths = Math.round(
-    annualSavingMinor("growth") / PLAN_LIST.find((plan) => plan.id === "growth")!.pricing.monthly.priceMinor,
+    annualSavingMinor("growth", plans) / (growth?.pricing.monthly.priceMinor || 3900),
   );
 
   return (
@@ -140,10 +140,11 @@ export function PlanCards({
 }: PlanCardsProps) {
   const current = normalizePlanId(currentPlanId);
   const feePaidFor = normalizePlanId(setupFeePaidPlanId);
+  const { planList, plans, formatPrice } = useSiteConfig();
 
   return (
     <div className="grid gap-3 md:grid-cols-3">
-      {PLAN_LIST.map((plan) => {
+      {planList.map((plan) => {
         const Icon = ICONS[plan.icon];
         const accent = ACCENTS[plan.accent];
         const selected = selectedPlanId === plan.id;
@@ -195,14 +196,14 @@ export function PlanCards({
 
             <div>
               <span className="text-2xl font-bold tracking-tight text-[var(--m-text-heading)]">
-                {formatAmount(price.priceMinor)}
+                {formatPrice(price.priceMinor)}
               </span>
               <span className="text-[11px] font-semibold text-[var(--m-text-tertiary)]">
                 {cycleSuffix(billingCycle)}
               </span>
-              {billingCycle === "annual" && annualSavingMinor(plan.id) > 0 && (
+              {billingCycle === "annual" && annualSavingMinor(plan.id, plans) > 0 && (
                 <span className="ml-1.5 text-[10px] font-semibold text-emerald-400">
-                  save {formatAmount(annualSavingMinor(plan.id))}
+                  save {formatPrice(annualSavingMinor(plan.id, plans))}
                 </span>
               )}
             </div>
@@ -214,7 +215,7 @@ export function PlanCards({
                 <span className="text-emerald-400">Setup included</span>
               ) : setupFeeDue ? (
                 <span className="text-[var(--m-text-secondary)]">
-                  + {formatAmount(plan.setupFeeMinor)} one-time setup
+                  + {formatPrice(plan.setupFeeMinor)} one-time setup
                 </span>
               ) : (
                 <span className="text-emerald-400">Setup fee already paid</span>

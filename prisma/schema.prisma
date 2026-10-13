@@ -1268,3 +1268,73 @@ model PaymentEvent {
   @@index([orderId, createdAt(sort: Desc)])
   @@index([tenantId, createdAt(sort: Desc)])
 }
+
+// ==========================================
+// CMS / SITE CONFIGURATION
+// ==========================================
+
+/// Global site configuration — single row, id is always 1.
+/// All fields are nullable so we can store partial updates without requiring
+/// all keys upfront (the application fills defaults for missing ones).
+model SiteConfig {
+  id          Int      @id @default(1)
+  updatedAt   DateTime @updatedAt
+
+  // ── Branding ──────────────────────────────
+  /// Display name for the entire platform (e.g. "Hashtags CRM")
+  siteName    String?  @db.VarChar(120)
+  /// Tagline / short description shown under logo
+  tagline     String?  @db.VarChar(255)
+  /// URL of the primary (portal/frontend) logo — stored in /public/uploads/cms/
+  logoUrl     String?  @db.VarChar(500)
+  /// Dark-variant logo (sidebar, dark backgrounds)
+  logoDarkUrl String?  @db.VarChar(500)
+  /// Favicon URL
+  faviconUrl  String?  @db.VarChar(500)
+  /// Primary brand colour (hex), e.g. "#7c3aed"
+  primaryColor String? @db.VarChar(12)
+  /// Accent colour (hex)
+  accentColor  String? @db.VarChar(12)
+
+  // ── Contact Information ────────────────────
+  contactEmail   String? @db.VarChar(255)
+  contactPhone   String? @db.VarChar(60)
+  contactAddress String? @db.VarChar(500)
+  supportUrl     String? @db.VarChar(500)
+  twitterUrl     String? @db.VarChar(500)
+  linkedinUrl    String? @db.VarChar(500)
+
+  // ── SEO ───────────────────────────────────
+  metaTitle       String? @db.VarChar(120)
+  metaDescription String? @db.VarChar(320)
+  ogImageUrl      String? @db.VarChar(500)
+
+  // ── Pricing overrides (JSON) ───────────────
+  /// Serialised PlanOverride[] — replaces prices/features in the live catalogue
+  /// without a code deploy. Each object looks like:
+  ///   { planId, name?, coreMessage?, monthlyMinor?, annualMinor?,
+  ///     setupFeeMinor?, features?, recommended? }
+  planOverrides Json?
+
+  /// Active billing currency (ISO-4217). Defaults to USD.
+  billingCurrency String? @db.VarChar(8)
+
+  // ── Footer / Legal ────────────────────────
+  footerTagline    String? @db.VarChar(255)
+  privacyPolicyUrl String? @db.VarChar(500)
+  termsUrl         String? @db.VarChar(500)
+  copyrightText    String? @db.VarChar(255)
+
+  // ── Maintenance ───────────────────────────
+  /// When true the frontend renders a maintenance banner
+  maintenanceMode    Boolean @default(false)
+  maintenanceMessage String? @db.VarChar(500)
+
+  // ── Custom Scripts / Integrations ─────────
+  /// Google Analytics / GTM ID (e.g. "G-XXXXXXXXXX")
+  analyticsId    String? @db.VarChar(80)
+  /// Crisp / Intercom / Tawk site ID for live chat widget
+  liveChatId     String? @db.VarChar(160)
+  /// Arbitrary <head> snippet (injected by layout.tsx)
+  customHeadHtml String? @db.Text
+}

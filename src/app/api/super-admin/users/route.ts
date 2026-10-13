@@ -34,11 +34,18 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    const convCounts = await prisma.conversation.groupBy({
-      by: ["userId"],
-      _count: { id: true },
-    });
-    const convMap = new Map(convCounts.map((r) => [r.userId, r._count.id]));
+    // Conversation counts — wrapped in try/catch so a DB issue here
+    // does not take down the entire user listing (root cause of 500s).
+    let convMap = new Map<string, number>();
+    try {
+      const convCounts = await prisma.conversation.groupBy({
+        by: ["userId"],
+        _count: { id: true },
+      });
+      convMap = new Map(convCounts.map((r) => [r.userId, r._count.id]));
+    } catch (convErr) {
+      console.warn("[SuperAdmin Users GET] Conversation counts failed, defaulting to 0:", convErr);
+    }
 
     const result = users.map((u) => {
       const tenant = u.tenantsOwned[0] ?? null;
@@ -189,7 +196,12 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const { id, isVerified, plan, role, fullName, businessName, businessType, phoneNumber, betaFeatures, tenantActive } = await req.json();
+    const body = await req.json();
+    const {
+      id, isVerified, plan, role, fullName, businessName, businessType,
+      phoneNumber, betaFeatures, tenantActive,
+      subscriptionAction, subscriptionUpdate,
+    } = body;
     if (!id) return NextResponse.json({ error: "Missing user id" }, { status: 400 });
 
     // Update user fields
@@ -241,6 +253,102 @@ export async function PATCH(req: NextRequest) {
       }
     }
     if (role !== undefined) userUpdateData.role = role;
+    if (plan !== undefined) {
+      const norm = normalizePlanId(typeof plan === "string" ? plan : null);
+      if (norm) userUpdateData.selectedPlan = norm;
+    }
+
+    // ─── Subscription management actions ────────────────────────────────
+    // Handles: extend, change_plan, collect_payment from the super-admin UI.
+    if (subscriptionAction && subscriptionUpdate && ["extend", "change_plan", "collect_payment"].includes(subscriptionAction)) {
+      const su = subscriptionUpdate as {
+        plan?: string;
+        billingCycle?: string;
+        extensionMonths?: number;
+        paymentMode?: string;
+        paymentAmount?: number;
+        paymentReference?: string;
+        paymentNotes?: string;
+        fromDate?: string;
+        toDate?: string;
+      };
+
+      const currUser = await prisma.user.findUnique({
+        where: { id },
+        include: { profile: true, tenantsOwned: { select: { id: true } } },
+      });
+
+      if (currUser) {
+        const tenantId = currUser.profile?.tenantId ?? currUser.tenantsOwned[0]?.id ?? null;
+
+        // Compute new expiry from the provided date range
+        let newExpiry: Date;
+        if (su.toDate) {
+          newExpiry = new Date(su.toDate + "T23:59:59.000Z");
+        } else {
+          // Fall back: extend from current expiry or now
+          const base = currUser.subscriptionExpiresAt && new Date(currUser.subscriptionExpiresAt) > new Date()
+            ? new Date(currUser.subscriptionExpiresAt)
+            : new Date();
+          newExpiry = new Date(base);
+          newExpiry.setMonth(newExpiry.getMonth() + (su.extensionMonths || 1));
+        }
+
+        // Determine the plan to apply
+        const targetPlanRaw = su.plan || plan;
+        const targetPlan = normalizePlanId(typeof targetPlanRaw === "string" ? targetPlanRaw : null) ?? DEFAULT_PLAN_ID;
+        const billingCycle = (su.billingCycle === "annual" ? "annual" : "monthly") as "monthly" | "annual";
+
+        // Use BillingService if tenant exists for a proper Subscription row
+        if (tenantId) {
+          try {
+            await BillingService.create(tenantDb(tenantId), tenantId).activateManually({
+              planId: targetPlan,
+              billingCycle,
+              actor: `super_admin:${subscriptionAction}`,
+            });
+          } catch (billingErr) {
+            console.warn("[SuperAdmin PATCH] BillingService.activateManually failed, falling back to direct write:", billingErr);
+          }
+
+          // Directly set the expiry to the operator-specified date, since
+          // activateManually always computes "now + 1 period" which may differ
+          // from what the operator chose.
+          await prisma.user.update({
+            where: { id },
+            data: {
+              subscriptionExpiresAt: newExpiry,
+              isVerified: true,
+              selectedPlan: targetPlan,
+            },
+          });
+
+          await prisma.tenant.updateMany({
+            where: { ownerUserId: id },
+            data: { plan: targetPlan, isActive: true },
+          });
+        } else {
+          // No tenant — legacy direct write
+          userUpdateData.subscriptionExpiresAt = newExpiry;
+          userUpdateData.isVerified = true;
+          userUpdateData.selectedPlan = targetPlan;
+        }
+
+        // Log the manual payment/action in console for auditing
+        console.log(`[SuperAdmin PATCH] Subscription ${subscriptionAction}:`, {
+          userId: id,
+          plan: targetPlan,
+          billingCycle,
+          expiry: newExpiry.toISOString(),
+          paymentMode: su.paymentMode,
+          paymentAmount: su.paymentAmount,
+          paymentReference: su.paymentReference,
+          paymentNotes: su.paymentNotes,
+        });
+
+        computedExpiry = newExpiry;
+      }
+    }
 
     if (Object.keys(userUpdateData).length > 0) {
       await prisma.user.update({ where: { id }, data: userUpdateData });
@@ -327,7 +435,25 @@ export async function PATCH(req: NextRequest) {
     if (betaFeatures !== undefined) profileUpdateData.betaFeatures = betaFeatures;
 
     if (Object.keys(profileUpdateData).length > 0) {
-      await prisma.profile.updateMany({ where: { userId: id }, data: profileUpdateData });
+      const existingProfile = await prisma.profile.findUnique({ where: { userId: id } });
+      if (existingProfile) {
+        await prisma.profile.update({ where: { userId: id }, data: profileUpdateData });
+      } else {
+        const u = await prisma.user.findUnique({ where: { id }, select: { email: true } });
+        await prisma.profile.create({
+          data: {
+            userId: id,
+            email: u?.email || "",
+            fullName: fullName || "",
+            businessName: businessName || "",
+            businessType: businessType || "",
+            phoneNumber: phoneNumber || "",
+            role: role || "user",
+            betaFeatures: (betaFeatures as any) || [],
+            ...profileUpdateData,
+          },
+        });
+      }
     }
 
     // Update tenant plan and active status.
@@ -337,7 +463,8 @@ export async function PATCH(req: NextRequest) {
     // id in the same request, so passing the operator's string straight through
     // would stomp `essential` with whatever the UI happened to send (`starter`,
     // `Growth`, `pro`) and desynchronise `Tenant.plan` from `Subscription.planId`.
-    if (plan !== undefined || tenantActive !== undefined) {
+    // Skip if subscriptionAction already handled plan/tenant updates.
+    if (!subscriptionAction && (plan !== undefined || tenantActive !== undefined)) {
       const tenantData: Record<string, any> = {};
       if (plan !== undefined) {
         const normalized = normalizePlanId(typeof plan === "string" ? plan : null);

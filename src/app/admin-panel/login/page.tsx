@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Shield, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useSiteConfig } from "@/context/site-config-context";
 
 export default function AdminLoginPage() {
+  const { config } = useSiteConfig();
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -48,12 +50,12 @@ export default function AdminLoginPage() {
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
             <img
-              src="/images/logo/chatnexgen-logo.png"
-              alt="Hashtags CRM Logo"
+              src={config.logoDarkUrl || config.logoUrl || "/images/logo/chatnexgen-logo.png"}
+              alt={`${config.siteName} Logo`}
               className="h-14 w-auto object-contain mb-4"
             />
             <h1 className="text-xl font-bold text-white">Super Admin</h1>
-            <p className="text-sm text-slate-400 mt-1">Agency Control Panel</p>
+            <p className="text-sm text-slate-400 mt-1">{config.siteName} Control Panel</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

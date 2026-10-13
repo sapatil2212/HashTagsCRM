@@ -2,8 +2,12 @@
 
 import React from "react";
 import { Scale } from "lucide-react";
+import { useSiteConfig } from "@/context/site-config-context";
 
 export default function TermsAndConditionsPage() {
+  const { config } = useSiteConfig();
+  const brand = config.siteName || "Hashtags CRM";
+
   return (
     <div className="w-full max-w-4xl mx-auto px-4 md:px-6 py-20 space-y-10">
       <div className="space-y-4 border-b border-[var(--m-border-primary)] pb-8">
@@ -18,13 +22,13 @@ export default function TermsAndConditionsPage() {
 
       <div className="space-y-8 text-xs sm:text-sm text-[var(--m-text-secondary)] leading-relaxed">
         <p>
-          Welcome to Hashtags CRM. These Terms & Conditions (&quot;Terms&quot;) govern your access to and use of the website, SaaS dashboard, automation engines, APIs, and customer relationship interfaces provided by Hashtags CRM Technologies (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). By subscribing to or utilizing our Platform, you agree to comply with and be bound by these Terms.
+          Welcome to {brand}. These Terms & Conditions (&quot;Terms&quot;) govern your access to and use of the website, SaaS dashboard, automation engines, APIs, and customer relationship interfaces provided by {brand} Technologies (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). By subscribing to or utilizing our Platform, you agree to comply with and be bound by these Terms.
         </p>
 
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">1. SaaS Subscription & Billing</h3>
           <p>
-            Subscribing to Hashtags CRM grants your business a non-exclusive, non-transferable, revocable license to access our platform services.
+            Subscribing to {brand} grants your business a non-exclusive, non-transferable, revocable license to access our platform services.
           </p>
           <ul className="list-disc pl-5 space-y-1 text-[var(--m-text-tertiary)]">
             <li>Subscriptions are billed monthly or annually in advance based on the plan selected.</li>
@@ -36,7 +40,7 @@ export default function TermsAndConditionsPage() {
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">2. User Responsibilities & Acceptable Use</h3>
           <p>
-            You agree to use Hashtags CRM only for lawful business operations and in absolute compliance with local, national, and international laws.
+            You agree to use {brand} only for lawful business operations and in absolute compliance with local, national, and international laws.
           </p>
           <ul className="list-disc pl-5 space-y-1 text-[var(--m-text-tertiary)]">
             <li>You must verify and manage the permissions of any team member added to your workspace.</li>
@@ -49,7 +53,7 @@ export default function TermsAndConditionsPage() {
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">3. Meta & WhatsApp Policy Compliance</h3>
           <p>
-            Hashtags CRM operates using the official WhatsApp Business API provided by Meta. All customers must comply with Meta's developer policies and WhatsApp Business Platform guidelines.
+            {brand} operates using the official WhatsApp Business API provided by Meta. All customers must comply with Meta's developer policies and WhatsApp Business Platform guidelines.
           </p>
           <ul className="list-disc pl-5 space-y-1 text-[var(--m-text-tertiary)]">
             <li>You represent that your business profile, logos, and links submitted for verification are authentic.</li>
@@ -73,14 +77,14 @@ export default function TermsAndConditionsPage() {
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">5. Intellectual Property</h3>
           <p>
-            All technology, graphic user interfaces, chatbot designs, workflow visualizations, logos, and custom code modules remain the exclusive intellectual property of Hashtags CRM Technologies or its licensors. You may not distribute or copy any portion of our software.
+            All technology, graphic user interfaces, chatbot designs, workflow visualizations, logos, and custom code modules remain the exclusive intellectual property of {brand} Technologies or its licensors. You may not distribute or copy any portion of our software.
           </p>
         </section>
 
         <section className="space-y-3">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">6. Service Limitations & Disclaimers</h3>
           <p>
-            Hashtags CRM is provided on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis. While we maintain a high standard of platform stability, we do not warrant that service will be uninterrupted.
+            {brand} is provided on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis. While we maintain a high standard of platform stability, we do not warrant that service will be uninterrupted.
           </p>
           <ul className="list-disc pl-5 space-y-1 text-[var(--m-text-tertiary)]">
             <li>We are not responsible for delivery delays or downtime caused directly by Meta/WhatsApp API node failures.</li>
@@ -98,13 +102,16 @@ export default function TermsAndConditionsPage() {
         <section className="space-y-3 text-center pt-8 border-t border-[var(--m-border-primary)]/50">
           <h3 className="text-lg font-bold text-[var(--m-text-heading)]">8. Contact Us</h3>
           <p>
-            If you have questions regarding these Terms & Conditions, contact Hashtags CRM Technologies:
+            If you have questions regarding these Terms &amp; Conditions, contact {brand} Technologies:
           </p>
           <div className="text-xs text-[var(--m-text-tertiary)] mt-3 space-y-1">
-            <p className="font-bold text-[var(--m-text-primary)]">Hashtags CRM Technologies</p>
-            <p>Phone: +92 316 1122339</p>
+            <p className="font-bold text-[var(--m-text-primary)]">{brand} Technologies</p>
+            <p>Phone: {config.contactPhone || "+92 316 1122339"}</p>
             <p>
-              Email: <a href="mailto:admin@hashtagscrm.com" className="text-orange-400 hover:underline">admin@hashtagscrm.com</a>
+              Email:{" "}
+              <a href={`mailto:${config.contactEmail || "admin@hashtagscrm.com"}`} className="text-orange-400 hover:underline">
+                {config.contactEmail || "admin@hashtagscrm.com"}
+              </a>
             </p>
           </div>
         </section>

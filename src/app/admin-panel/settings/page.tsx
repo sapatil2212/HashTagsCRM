@@ -1,26 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Settings, Shield, Bell, Key, Save, Eye, EyeOff } from "lucide-react";
 import { AdminShell } from "../admin-shell";
+import { useSiteConfig, broadcastConfigUpdate } from "@/context/site-config-context";
 
 const inputCls = "w-full rounded-xl border border-slate-700 bg-slate-800 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-orange-500 transition-colors";
 const labelCls = "block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5";
 
 export default function AdminSettingsPage() {
+  const { config, refreshConfig } = useSiteConfig();
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [form, setForm] = useState({
     adminEmail: "admin@agency.com",
     adminPassword: "",
-    agencyName: "Hashtags CRM Technologies",
-    supportEmail: "admin@hashtagscrm.com",
+    agencyName: config.siteName || "Hashtags CRM",
+    supportEmail: config.contactEmail || "admin@hashtagscrm.com",
     notifyNewClient: true,
     notifyChurn: true,
     notifyTrial: false,
   });
 
+  useEffect(() => {
+    setForm((p) => ({
+      ...p,
+      agencyName: config.siteName || p.agencyName,
+      supportEmail: config.contactEmail || p.supportEmail,
+    }));
+  }, [config.siteName, config.contactEmail]);
+
   const set = (k: string, v: string | boolean) => setForm(p => ({ ...p, [k]: v }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await fetch("/api/super-admin/cms", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          siteName: form.agencyName.trim(),
+          contactEmail: form.supportEmail.trim(),
+        }),
+      });
+      broadcastConfigUpdate();
+      await refreshConfig();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch {} finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <AdminShell>
@@ -76,9 +107,13 @@ export default function AdminSettingsPage() {
           ))}
         </div>
 
-        <button onClick={()=>{setSaved(true);setTimeout(()=>setSaved(false),2500);}}
-          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold transition-colors">
-          <Save className="size-4"/>{saved?"Saved!":"Save Settings"}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white text-sm font-bold transition-colors"
+        >
+          <Save className="size-4" />
+          {saving ? "Saving..." : saved ? "Saved!" : "Save Settings"}
         </button>
       </div>
     </AdminShell>

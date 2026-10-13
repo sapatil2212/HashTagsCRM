@@ -10,9 +10,11 @@ import { ThemeToggle } from "./theme-toggle";
 import { MagneticButton } from "./magnetic-button";
 import { BookDemoTrigger } from "./book-demo-trigger";
 import { cn } from "@/lib/utils";
+import { useSiteConfig } from "@/context/site-config-context";
 
 export function GlassNavbar() {
   const pathname = usePathname();
+  const { config } = useSiteConfig();
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -110,8 +112,12 @@ export function GlassNavbar() {
           {/* Brand */}
           <Link href="/" className="flex items-center gap-2 group shrink-0">
             <img
-              src={isLight ? "/images/logo/chatnexgen-logo-light.png" : "/images/logo/chatnexgen-logo.png"}
-              alt="Hashtags CRM Logo"
+              src={
+                isLight
+                  ? (config.logoUrl || "/images/logo/chatnexgen-logo-light.png")
+                  : (config.logoDarkUrl || config.logoUrl || "/images/logo/chatnexgen-logo.png")
+              }
+              alt={`${config.siteName} Logo`}
               className="h-10 md:h-11 w-auto object-contain group-hover:scale-110 transition-transform"
             />
           </Link>

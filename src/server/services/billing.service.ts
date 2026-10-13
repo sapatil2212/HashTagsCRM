@@ -57,6 +57,7 @@ import {
   type PlanId,
   type Quote,
 } from '@/lib/billing/plans';
+import { getSiteConfig, mergeOverrides } from '@/lib/cms/site-config';
 import { SafepayApiError, buildCheckoutUrl, createTracker } from '@/lib/safepay/client';
 import {
   SafepayConfigError,
@@ -144,7 +145,9 @@ export class BillingService {
     // The plan chosen at signup is surfaced as a preference so the billing page
     // can pre-select it, with every entitlement field left empty.
     const selectedPlan = await this.readSignupPlanPreference();
-    return emptySubscriptionDto(BILLING_CURRENCY, selectedPlan);
+    const siteConfig = await getSiteConfig();
+    const currency = siteConfig.billingCurrency || BILLING_CURRENCY;
+    return emptySubscriptionDto(currency, selectedPlan);
   }
 
   /**
@@ -153,7 +156,15 @@ export class BillingService {
    */
   async quote(planId: PlanId, billingCycle: BillingCycle): Promise<QuoteDto> {
     const subscription = await this.deps.subscriptions.find();
-    return priceQuote({ planId, billingCycle, setupFeePaidPlanId: subscription?.setupFeePaidPlanId ?? null });
+    const siteConfig = await getSiteConfig();
+    const currency = siteConfig.billingCurrency || BILLING_CURRENCY;
+    const catalogue = mergeOverrides(siteConfig.planOverrides, currency);
+
+    return priceQuote(
+      { planId, billingCycle, setupFeePaidPlanId: subscription?.setupFeePaidPlanId ?? null },
+      catalogue,
+      currency
+    );
   }
 
   async listOrders(query: ListOrdersQuery): Promise<Page<PaymentOrderDto>> {
@@ -180,17 +191,25 @@ export class BillingService {
     const config = this.requireGateway();
     const now = new Date();
 
+    const siteConfig = await getSiteConfig();
+    const currency = siteConfig.billingCurrency || BILLING_CURRENCY;
+    const catalogue = mergeOverrides(siteConfig.planOverrides, currency);
+
     const subscription = await this.deps.subscriptions.ensure({
       planId: body.planId,
       billingCycle: body.billingCycle,
-      currency: BILLING_CURRENCY,
+      currency,
     });
 
-    const pricing = priceQuote({
-      planId: body.planId,
-      billingCycle: body.billingCycle,
-      setupFeePaidPlanId: subscription.setupFeePaidPlanId,
-    });
+    const pricing = priceQuote(
+      {
+        planId: body.planId,
+        billingCycle: body.billingCycle,
+        setupFeePaidPlanId: subscription.setupFeePaidPlanId,
+      },
+      catalogue,
+      currency
+    );
 
     // Reusing a live session is not just tidiness: a customer who double-clicks
     // "Pay" or reloads the checkout page would otherwise open a second payment

@@ -18,8 +18,10 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const email = (body.email ?? body.username ?? "").trim().toLowerCase();
   const password = (body.password ?? "").trim();
+  const adminUser = (process.env.SUPER_ADMIN_USERNAME ?? "admin@hashtagscrm.com").trim().toLowerCase();
+  const adminPass = (process.env.SUPER_ADMIN_PASSWORD ?? "admin123").trim();
 
-  if (email !== ADMIN_USER || password !== ADMIN_PASS) {
+  if (email !== adminUser || password !== adminPass) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 

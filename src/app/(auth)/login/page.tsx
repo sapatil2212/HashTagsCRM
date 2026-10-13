@@ -14,11 +14,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Loader2, Eye, EyeOff, CreditCard } from "lucide-react";
 import { InteractiveGrid } from "@/components/marketing/interactive-grid";
+import { useSiteConfig } from "@/context/site-config-context";
+import { Loader2, ArrowLeft, CreditCard, EyeOff, Eye } from "lucide-react";
 
 // ─── LoginPage Component ──────────────────────────────────────────────────────
 function LoginPageInner() {
+  const { config } = useSiteConfig();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/inbox";
@@ -142,11 +144,18 @@ function LoginPageInner() {
 
       <Card className="w-full max-w-sm border border-[var(--m-border-glass)]/40 bg-[var(--m-bg-glass)]/70 backdrop-blur-xl relative z-10 p-6 md:p-8 shadow-none transition-all duration-300">
         <CardHeader className="items-center text-center p-0 pb-5">
+          <Link href="/" className="mb-2 inline-block">
+            <img
+              src={config.logoDarkUrl || config.logoUrl || "/images/logo/chatnexgen-logo.png"}
+              alt={config.siteName}
+              className="h-9 w-auto object-contain mx-auto"
+            />
+          </Link>
           <CardTitle className="text-lg font-bold tracking-tight text-[var(--m-text-heading)]">
             Sign In
           </CardTitle>
           <CardDescription className="text-[11px] text-[var(--m-text-tertiary)] mt-1">
-            Access your AI WhatsApp Automation Dashboard
+            Access your {config.siteName} Workspace
           </CardDescription>
         </CardHeader>
 

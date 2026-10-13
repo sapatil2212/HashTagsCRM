@@ -11,7 +11,7 @@ import { AIChatSimulation } from "@/components/marketing/ai-chat-simulation";
 import { ReferenceDashboard } from "@/components/marketing/reference-dashboard";
 import { SocialProofMetrics } from "@/components/marketing/social-proof-metrics";
 import { BookDemoTrigger } from "@/components/marketing/book-demo-trigger";
-import { PLAN_LIST, formatAmount } from "@/lib/billing/plans";
+import { useSiteConfig } from "@/context/site-config-context";
 
 interface FAQItem {
   q: string;
@@ -20,47 +20,50 @@ interface FAQItem {
 
 export default function HomePage() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const { config, planList, formatPrice } = useSiteConfig();
+
+  const brand = config.siteName || "Hashtags CRM";
 
   const testimonials = [
     {
       name: "Dr. Layla Haddad",
       role: "Clinic Operations Director",
       company: "Aura Health Clinics · Dubai",
-      content: "Switching to Hashtags CRM automated our patient booking flow. Clients schedule check-ups directly on WhatsApp, and the AI resolves clinic FAQs instantly. Handovers to our front desk are perfectly seamless.",
+      content: `Switching to ${brand} automated our patient booking flow. Clients schedule check-ups directly on WhatsApp, and the AI resolves clinic FAQs instantly. Handovers to our front desk are perfectly seamless.`,
       stars: 5,
     },
     {
       name: "Marcus Bennett",
       role: "Founder & CEO",
       company: "CraftedThreads E-Commerce · London",
-      content: "Our customer engagement rates skyrocketed with Hashtags CRM's automated order status and shipping alerts. Using the official WhatsApp Business API ensures we maintain a solid reputation and perfect compliance.",
+      content: `Our customer engagement rates skyrocketed with ${brand}'s automated order status and shipping alerts. Using the official WhatsApp Business API ensures we maintain a solid reputation and perfect compliance.`,
       stars: 5,
     },
     {
       name: "Mei Chen",
       role: "Lead Product Owner",
       company: "VentureScale SaaS · Singapore",
-      content: "Hashtags CRM's visual pipeline editor is custom-built for chat threads. We easily classify inbound leads, auto-assign tickets to support agents, and monitor drop-offs with absolute visual clarity.",
+      content: `${brand}'s visual pipeline editor is custom-built for chat threads. We easily classify inbound leads, auto-assign tickets to support agents, and monitor drop-offs with absolute visual clarity.`,
       stars: 5,
     },
   ];
 
   const faqs: FAQItem[] = [
     {
-      q: "What is Hashtags CRM and how does it work?",
-      a: "Hashtags CRM is an AI-powered WhatsApp CRM and customer support platform that integrates with the official WhatsApp Business API. It allows your team to manage conversations in a shared inbox, automate responses via custom AI agents, track leads through kanban pipelines, and sync schedules directly via WhatsApp.",
+      q: `What is ${brand} and how does it work?`,
+      a: `${brand} is an AI-powered WhatsApp CRM and customer support platform that integrates with the official WhatsApp Business API. It allows your team to manage conversations in a shared inbox, automate responses via custom AI agents, track leads through kanban pipelines, and sync schedules directly via WhatsApp.`,
     },
     {
-      q: "Is Hashtags CRM compliant with WhatsApp policies?",
-      a: "Yes. Hashtags CRM is fully compliant with Meta and WhatsApp Business Platform policies. We exclusively utilize official WhatsApp Business API endpoints. We do not support bulk messaging spam, contact scraping, or blast tools, ensuring your business number maintains high reliability.",
+      q: `Is ${brand} compliant with WhatsApp policies?`,
+      a: `Yes. ${brand} is fully compliant with Meta and WhatsApp Business Platform policies. We exclusively utilize official WhatsApp Business API endpoints. We do not support bulk messaging spam, contact scraping, or blast tools, ensuring your business number maintains high reliability.`,
     },
     {
       q: "Do I need a WhatsApp Business Account (WABA)?",
-      a: "Yes. To run active automation, you need a verified Meta Business Account and a clean phone number. Hashtags CRM's support team guides you through the entire Meta Business Verification process to establish your official partner status.",
+      a: `Yes. To run active automation, you need a verified Meta Business Account and a clean phone number. ${brand}'s support team guides you through the entire Meta Business Verification process to establish your official partner status.`,
     },
     {
       q: "What are the subscription rates and API charges?",
-      a: "Our platform subscriptions start at $19/month for the Essential plan, with Guided Setup (Growth) and Done-for-You (Managed) tiers available. WhatsApp's conversation-based rates are charged directly by Meta; Hashtags CRM passes through these official Meta charges with absolutely 0% markup.",
+      a: `Our platform subscriptions offer tiers for every stage, with Guided Setup and Done-for-You tiers available. WhatsApp's conversation-based rates are charged directly by Meta; ${brand} passes through these official Meta charges with absolutely 0% markup.`,
     },
     {
       q: "How does the AI Assistant resolve queries?",
@@ -68,18 +71,17 @@ export default function HomePage() {
     },
   ];
 
-  // Pricing preview is derived from the same catalogue the /pricing page and
-  // the checkout endpoint use (`@/lib/billing/plans`), so the home page can
-  // never quote a price the gateway won't honour.
-  const pricingCards = PLAN_LIST.map((plan) => ({
+  // Pricing preview is derived from dynamic CMS catalogue overrides
+  // so the home page always matches the live payment gateway price and currency.
+  const pricingCards = planList.map((plan) => ({
     name: plan.name,
     tag: plan.positioning,
-    price: formatAmount(plan.pricing.monthly.priceMinor),
+    price: formatPrice(plan.pricing.monthly.priceMinor),
     period: "/month",
     renewal:
       plan.setupFeeMinor === 0
         ? undefined
-        : `+ ${formatAmount(plan.setupFeeMinor)} one-time setup`,
+        : `+ ${formatPrice(plan.setupFeeMinor)} one-time setup`,
     desc: plan.coreMessage,
     features: plan.features,
     cta: "Get Started",

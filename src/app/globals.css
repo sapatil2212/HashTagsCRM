@@ -505,8 +505,8 @@ html[data-mtheme="light"] .border-sidebar-border {
   border-color: #e2e8f0 !important;
 }
 
-/* Force dark text color overlays in Light Mode for hardcoded text elements */
-html[data-mtheme="light"] .text-white,
+/* Force dark text color overlays in Light Mode for hardcoded text elements (excluding buttons, badges, and colored containers) */
+html[data-mtheme="light"] .text-white:not(button):not(button *):not(a[class*="bg-"]):not(a[class*="bg-"] *):not([class*="bg-violet"]):not([class*="bg-violet"] *):not([class*="bg-indigo"]):not([class*="bg-indigo"] *):not([class*="bg-emerald"]):not([class*="bg-emerald"] *):not([class*="bg-blue"]):not([class*="bg-blue"] *):not([class*="bg-red"]):not([class*="bg-red"] *):not([class*="bg-amber"]):not([class*="bg-amber"] *):not([class*="bg-primary"]):not([class*="bg-primary"] *):not([class*="bg-slate-9"]):not([class*="bg-slate-9"] *):not([class*="bg-black"]):not([class*="bg-black"] *),
 html[data-mtheme="light"] [aria-pressed="false"] .text-white,
 html[data-mtheme="light"] .text-sidebar-foreground,
 html[data-mtheme="light"] .text-slate-50,
@@ -523,7 +523,7 @@ html[data-mtheme="light"] .text-sidebar-foreground\/75 {
   color: #475569 !important;
 }
 
-/* Universal crisp white text contrast on active primary and brand buttons */
+/* Universal crisp white text contrast on active primary, brand buttons, and badges in ALL themes */
 button.bg-primary,
 a.bg-primary,
 .bg-primary,
@@ -535,6 +535,28 @@ button.bg-orange-500,
 button.bg-orange-600,
 a.bg-orange-500,
 a.bg-orange-600,
+html[data-mtheme="light"] button.text-white,
+html[data-mtheme="light"] button.text-white *,
+html[data-mtheme="light"] a.text-white[class*="bg-"],
+html[data-mtheme="light"] a.text-white[class*="bg-"] *,
+html[data-mtheme="light"] [class*="bg-violet"] .text-white,
+html[data-mtheme="light"] [class*="bg-violet"].text-white,
+html[data-mtheme="light"] [class*="bg-violet-600"],
+html[data-mtheme="light"] [class*="bg-violet-600"] *,
+html[data-mtheme="light"] [class*="bg-violet-700"],
+html[data-mtheme="light"] [class*="bg-violet-700"] *,
+html[data-mtheme="light"] [class*="bg-indigo"] .text-white,
+html[data-mtheme="light"] [class*="bg-indigo"].text-white,
+html[data-mtheme="light"] [class*="bg-emerald"] .text-white,
+html[data-mtheme="light"] [class*="bg-emerald"].text-white,
+html[data-mtheme="light"] [class*="bg-blue"] .text-white,
+html[data-mtheme="light"] [class*="bg-blue"].text-white,
+html[data-mtheme="light"] [class*="bg-red"] .text-white,
+html[data-mtheme="light"] [class*="bg-red"].text-white,
+html[data-mtheme="light"] [class*="bg-red-500"],
+html[data-mtheme="light"] [class*="bg-red-500"] *,
+html[data-mtheme="light"] [class*="bg-red-600"],
+html[data-mtheme="light"] [class*="bg-red-600"] *,
 html[data-mtheme="light"] .bg-primary .text-white,
 html[data-mtheme="light"] .bg-primary.text-white,
 html[data-mtheme="light"] button.bg-primary,

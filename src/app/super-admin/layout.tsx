@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
 import { SuperAdminShell } from "./super-admin-shell";
 
-export const metadata: Metadata = {
-  title: "Super Admin — Hashtags CRM",
-  description: "Super Admin Portal for Hashtags CRM",
-  robots: { index: false, follow: false },
-};
+import { getSiteConfig } from "@/lib/cms/site-config";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await getSiteConfig();
+  const siteName = config.siteName || "Hashtags CRM";
+  return {
+    title: `Super Admin — ${siteName}`,
+    description: `Super Admin Portal for ${siteName}`,
+    robots: { index: false, follow: false },
+  };
+}
 
 // The shell (sidebar + header + auth gate) lives here, in the layout, so it
 // mounts once and persists across navigations between the overview, users,

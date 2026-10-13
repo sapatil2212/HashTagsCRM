@@ -42,15 +42,20 @@ export async function GET() {
       });
     }
 
-    // Plan breakdown
+    // Plan breakdown (normalized to free, starter, pro, enterprise)
     const planBreakdown: Record<string, number> = { free: 0, starter: 0, pro: 0, enterprise: 0 };
     for (const t of tenants) {
-      const p = t.plan as string;
-      planBreakdown[p] = (planBreakdown[p] ?? 0) + 1;
+      const raw = ((t.plan as string) || "free").toLowerCase().trim();
+      let normalized = "free";
+      if (raw === "pro" || raw === "growth" || raw === "professional") normalized = "pro";
+      else if (raw === "starter" || raw === "essential" || raw === "basic") normalized = "starter";
+      else if (raw === "enterprise" || raw === "managed") normalized = "enterprise";
+      planBreakdown[normalized] = (planBreakdown[normalized] ?? 0) + 1;
     }
 
     const totalUsers = users.length;
     const verifiedUsers = users.filter((u) => u.isVerified).length;
+    const pendingApprovals = users.filter((u) => u.isEmailVerified && !u.isVerified).length;
     const waConnected = users.filter((u) => u.whatsappConfigs[0]?.status === "connected").length;
     const totalContacts = users.reduce((s, u) => s + u.contacts.length, 0);
     const openConversations = conversations.filter((c) => c.status === "open").length;
@@ -58,6 +63,7 @@ export async function GET() {
     return NextResponse.json({
       totalUsers,
       verifiedUsers,
+      pendingApprovals,
       waConnected,
       totalContacts,
       openConversations,

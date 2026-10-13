@@ -5,32 +5,31 @@ import Link from "next/link";
 import { Check, Sparkles } from "lucide-react";
 import { SpotlightCard } from "@/components/marketing/spotlight-card";
 import { BookDemoTrigger } from "@/components/marketing/book-demo-trigger";
-import { PLAN_LIST, annualSavingMinor, formatAmount } from "@/lib/billing/plans";
+import { useSiteConfig } from "@/context/site-config-context";
 
 /**
- * Prices are read from `@/lib/billing/plans`, which is the same module the
- * checkout endpoint prices an order with. This page previously carried its own
- * list ($9 / $15 first month / $25 pilot month) that had drifted from the signup
- * wizard's and from the settings panel's — tolerable when payment was a bank
- * transfer and a human check, indefensible now that a card is charged. If the
- * page and the gateway can disagree, one of them is lying to the customer.
+ * Prices are read from `useSiteConfig()`, which receives the live CMS overrides
+ * and currency configured by the super-admin. Checkout quotes and charges
+ * use the same dynamic settings.
  */
 export default function PricingPage() {
-  const plans = PLAN_LIST.map((plan) => ({
+  const { planList, formatPrice } = useSiteConfig();
+
+  const plans = planList.map((plan) => ({
     id: plan.id,
     name: plan.name,
     tagline: plan.positioning,
     coreMessage: plan.coreMessage,
-    monthly: formatAmount(plan.pricing.monthly.priceMinor),
-    annual: formatAmount(plan.pricing.annual.priceMinor),
-    annualSaving: annualSavingMinor(plan.id),
+    monthly: formatPrice(plan.pricing.monthly.priceMinor),
+    annual: formatPrice(plan.pricing.annual.priceMinor),
+    annualSaving: Math.max(0, plan.pricing.annual.listPriceMinor - plan.pricing.annual.priceMinor),
     setupFee: plan.setupFeeMinor,
     popular: plan.recommended,
     badge: plan.recommended ? "Recommended" : undefined,
     footerText:
       plan.setupFeeMinor === 0
         ? "Your workspace unlocks the moment payment clears."
-        : `Onboarding begins within 48 hours of payment. One-time ${formatAmount(plan.setupFeeMinor)} setup covers it.`,
+        : `Onboarding begins within 48 hours of payment. One-time ${formatPrice(plan.setupFeeMinor)} setup covers it.`,
   }));
 
   // Matrix keys match the catalogue's plan ids so a column cannot silently point
@@ -133,7 +132,7 @@ export default function PricingPage() {
                     or <span className="font-semibold text-[var(--m-text-secondary)]">{plan.annual}</span>/year
                     {plan.annualSaving > 0 && (
                       <span className="ml-1 font-semibold text-emerald-400">
-                        save {formatAmount(plan.annualSaving)}
+                        save {formatPrice(plan.annualSaving)}
                       </span>
                     )}
                   </div>
@@ -142,7 +141,7 @@ export default function PricingPage() {
                 <div className="text-xs font-medium text-orange-400/90">
                   {plan.setupFee === 0
                     ? "Setup included — no one-time fee"
-                    : `+ ${formatAmount(plan.setupFee)} one-time setup`}
+                    : `+ ${formatPrice(plan.setupFee)} one-time setup`}
                 </div>
 
                 <p className="text-xs leading-relaxed text-[var(--m-text-tertiary)]">{plan.coreMessage}</p>
@@ -178,7 +177,7 @@ export default function PricingPage() {
             <thead>
               <tr className="border-b border-[var(--m-border-primary)] bg-[var(--m-bg-secondary)]/40 text-[var(--m-text-secondary)] font-bold text-xs">
                 <th className="p-4 w-[40%]">Capability</th>
-                {PLAN_LIST.map((plan) => (
+                {planList.map((plan) => (
                   <th key={plan.id} className="p-4 text-center w-[20%]">{plan.name}</th>
                 ))}
               </tr>

@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sparkles, Send, Mail, Building, ShieldAlert } from "lucide-react";
+import { Sparkles, Send, Mail, Building, ShieldAlert, Phone, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useSiteConfig } from "@/context/site-config-context";
 
 export default function ContactPage() {
+  const { config } = useSiteConfig();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
@@ -41,15 +43,30 @@ export default function ContactPage() {
         {/* Corporate contact cards */}
         <div className="space-y-3.5 border-t border-[var(--m-border-primary)] pt-6 mt-6">
           <div className="flex items-center gap-3.5 text-xs text-[var(--m-text-tertiary)]">
+            <Building className="size-4 text-orange-400" />
+            <div>
+              <span className="block font-bold text-[var(--m-text-primary)]">Company</span>
+              <span>{config.siteName} Technologies</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3.5 text-xs text-[var(--m-text-tertiary)]">
             <Mail className="size-4 text-orange-400" />
-            <a href="mailto:admin@hashtagscrm.com" className="hover:text-orange-400 transition-colors">
-              admin@hashtagscrm.com
+            <a href={`mailto:${config.contactEmail || "admin@hashtagscrm.com"}`} className="hover:text-orange-400 transition-colors">
+              {config.contactEmail || "admin@hashtagscrm.com"}
             </a>
           </div>
           <div className="flex items-center gap-3.5 text-xs text-[var(--m-text-tertiary)]">
-            <Building className="size-4 text-teal-400" />
-            <span>Phone: +92 316 1122339</span>
+            <Phone className="size-4 text-teal-400" />
+            <a href={`tel:${(config.contactPhone || "+92 316 1122339").replace(/\s+/g, "")}`} className="hover:text-teal-400 transition-colors">
+              {config.contactPhone || "+92 316 1122339"}
+            </a>
           </div>
+          {config.contactAddress && (
+            <div className="flex items-center gap-3.5 text-xs text-[var(--m-text-tertiary)]">
+              <MapPin className="size-4 text-orange-400" />
+              <span>{config.contactAddress}</span>
+            </div>
+          )}
         </div>
       </div>
 

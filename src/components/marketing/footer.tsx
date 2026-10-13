@@ -3,9 +3,11 @@
 import React from "react";
 import Link from "next/link";
 import { useMarketingTheme } from "@/components/marketing/marketing-theme-provider";
+import { useSiteConfig } from "@/context/site-config-context";
 
 export function Footer() {
   const { resolvedTheme } = useMarketingTheme();
+  const { config } = useSiteConfig();
   const isLight = resolvedTheme === "light";
 
   const productLinks = [
@@ -33,13 +35,18 @@ export function Footer() {
         <div className="col-span-1 md:col-span-2 space-y-4">
           <Link href="/" className="inline-block">
             <img
-              src={isLight ? "/images/logo/chatnexgen-logo-light.png" : "/images/logo/chatnexgen-logo.png"}
-              alt="Hashtags CRM Logo"
+              src={
+                isLight
+                  ? (config.logoUrl || "/images/logo/chatnexgen-logo-light.png")
+                  : (config.logoDarkUrl || config.logoUrl || "/images/logo/chatnexgen-logo.png")
+              }
+              alt={`${config.siteName} Logo`}
               className="h-11 md:h-12 w-auto object-contain"
             />
           </Link>
           <p className="text-xs text-[var(--m-text-tertiary)] leading-relaxed max-w-sm">
-            Hashtags CRM is a premium AI-powered WhatsApp CRM and customer support automation platform. Automate business communication, configure smart chatbots, organize leads, and sync calendar reminders using the official WhatsApp Business API.
+            {config.tagline ||
+              `${config.siteName} is a premium AI-powered WhatsApp CRM and customer support automation platform. Automate business communication, configure smart chatbots, organize leads, and sync calendar reminders using the official WhatsApp Business API.`}
           </p>
 
         </div>
@@ -76,11 +83,12 @@ export function Footer() {
         <div className="col-span-1 space-y-4">
           <h6 className="text-[10px] uppercase font-bold tracking-wider text-[var(--m-text-tertiary)]">Contact Us</h6>
           <ul className="space-y-2.5 text-xs text-[var(--m-text-muted)]">
-            <li>Hashtags CRM Technologies</li>
-            <li>Phone: +92 316 1122339</li>
+            <li>{config.siteName} Technologies</li>
+            {config.contactPhone && <li>Phone: {config.contactPhone}</li>}
+            {config.contactAddress && <li>Address: {config.contactAddress}</li>}
             <li className="pt-1">
-              <a href="mailto:admin@hashtagscrm.com" className="text-orange-400 hover:underline">
-                admin@hashtagscrm.com
+              <a href={`mailto:${config.contactEmail || "admin@hashtagscrm.com"}`} className="text-orange-400 hover:underline">
+                {config.contactEmail || "admin@hashtagscrm.com"}
               </a>
             </li>
           </ul>
@@ -102,7 +110,7 @@ export function Footer() {
       {/* Meta API disclaimer & Copyright footer */}
       <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-[var(--m-border-primary)]/50 space-y-6 relative z-10 flex flex-col items-center">
         <p className="text-[10px] leading-relaxed text-[var(--m-text-muted)] max-w-3xl mx-auto text-center">
-          &quot;Hashtags CRM uses WhatsApp Business API solutions in accordance with Meta and WhatsApp Business policies. Businesses are responsible for obtaining user consent before initiating communication.&quot;
+          &quot;{config.siteName} uses WhatsApp Business API solutions in accordance with Meta and WhatsApp Business policies. Businesses are responsible for obtaining user consent before initiating communication.&quot;
         </p>
 
         {/* Minimal Footer Style bar (Option 3) */}
@@ -129,16 +137,20 @@ export function Footer() {
           <p className={`text-xs sm:text-[13px] font-normal text-center sm:text-left leading-normal ${
             isLight ? "text-slate-600" : "text-slate-300"
           }`}>
-            © 2026 Hashtags CRM Technologies™ | A Product of{" "}
-            <a
-              href="https://hashtagstech.com/en"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#ff4359] font-medium hover:underline inline-flex items-center transition-colors"
-            >
-              Hashtags Technologies
-            </a>{" "}
-            | All Rights Reserved.
+            {config.copyrightText || (
+              <>
+                © 2026 {config.siteName} Technologies™ | A Product of{" "}
+                <a
+                  href="https://hashtagstech.com/en"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#ff4359] font-medium hover:underline inline-flex items-center transition-colors"
+                >
+                  Hashtags Technologies
+                </a>{" "}
+                | All Rights Reserved.
+              </>
+            )}
           </p>
         </div>
       </div>

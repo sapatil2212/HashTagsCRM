@@ -24,6 +24,7 @@ import {
 } from "@/lib/billing/plans";
 import { BillingCycleToggle, PlanCards } from "@/components/billing/plan-cards";
 import { useCheckout } from "@/components/billing/use-checkout";
+import { useSiteConfig } from "@/context/site-config-context";
 
 // ─── Business Categories ──────────────────────────────────────────────────────
 const BUSINESS_CATEGORIES = [
@@ -58,6 +59,7 @@ const BUSINESS_CATEGORIES = [
 type Step = "form" | "otp" | "payment" | "done";
 
 function SignupPageInner() {
+  const { config, planList, plans, formatPrice } = useSiteConfig();
   // The pricing page links here as `/signup?plan=growth&cycle=annual`, so a
   // customer who already chose on the marketing site does not have to choose
   // again. Both params are validated against the catalogue — an unknown value
@@ -95,7 +97,7 @@ function SignupPageInner() {
   const checkout = useCheckout();
   const supabase = createClient();
 
-  const selectedPlan = getPlan(selectedPlanId);
+  const selectedPlan = plans[selectedPlanId] || getPlan(selectedPlanId);
   const setupFeeDue = selectedPlan.setupFeeMinor;
   const dueTodayMinor = selectedPlan.pricing[billingCycle].priceMinor + setupFeeDue;
 
@@ -206,11 +208,18 @@ function SignupPageInner() {
           >
             <Card className="border border-[var(--m-border-glass)]/40 bg-[var(--m-bg-glass)]/70 backdrop-blur-xl p-6 md:p-8 shadow-none">
               <CardHeader className="items-center text-center p-0 pb-6">
+                <Link href="/" className="mb-2 inline-block">
+                  <img
+                    src={config.logoDarkUrl || config.logoUrl || "/images/logo/chatnexgen-logo.png"}
+                    alt={config.siteName}
+                    className="h-9 w-auto object-contain mx-auto"
+                  />
+                </Link>
                 <CardTitle className="text-xl font-bold tracking-tight text-[var(--m-text-heading)]">
                   Create Account
                 </CardTitle>
                 <CardDescription className="text-xs text-[var(--m-text-tertiary)] mt-1">
-                  Get started with Hashtags CRM for WhatsApp
+                  Get started with {config.siteName} for WhatsApp
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
@@ -278,11 +287,11 @@ function SignupPageInner() {
                     <div className="flex flex-col gap-1.2 sm:col-span-2">
                       <Label htmlFor="selectedPlan" className="text-[11px] font-semibold text-[var(--m-text-secondary)]/90">Select Plan</Label>
                       <Combobox
-                        items={[...PLAN_LIST]}
+                        items={[...planList]}
                         value={selectedPlan}
                         itemToStringLabel={(plan) =>
-                          `${plan.name} — ${formatAmount(plan.pricing[billingCycle].priceMinor)}${cycleSuffix(billingCycle)}${
-                            plan.setupFeeMinor > 0 ? ` + ${formatAmount(plan.setupFeeMinor)} setup` : ""
+                          `${plan.name} — ${formatPrice(plan.pricing[billingCycle].priceMinor)}${cycleSuffix(billingCycle)}${
+                            plan.setupFeeMinor > 0 ? ` + ${formatPrice(plan.setupFeeMinor)} setup` : ""
                           }`
                         }
                         isItemEqualToValue={(item, value) => item.id === value.id}
@@ -302,11 +311,11 @@ function SignupPageInner() {
                         <ComboboxContent className="border border-[var(--m-border-glass)]/40 bg-[var(--m-bg-secondary)] text-[11px]">
                           <ComboboxEmpty>No plan found.</ComboboxEmpty>
                           <ComboboxList>
-                            {(plan: (typeof PLAN_LIST)[number]) => (
+                            {(plan: (typeof planList)[number]) => (
                               <ComboboxItem key={plan.id} value={plan} className="text-[11px] text-[var(--m-text-primary)]">
-                                {plan.name} — {formatAmount(plan.pricing[billingCycle].priceMinor)}
+                                {plan.name} — {formatPrice(plan.pricing[billingCycle].priceMinor)}
                                 {cycleSuffix(billingCycle)}
-                                {plan.setupFeeMinor > 0 && ` + ${formatAmount(plan.setupFeeMinor)} setup`}
+                                {plan.setupFeeMinor > 0 && ` + ${formatPrice(plan.setupFeeMinor)} setup`}
                               </ComboboxItem>
                             )}
                           </ComboboxList>
@@ -463,7 +472,7 @@ function SignupPageInner() {
                     {selectedPlan.name} — {billingCycle === "annual" ? "12 months" : "1 month"}
                   </span>
                   <span className="text-[11px] font-semibold text-[var(--m-text-primary)]">
-                    {formatAmount(selectedPlan.pricing[billingCycle].priceMinor)}
+                    {formatPrice(selectedPlan.pricing[billingCycle].priceMinor)}
                   </span>
                 </div>
                 {setupFeeDue > 0 && (
@@ -472,14 +481,14 @@ function SignupPageInner() {
                       {selectedPlan.name} onboarding (one-time)
                     </span>
                     <span className="text-[11px] font-semibold text-[var(--m-text-primary)]">
-                      {formatAmount(setupFeeDue)}
+                      {formatPrice(setupFeeDue)}
                     </span>
                   </div>
                 )}
                 <div className="flex items-baseline justify-between gap-4 border-t border-[var(--m-border-glass)]/60 pt-2">
                   <span className="text-[11px] font-bold text-[var(--m-text-heading)]">Due today</span>
                   <span className="text-base font-bold text-[var(--m-text-heading)]">
-                    {formatAmount(dueTodayMinor)}
+                    {formatPrice(dueTodayMinor)}
                   </span>
                 </div>
               </div>
@@ -514,7 +523,7 @@ function SignupPageInner() {
                 ) : (
                   <>
                     <CreditCard className="size-3.5" aria-hidden="true" />
-                    {canCheckout ? `Pay ${formatAmount(dueTodayMinor)} with Safepay` : "Continue"}
+                    {canCheckout ? `Pay ${formatPrice(dueTodayMinor)} with Safepay` : "Continue"}
                   </>
                 )}
               </button>

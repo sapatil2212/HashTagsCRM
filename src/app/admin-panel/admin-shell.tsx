@@ -8,6 +8,7 @@ import {
   Menu, X, Bell, ChevronRight, Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSiteConfig } from "@/context/site-config-context";
 
 const NAV = [
   { href: "/admin-panel",          label: "Overview",  icon: BarChart2  },
@@ -17,6 +18,7 @@ const NAV = [
 
 function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname();
+  const { config } = useSiteConfig();
 
   const handleLogout = async () => {
     await fetch("/api/admin/login", { method: "DELETE" });
@@ -43,13 +45,13 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         <div className="flex h-14 items-center justify-between gap-2 border-b border-slate-800 px-4">
           <Link href="/admin-panel" className="flex items-center gap-2.5">
             <img
-              src="/images/logo/chatnexgen-logo.png"
-              alt="Hashtags CRM Logo"
+              src={config.logoDarkUrl || config.logoUrl || "/images/logo/chatnexgen-logo.png"}
+              alt={`${config.siteName} Logo`}
               className="h-8 w-auto object-contain"
             />
             <div>
               <p className="text-sm font-bold text-white leading-none">Super Admin</p>
-              <p className="text-[10px] text-slate-500 mt-0.5">Agency Panel</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{config.siteName} Panel</p>
             </div>
           </Link>
           <button onClick={onClose} className="lg:hidden text-slate-500 hover:text-white transition-colors">

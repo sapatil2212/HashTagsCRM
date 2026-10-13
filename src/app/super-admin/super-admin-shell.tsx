@@ -5,20 +5,23 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Users, BarChart2, Settings, LogOut,
-  Menu, X, ChevronRight, Building2, Loader2, UserPlus
+  Menu, X, ChevronRight, Building2, Loader2, UserPlus, Globe
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSiteConfig } from "@/context/site-config-context";
 
 const NAV = [
   { href: "/super-admin",           label: "Overview",   icon: BarChart2 },
   { href: "/super-admin/new-users", label: "New Users",  icon: UserPlus  },
   { href: "/super-admin/users",     label: "Users",      icon: Users     },
+  { href: "/super-admin/cms",       label: "CMS",        icon: Globe     },
   { href: "/super-admin/settings",  label: "Settings",   icon: Settings  },
 ];
 
 function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname();
   const router   = useRouter();
+  const { config } = useSiteConfig();
   const [pendingCount, setPendingCount] = useState(0);
 
   useEffect(() => {
@@ -35,7 +38,6 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
       }
     };
     fetchPending();
-    // Poll every 30 seconds for live updates
     const interval = setInterval(fetchPending, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -52,7 +54,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         aria-label="Close menu"
         onClick={onClose}
         className={cn(
-          "fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-sm lg:hidden transition-opacity",
+          "fixed inset-0 z-30 bg-slate-900/15 backdrop-blur-[2.5px] lg:hidden transition-opacity",
           open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
       />
@@ -65,12 +67,10 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         {/* Logo */}
         <div className="flex h-16 items-center gap-2 border-b border-slate-200 px-5">
           <Link href="/super-admin" onClick={onClose} className="flex items-center">
-            {/* Light-background wordmark — the sidebar is white, so this matches
-                the variant the marketing navbar/footer use in light mode. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/logo/chatnexgen-logo-light.png"
-              alt="Hashtags CRM"
+              src={config.logoUrl || "/images/logo/chatnexgen-logo-light.png"}
+              alt={config.siteName}
               className="h-9 w-auto object-contain"
             />
           </Link>
@@ -83,7 +83,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-1.5">
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
           {NAV.map((item) => {
             const isActive = item.href === "/super-admin"
               ? pathname === "/super-admin"
@@ -92,20 +92,20 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
             return (
               <Link key={item.href} href={item.href} onClick={onClose}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                  "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium transition-all",
                   isActive
-                    ? "bg-violet-50 text-violet-600 border border-violet-100/50"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-violet-50 text-violet-700 border border-violet-100 font-semibold"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent"
                 )}
               >
-                <item.icon className={cn("size-4 shrink-0", isActive ? "text-violet-600" : "text-slate-400")} />
+                <item.icon className={cn("size-3.5 shrink-0", isActive ? "text-violet-600" : "text-slate-400")} />
                 <span className="flex-1">{item.label}</span>
                 {isNewUsers && pendingCount > 0 && (
-                  <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  <span className="bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                     {pendingCount}
                   </span>
                 )}
-                {isActive && !isNewUsers && <ChevronRight className="size-3 text-violet-500" />}
+                {isActive && !isNewUsers && <ChevronRight className="size-3 text-violet-400" />}
               </Link>
             );
           })}
@@ -115,9 +115,9 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         <div className="border-t border-slate-200 p-3 bg-slate-50/50">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-red-50 hover:text-red-600 hover:shadow-sm border border-transparent hover:border-red-100/50 active:scale-[0.98] transition-all duration-200"
+            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-600 hover:bg-red-50 hover:text-red-600 border border-transparent hover:border-red-100/60 active:scale-[0.98] transition-all"
           >
-            <LogOut className="size-4" />
+            <LogOut className="size-3.5" />
             Sign Out
           </button>
         </div>
@@ -131,11 +131,17 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
   const [checking,    setChecking]    = useState(true);
   const pathname = usePathname();
   const router   = useRouter();
+  const { config } = useSiteConfig();
 
-  // Breadcrumb label resolved from the nav table (longest matching href wins)
-  // so it reads "Overview" / "New Users" rather than the raw slug — the old
-  // `split("/").pop().replace("-"," ")` showed "super admin" on the root route
-  // and only ever replaced the first hyphen.
+  // Enforce light mode strictly in the Super Admin portal
+  useEffect(() => {
+    document.documentElement.setAttribute("data-mtheme", "light");
+    document.documentElement.classList.remove("dark");
+    try {
+      localStorage.setItem("theme", "light");
+    } catch {}
+  }, [pathname]);
+
   const currentLabel =
     [...NAV]
       .sort((a, b) => b.href.length - a.href.length)
@@ -166,7 +172,7 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
   if (checking) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="size-8 text-violet-600 animate-spin" />
+        <Loader2 className="size-6 text-violet-600 animate-spin" />
       </div>
     );
   }
@@ -177,37 +183,37 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 lg:px-6 shadow-sm shadow-slate-100">
-          <div className="flex items-center gap-3">
+        <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 lg:px-6">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
+              className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
             >
-              <Menu className="size-5" />
+              <Menu className="size-4" />
             </button>
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
-              <Building2 className="size-3.5" />
-              <span>Hashtags CRM</span>
-              <ChevronRight className="size-3" />
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+              <Building2 className="size-3" />
+              <span>{config.siteName}</span>
+              <ChevronRight className="size-2.5" />
               <span className="text-slate-700 font-semibold">
                 {currentLabel}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-violet-50 border border-violet-100">
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-50 border border-violet-100">
               <div className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-              <span className="text-xs text-violet-700 font-semibold">Super Admin</span>
+              <span className="text-[11px] text-violet-700 font-semibold">Super Admin</span>
             </div>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-violet-500/20">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center text-white text-[10px] font-bold border border-violet-700">
               SA
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <div className="mx-auto w-full max-w-screen-xl">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-5">
+          <div className="w-full">
             {children}
           </div>
         </main>

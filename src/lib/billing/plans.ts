@@ -216,8 +216,12 @@ export function getPlanPriceMinor(id: PlanId, cycle: BillingCycle): number {
  * the target tier's fee in full. Deliberately never prorated or refunded —
  * the fee buys human onboarding work, which is not divisible.
  */
-export function resolveSetupFeeMinor(planId: PlanId, setupFeePaidPlanId: string | null | undefined): number {
-  const plan = PLANS[planId];
+export function resolveSetupFeeMinor(
+  planId: PlanId,
+  setupFeePaidPlanId: string | null | undefined,
+  catalogue?: Record<PlanId, Plan>
+): number {
+  const plan = catalogue ? (catalogue[planId] ?? PLANS[planId]) : PLANS[planId];
   if (plan.setupFeeMinor === 0) return 0;
   return normalizePlanId(setupFeePaidPlanId) === planId ? 0 : plan.setupFeeMinor;
 }
@@ -245,15 +249,23 @@ export interface Quote {
  * Prices an order. This is the *only* place a chargeable total is computed;
  * the checkout endpoint, the receipt, and the settlement amount check all read
  * the same function, so the three can never disagree.
+ *
+ * Optionally accepts a dynamic `catalogue` and `currency` (e.g. from the CMS
+ * SiteConfig) so runtime overrides take effect across quotes and checkouts.
  */
-export function quote(input: {
-  planId: PlanId;
-  billingCycle: BillingCycle;
-  setupFeePaidPlanId?: string | null;
-}): Quote {
-  const plan = PLANS[input.planId];
-  const planAmountMinor = getPlanPriceMinor(input.planId, input.billingCycle);
-  const setupFeeMinor = resolveSetupFeeMinor(input.planId, input.setupFeePaidPlanId);
+export function quote(
+  input: {
+    planId: PlanId;
+    billingCycle: BillingCycle;
+    setupFeePaidPlanId?: string | null;
+  },
+  catalogue?: Record<PlanId, Plan>,
+  currency?: string
+): Quote {
+  const plan = catalogue ? (catalogue[input.planId] ?? PLANS[input.planId]) : PLANS[input.planId];
+  const planAmountMinor = plan.pricing[input.billingCycle].priceMinor;
+  const setupFeeMinor = resolveSetupFeeMinor(input.planId, input.setupFeePaidPlanId, catalogue);
+  const resolvedCurrency = currency ?? BILLING_CURRENCY;
 
   const lineItems: QuoteLineItem[] = [
     {
@@ -273,7 +285,7 @@ export function quote(input: {
   return {
     planId: input.planId,
     billingCycle: input.billingCycle,
-    currency: BILLING_CURRENCY,
+    currency: resolvedCurrency,
     planAmountMinor,
     setupFeeMinor,
     totalMinor: planAmountMinor + setupFeeMinor,
@@ -375,7 +387,8 @@ export function cycleSuffix(cycle: BillingCycle): string {
  * How much an annual commitment saves against paying monthly, in minor units.
  * Zero when the two are priced the same.
  */
-export function annualSavingMinor(id: PlanId): number {
-  const { priceMinor, listPriceMinor } = PLANS[id].pricing.annual;
+export function annualSavingMinor(id: PlanId, catalogue?: Record<PlanId, Plan>): number {
+  const plan = catalogue ? (catalogue[id] ?? PLANS[id]) : PLANS[id];
+  const { priceMinor, listPriceMinor } = plan.pricing.annual;
   return Math.max(0, listPriceMinor - priceMinor);
 }

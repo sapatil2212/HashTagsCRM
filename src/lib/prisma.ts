@@ -4,8 +4,11 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
+const cached = globalForPrisma.prisma
+const isClientCurrent = cached && typeof (cached as any).siteConfig !== 'undefined'
+
 export const prisma =
-  globalForPrisma.prisma ??
+  (isClientCurrent ? cached : undefined) ??
   new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   })

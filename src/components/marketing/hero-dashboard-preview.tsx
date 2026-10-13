@@ -53,6 +53,7 @@ import {
 } from "lucide-react";
 import type { ComponentType } from "react";
 import { useMarketingTheme } from "./marketing-theme-provider";
+import { useSiteConfig } from "@/context/site-config-context";
 
 /* ------------------------------------------------------------------ *
  * Demo data. Deliberately cross-consistent: the donut stages sum to
@@ -96,15 +97,17 @@ const PIPELINE_TOTAL = STAGES.reduce((sum, s) => sum + s.totalValue, 0); // 48_2
 
 export function HeroDashboardPreview() {
   const { resolvedTheme } = useMarketingTheme();
+  const { config } = useSiteConfig();
+  const siteName = config.siteName || "Hashtags CRM";
   const logo =
     resolvedTheme === "light"
-      ? "/images/logo/chatnexgen-logo-light.png"
-      : "/images/logo/chatnexgen-logo.png";
+      ? (config.logoUrl || "/images/logo/chatnexgen-logo-light.png")
+      : (config.logoDarkUrl || config.logoUrl || "/images/logo/chatnexgen-logo.png");
 
   return (
     <div
       role="img"
-      aria-label="The Hashtags CRM dashboard, showing active conversations, new contacts, open deals value and messages sent today, alongside a conversations-over-time chart and a pipeline value breakdown by stage."
+      aria-label={`The ${siteName} dashboard, showing active conversations, new contacts, open deals value and messages sent today, alongside a conversations-over-time chart and a pipeline value breakdown by stage.`}
       className="relative flex h-[430px] select-none overflow-hidden bg-background text-foreground sm:h-[520px] lg:h-[620px]"
     >
       {/* ---------------- Sidebar (lg+ only, mirroring the real app's
