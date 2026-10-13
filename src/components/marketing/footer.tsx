@@ -42,6 +42,13 @@ export function Footer() {
               }
               alt={`${config.siteName} Logo`}
               className="h-11 md:h-12 w-auto object-contain"
+              onError={(e) => {
+                // Fall back to the bundled logo if the CMS logo URL 404s.
+                const fallback = isLight
+                  ? "/images/logo/chatnexgen-logo-light.png"
+                  : "/images/logo/chatnexgen-logo.png";
+                if (!e.currentTarget.src.endsWith(fallback)) e.currentTarget.src = fallback;
+              }}
             />
           </Link>
           <p className="text-xs text-[var(--m-text-tertiary)] leading-relaxed max-w-sm">

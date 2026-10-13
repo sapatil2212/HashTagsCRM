@@ -119,6 +119,15 @@ export function GlassNavbar() {
               }
               alt={`${config.siteName} Logo`}
               className="h-10 md:h-11 w-auto object-contain group-hover:scale-110 transition-transform"
+              onError={(e) => {
+                // A CMS logo URL whose file is missing (e.g. uploaded in another
+                // environment, or lost on redeploy) would otherwise render a
+                // broken image. Degrade to the bundled default instead.
+                const fallback = isLight
+                  ? "/images/logo/chatnexgen-logo-light.png"
+                  : "/images/logo/chatnexgen-logo.png";
+                if (!e.currentTarget.src.endsWith(fallback)) e.currentTarget.src = fallback;
+              }}
             />
           </Link>
 

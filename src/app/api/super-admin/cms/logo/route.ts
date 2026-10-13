@@ -1,55 +1,38 @@
 /**
- * POST /api/super-admin/cms/logo
+ * POST /api/super-admin/cms/logo?kind=<logo|logoDark|favicon|ogImage>
  *
- * Accepts a multipart/form-data upload with a single `file` field.
- * Supported sub-types via `kind` query param:
- *   - logo        → primary logo  → writes to logoUrl
- *   - logoDark    → dark logo     → writes to logoDarkUrl
- *   - favicon     → favicon       → writes to faviconUrl
- *   - ogImage     → OG image      → writes to ogImageUrl
+ * Accepts a multipart/form-data upload with a single `file` field and stores
+ * the branding asset, persisting its URL to the matching `SiteConfig` field.
  *
- * Uses the same magic-byte validation as /api/avatar/upload.
- * Files are stored under public/uploads/cms/.
+ * This now routes through the shared, hardened storage lib
+ * (`@/lib/storage/local-storage`) exactly like the avatar and portfolio
+ * uploads, instead of hand-rolling its own writer. That gives it, for free:
+ *   - the same magic-byte validation and raster-only allowlist (PNG/JPG/WebP/
+ *     GIF). SVG and ICO are deliberately rejected — an SVG served from our own
+ *     origin can carry script and become stored XSS;
+ *   - unique uuid filenames with a collision-safe `wx` write;
+ *   - `UPLOAD_DIR` support, so CMS logos land on the same persistent volume as
+ *     every other upload rather than a hardcoded `public/uploads/cms`;
+ *   - old-file cleanup, so replaced logos don't accumulate as orphans.
+ *
+ * If the DB write fails (e.g. the SiteConfig table is missing), the freshly
+ * written file is rolled back so a failed save never leaves an orphan on disk.
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifySuperAdminToken } from "@/lib/auth";
-import { updateSiteConfig } from "@/lib/cms/site-config";
-import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { getSiteConfig, updateSiteConfig } from "@/lib/cms/site-config";
+import { saveUpload, deleteStoredUpload, UploadError } from "@/lib/storage/local-storage";
 
 const SESSION_COOKIE = "super_admin_session";
-const MAX_BYTES = 4 * 1024 * 1024; // 4 MB
-
-function detectImageType(bytes: Uint8Array): { mime: string; ext: string } | null {
-  // JPEG: FF D8
-  if (bytes[0] === 0xff && bytes[1] === 0xd8) return { mime: "image/jpeg", ext: "jpg" };
-  // PNG: 89 50 4E 47
-  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return { mime: "image/png", ext: "png" };
-  // WebP: RIFF....WEBP
-  if (bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return { mime: "image/webp", ext: "webp" };
-  // GIF: GIF8
-  if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) return { mime: "image/gif", ext: "gif" };
-  // ICO: 00 00 01 00
-  if (bytes[0] === 0x00 && bytes[1] === 0x00 && bytes[2] === 0x01 && bytes[3] === 0x00) return { mime: "image/x-icon", ext: "ico" };
-  // SVG: text containing <svg
-  try {
-    const snippet = new TextDecoder("utf-8", { fatal: false }).decode(bytes.slice(0, 512));
-    if (snippet.includes("<svg") || (snippet.includes("<?xml") && snippet.toLowerCase().includes("<svg"))) {
-      return { mime: "image/svg+xml", ext: "svg" };
-    }
-  } catch {}
-  return null;
-}
 
 type KindKey = "logo" | "logoDark" | "favicon" | "ogImage";
 const KIND_TO_FIELD: Record<KindKey, "logoUrl" | "logoDarkUrl" | "faviconUrl" | "ogImageUrl"> = {
-  logo:     "logoUrl",
+  logo: "logoUrl",
   logoDark: "logoDarkUrl",
-  favicon:  "faviconUrl",
-  ogImage:  "ogImageUrl",
+  favicon: "faviconUrl",
+  ogImage: "ogImageUrl",
 };
 
 async function requireSuperAdmin() {
@@ -65,7 +48,8 @@ export async function POST(req: NextRequest) {
   }
 
   const kind = (req.nextUrl.searchParams.get("kind") ?? "logo") as KindKey;
-  if (!Object.keys(KIND_TO_FIELD).includes(kind)) {
+  const field = KIND_TO_FIELD[kind];
+  if (!field) {
     return NextResponse.json({ error: "Invalid kind." }, { status: 400 });
   }
 
@@ -81,32 +65,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No file provided." }, { status: 400 });
   }
 
-  const bytes = new Uint8Array(await file.arrayBuffer());
+  try {
+    // Validate + write the new asset first (throws UploadError on bad input).
+    const { url } = await saveUpload({ file, kind: "branding" });
 
-  if (bytes.length > MAX_BYTES) {
-    return NextResponse.json({ error: "File too large (max 4 MB)." }, { status: 413 });
-  }
+    try {
+      // Capture the asset we're replacing so it can be removed after the new
+      // URL is persisted. Read + write + cleanup are grouped so a DB failure
+      // triggers the rollback below rather than orphaning the new file.
+      const previous = await getSiteConfig();
+      await updateSiteConfig({ [field]: url } as Parameters<typeof updateSiteConfig>[0]);
+      await deleteStoredUpload(previous[field]); // best-effort, never throws
+    } catch (dbErr) {
+      await deleteStoredUpload(url); // roll back the just-written file
+      throw dbErr;
+    }
 
-  const detected = detectImageType(bytes);
-  if (!detected) {
+    return NextResponse.json({ ok: true, url });
+  } catch (err) {
+    if (err instanceof UploadError) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
+    }
+    console.error("[cms logo] upload failed:", err);
     return NextResponse.json(
-      { error: "Unsupported file type. Use SVG, PNG, JPEG, WebP, GIF or ICO." },
-      { status: 415 }
+      { error: "Failed to save logo. Please try again." },
+      { status: 500 }
     );
   }
-
-  // Write to public/uploads/cms/
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "cms");
-  await mkdir(uploadDir, { recursive: true });
-
-  const filename = `${kind}-${randomUUID()}.${detected.ext}`;
-  const filePath = path.join(uploadDir, filename);
-  await writeFile(filePath, bytes);
-
-  const publicUrl = `/uploads/cms/${filename}`;
-
-  // Persist URL in site config
-  await updateSiteConfig({ [KIND_TO_FIELD[kind]]: publicUrl } as Parameters<typeof updateSiteConfig>[0]);
-
-  return NextResponse.json({ ok: true, url: publicUrl });
 }

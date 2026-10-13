@@ -234,7 +234,7 @@ function LogoUploader({
             )}
           </div>
           <p className="text-[10px] text-slate-400">
-            SVG, PNG, JPEG, WebP, GIF or ICO \u00b7 max 4 MB
+            PNG, JPEG, WebP or GIF \u00b7 max 4 MB
           </p>
           {error && <p className="text-[10px] text-red-500">{error}</p>}
           <div className="space-y-1">
@@ -252,7 +252,7 @@ function LogoUploader({
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,image/x-icon,image/vnd.microsoft.icon"
+        accept="image/jpeg,image/png,image/webp,image/gif"
         className="hidden"
         onChange={handleFile}
       />

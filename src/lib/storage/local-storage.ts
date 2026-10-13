@@ -17,11 +17,13 @@
  * handler. The report-only CSP already allows same-origin images (`img-src
  * 'self'`), so nothing there needs touching either.
  *
- * An operator who wants a truly separate storage volume can set `UPLOAD_DIR` to
- * an absolute path outside the app (surviving in-place `git pull` deploys
- * cleanly) and point their web server at it via `UPLOAD_PUBLIC_BASE_PATH`. The
- * two must stay consistent: the public base path is what the browser requests,
- * `UPLOAD_DIR` is where the bytes live.
+ * An operator who wants a truly separate storage volume (one that survives a
+ * container rebuild or `output: 'standalone'` deploy, not just an in-place
+ * `git pull`) can set `UPLOAD_DIR` to an absolute path outside the app. Those
+ * files are no longer under `public/`, so the app's own `/uploads/[...path]`
+ * route streams them — no reverse-proxy rule required. Keep
+ * `UPLOAD_PUBLIC_BASE_PATH` at its `/uploads` default so the stored URLs match
+ * that route.
  *
  * ## Why the validation lives here
  *
@@ -45,7 +47,7 @@ import { mkdir, writeFile, unlink } from 'node:fs/promises';
 import path from 'node:path';
 
 /** Logical buckets. The value is also the on-disk subfolder and URL segment. */
-export type UploadKind = 'avatars' | 'portfolio';
+export type UploadKind = 'avatars' | 'portfolio' | 'branding';
 
 /**
  * A recognised image type: its canonical file extension and a magic-byte test.
@@ -91,6 +93,7 @@ const IMAGE_TYPES: Readonly<Record<string, ImageType>> = {
 const KIND_LIMITS: Readonly<Record<UploadKind, { maxBytes: number }>> = {
   avatars: { maxBytes: 2 * 1024 * 1024 }, // 2 MB — matches the profile form
   portfolio: { maxBytes: 5 * 1024 * 1024 }, // 5 MB — matches the portfolio editor
+  branding: { maxBytes: 4 * 1024 * 1024 }, // 4 MB — CMS logo / favicon / OG image
 };
 
 /**
@@ -108,10 +111,37 @@ export class UploadError extends Error {
 }
 
 /** Absolute directory the bytes are written under. */
-function resolveUploadRoot(): string {
+export function resolveUploadRoot(): string {
   const configured = process.env.UPLOAD_DIR?.trim();
   if (configured) return path.resolve(configured);
   return path.join(process.cwd(), 'public', 'uploads');
+}
+
+/**
+ * Maps the URL segments after the public base (e.g. `['branding','<uuid>.png']`
+ * for `/uploads/branding/<uuid>.png`) to an absolute path inside the upload
+ * root, or `null` if the request escapes the root or is empty.
+ *
+ * Used by the `/uploads/[...path]` serving route so files written to an
+ * `UPLOAD_DIR` *outside* `public/` — a persistent VPS volume that survives
+ * redeploys — are still reachable, with no reverse-proxy rule. (When files live
+ * under `public/uploads`, Next.js serves them statically and this route is just
+ * a fallback.) Containment is enforced here, the same way `deleteStoredUpload`
+ * guards its unlink.
+ */
+export function resolveStoredFilePath(segments: readonly string[]): string | null {
+  if (!segments || segments.length === 0) return null;
+
+  const relative = segments.join('/');
+  if (!relative || relative.includes('\0')) return null;
+
+  const root = resolveUploadRoot();
+  const target = path.resolve(root, relative);
+
+  const rootWithSep = root.endsWith(path.sep) ? root : root + path.sep;
+  if (target !== root && !target.startsWith(rootWithSep)) return null;
+
+  return target;
 }
 
 /** URL prefix the browser requests. Normalised to `/segment`, no trailing slash. */
